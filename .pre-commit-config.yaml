@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+  - repo: local
+    hooks:
+      - id: mix-precommit
+        name: mix precommit
+        entry: bash -lc 'mix precommit'
+        language: system
+        pass_filenames: false
+        types: [elixir]
+        stages: [pre-commit]
+
+ci:
+  autofix_commit_msg: "chore(pre-commit): auto-fix from hooks"
+  autofix_prs: true
+  skip: []
+  submodules: false
