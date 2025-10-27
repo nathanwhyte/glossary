@@ -1,0 +1,62 @@
+defmodule GlossaryWeb.SearchLive do
+  @moduledoc """
+  Search modal component for the home page.
+  """
+  use GlossaryWeb, :live_view
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.search_modal show={false} on_close="close_search" />
+    """
+  end
+
+  attr :show, :boolean, default: true
+  attr :on_close, :any, required: true
+
+  def search_modal(assigns) do
+    ~H"""
+    <div class={if @show, do: "modal modal-open", else: "modal"}>
+      <div
+        phx-click-away="modal_click_away"
+        class="modal-box border-base-content/10 max-h-[75vh] mx-auto max-w-6xl space-y-6 border"
+      >
+        <div class="space-y-2">
+          <div class="input flex w-full items-center">
+            <.icon name="hero-magnifying-glass-micro" class="size-4" />
+            <input type="search" placeholder="Search" class="flex-1" />
+            <kbd class="kbd kbd-xs bg-base-content/10">esc</kbd>
+          </div>
+
+          <div class="flex justify-between pt-2">
+            <div class="text-base-content/60 items-center text-xs font-medium">
+              Use <code class="badge badge-xs bg-base-content/10 border-none">@tag</code>, <code class="badge badge-xs bg-base-content/10 border-none">#subject</code>, and
+              <code class="badge badge-xs bg-base-content/10 border-none">&project</code>
+              to modify search.
+            </div>
+
+            <div class="text-base-content/60 text-xs font-medium">
+              Use the <code class="badge badge-xs bg-base-content/10 border-none">!</code>
+              prefix to generate an AI-assisted summary of results.
+            </div>
+          </div>
+        </div>
+
+        <div class="min-h-64">
+          <h1 class="text-xl font-semibold">
+            Results
+          </h1>
+        </div>
+      </div>
+
+      <%!-- TODO: add listener for escape and clicks outside modal --%>
+      <div class="modal-action"></div>
+    </div>
+    """
+  end
+end

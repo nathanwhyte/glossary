@@ -4,48 +4,108 @@ defmodule GlossaryWeb.HomeLive do
   """
   use GlossaryWeb, :live_view
 
+  require Logger
+
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, show_search_modal: false, leader_down: false)}
+  end
+
+  @impl true
+  def handle_event("open_search_modal", _params, socket) do
+    {:noreply, assign(socket, show_search_modal: true)}
+  end
+
+  @impl true
+  def handle_event("close_search_modal", _params, socket) do
+    {:noreply, assign(socket, show_search_modal: false)}
+  end
+
+  @impl true
+  def handle_event("key_down", %{"key" => "Meta"}, socket) do
+    {:noreply, assign(socket, :leader_down, true)}
+  end
+
+  @impl true
+  def handle_event("key_down", %{"key" => "Control"}, socket) do
+    {:noreply, assign(socket, :leader_down, true)}
+  end
+
+  @impl true
+  def handle_event("key_up", %{"key" => "Meta"}, socket) do
+    {:noreply, assign(socket, :leader_down, false)}
+  end
+
+  @impl true
+  def handle_event("key_up", %{"key" => "Control"}, socket) do
+    {:noreply, assign(socket, :leader_down, false)}
+  end
+
+  @impl true
+  def handle_event("key_down", %{"key" => "k"}, socket) do
+    if socket.assigns.leader_down do
+      {:noreply, assign(socket, show_search_modal: !socket.assigns.show_search_modal)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("key_down", %{"key" => "Escape"}, socket) do
+    if socket.assigns.leader_down do
+      {:noreply, assign(socket, show_search_modal: false)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("key_down", %{"key" => key}, socket) do
+    case key do
+      _ -> {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("click_search", _params, socket) do
+    {:noreply, assign(socket, show_search_modal: true)}
+  end
+
+  @impl true
+  def handle_event("modal_click_away", _params, socket) do
+    Logger.debug("Modal clicked away")
+    {:noreply, assign(socket, show_search_modal: false)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <div class="flex flex-col gap-12">
+      <div phx-window-keydown="key_down" phx-throttle="500" class="flex flex-col gap-12">
         <.search_bar />
         <.quick_start_content />
       </div>
+
+      <GlossaryWeb.SearchLive.search_modal
+        show={@show_search_modal}
+        on_close="close_search_modal"
+      />
     </Layouts.app>
     """
   end
 
   defp search_bar(assigns) do
     ~H"""
-    <section class="pt-24">
+    <section class="pt-32">
       <div class="w-full flex-col items-start space-y-2">
         <h1 class="text-xl font-semibold">Glossary Search</h1>
 
-        <div class="input w-full">
-          <input type="search" placeholder="Search" />
+        <div phx-click="click_search" class="input flex w-full">
+          <input type="search" placeholder="Search" class="flex-1" />
 
           <div>
             <kbd class="kbd kbd-sm bg-base-content/10">⌘</kbd>
             <kbd class="kbd kbd-sm bg-base-content/10">K</kbd>
-          </div>
-        </div>
-
-        <div class="flex justify-between pt-2">
-          <div class="text-base-content/60 items-center text-xs font-medium">
-            Use <code class="badge badge-xs bg-base-content/10 border-none">@tag</code>, <code class="badge badge-xs bg-base-content/10 border-none">#subject</code>, and
-            <code class="badge badge-xs bg-base-content/10 border-none">&project</code>
-            to modify search.
-          </div>
-
-          <div class="text-base-content/60 text-xs font-medium">
-            Use the <code class="badge badge-xs bg-base-content/10 border-none">!</code>
-            prefix to generate an AI-assisted summary of results.
           </div>
         </div>
       </div>
