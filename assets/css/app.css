@@ -2,6 +2,7 @@
    https://tailwindcss.com/docs/configuration */
 
 @import "tailwindcss" source(none);
+
 @source "../css";
 @source "../js";
 @source "../../lib/glossary_web";
@@ -51,8 +52,8 @@
   --radius-box: 0.5rem;
   --size-selector: 0.28125rem;
   --size-field: 0.28125rem;
-  --border: 2px;
-  --depth: 1;
+  --border: 1px;
+  --depth: 0;
   --noise: 0;
 }
 
@@ -86,8 +87,8 @@
   --radius-box: 0.5rem;
   --size-selector: 0.28125rem;
   --size-field: 0.28125rem;
-  --border: 2px;
-  --depth: 1;
+  --border: 1px;
+  --depth: 0;
   --noise: 0;
 }
 
