@@ -29,8 +29,11 @@ defmodule GlossaryWeb.HomeLive do
 
         <div class="input w-full">
           <input type="search" placeholder="Search" />
-          <kbd class="kbd kbd-sm bg-base-content/10">⌘</kbd>
-          <kbd class="kbd kbd-sm bg-base-content/10 -ml-1">K</kbd>
+
+          <div>
+            <kbd class="kbd kbd-sm bg-base-content/10">⌘</kbd>
+            <kbd class="kbd kbd-sm bg-base-content/10">K</kbd>
+          </div>
         </div>
 
         <div class="flex justify-between pt-2">
@@ -60,6 +63,7 @@ defmodule GlossaryWeb.HomeLive do
           action_name="New Entry"
           action_link="/"
           action_keys={["⌘", "shift", "O"]}
+          disabled
         />
         <.quick_start_button
           action_name="View Last Entry"
@@ -83,7 +87,7 @@ defmodule GlossaryWeb.HomeLive do
 
   defp quick_start_button(assigns) do
     base_style =
-      "relative flex h-20 rounded-md px-3 py-2 "
+      "relative flex h-20 rounded-md px-3 py-2"
 
     assigns =
       assign(
@@ -92,11 +96,10 @@ defmodule GlossaryWeb.HomeLive do
         cond do
           assigns[:disabled] ->
             base_style <>
-              " " <>
-              "cursor-default bg-base-content/5"
+              " cursor-default bg-base-content/5"
 
           true ->
-            base_style <> " " <> "bg-base-300/75 cursor-pointer transition hover:bg-base-300"
+            base_style <> " bg-base-300/75 cursor-pointer transition hover:bg-base-300"
         end
       )
 
