@@ -12,6 +12,32 @@ defmodule GlossaryWeb.Layouts do
   embed_templates "layouts/*"
 
   @doc """
+  Glossary navbar.
+
+  Drawn at the top of pages using <Layouts.app flash={@flash}>.
+  """
+
+  def navbar(assigns) do
+    ~H"""
+    <nav class="navbar px-5">
+      <div class="flex-1">
+        <a href="/" class="flex w-fit flex-1 items-center gap-4">
+          <span class="text-3xl">🧠</span>
+          <span class="text-base-content text-xl font-bold">Glossary</span>
+        </a>
+      </div>
+      <div class="flex-none">
+        <ul class="flex-column flex items-center space-x-4 px-1">
+          <li>
+            <.theme_toggle />
+          </li>
+        </ul>
+      </div>
+    </nav>
+    """
+  end
+
+  @doc """
   Renders your app layout.
 
   This function is typically invoked from every template,
@@ -35,35 +61,10 @@ defmodule GlossaryWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+    <.navbar />
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <main class="px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-5xl space-y-4">
         {render_slot(@inner_block)}
       </div>
     </main>
@@ -97,7 +98,7 @@ defmodule GlossaryWeb.Layouts do
         hidden
       >
         {gettext("Attempting to reconnect")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        <.icon name="hero-arrow-path" class="size-3 ml-1 motion-safe:animate-spin" />
       </.flash>
 
       <.flash
@@ -109,7 +110,7 @@ defmodule GlossaryWeb.Layouts do
         hidden
       >
         {gettext("Attempting to reconnect")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        <.icon name="hero-arrow-path" class="size-3 ml-1 motion-safe:animate-spin" />
       </.flash>
     </div>
     """
@@ -122,11 +123,11 @@ defmodule GlossaryWeb.Layouts do
   """
   def theme_toggle(assigns) do
     ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
+    <div class="card border-base-300 bg-base-300 relative flex flex-row items-center rounded-full border-2">
+      <div class="border-1 border-base-200 bg-base-100 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left] absolute left-0 h-full w-1/3 rounded-full brightness-200" />
 
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="flex w-1/3 cursor-pointer p-2"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="system"
       >
@@ -134,7 +135,7 @@ defmodule GlossaryWeb.Layouts do
       </button>
 
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="flex w-1/3 cursor-pointer p-2"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="light"
       >
@@ -142,7 +143,7 @@ defmodule GlossaryWeb.Layouts do
       </button>
 
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="flex w-1/3 cursor-pointer p-2"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="dark"
       >

@@ -35,3 +35,7 @@ glossary-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Editor-specific
+.idea/
+.vscode/
+.cursor/
