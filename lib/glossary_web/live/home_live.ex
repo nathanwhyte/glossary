@@ -35,8 +35,8 @@ defmodule GlossaryWeb.HomeLive do
 
         <div class="flex justify-between pt-2">
           <div class="text-base-content/60 items-center text-xs font-medium">
-            Use <code class="badge badge-xs bg-base-content/10 border-none">@tag</code>
-            and <code class="badge badge-xs bg-base-content/10 border-none">#subject</code>
+            Use <code class="badge badge-xs bg-base-content/10 border-none">@tag</code>, <code class="badge badge-xs bg-base-content/10 border-none">#subject</code>,
+            and <code class="badge badge-xs bg-base-content/10 border-none">&project</code>
             to modify search.
           </div>
 
@@ -69,7 +69,7 @@ defmodule GlossaryWeb.HomeLive do
         <.quick_start_button action_name="Get a Refresher" action_link="/" />
         <.quick_start_button action_name="View All Tags" action_link="/" />
         <.quick_start_button action_name="View All Subjects" action_link="/" />
-        <.quick_start_button action_name="View AI-Assisted Summaries" action_link="/" />
+        <.quick_start_button action_name="View Projects" action_link="/" />
       </div>
     </section>
     """
