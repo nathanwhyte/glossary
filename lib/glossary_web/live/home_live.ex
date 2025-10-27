@@ -20,11 +20,25 @@ defmodule GlossaryWeb.HomeLive do
 
   defp home_content(assigns) do
     ~H"""
-    <div class="text-center">
-      <h1 class="text-4xl font-bold text-base-content mb-6">
-        Welcome to Glossary
-      </h1>
-    </div>
+    <section class="hero pt-32">
+      <div class="hero-content w-full flex-col gap-2">
+        <div class="text-base-content/60 items-center text-sm font-medium">
+          Use <code class="badge badge-sm bg-base-content/10 border-none">@tag</code>
+          and <code class="badge badge-sm bg-base-content/10 border-none">#subject</code>
+          to modify search.
+        </div>
+        <div class="text-base-content/60 text-sm font-medium">
+          Use the <code class="badge badge-sm bg-base-content/10 border-none">!</code>
+          prefix to generate an AI-assisted summary of results.
+        </div>
+        <div class="input mt-4 w-full">
+          <%!-- <.icon name="hero-magnifying-glass-micro" class="size-5 text-base-content/60" /> --%>
+          <input type="search" placeholder="Search" class="" />
+          <kbd class="kbd kbd-sm bg-base-content/10">⌘</kbd>
+          <kbd class="kbd kbd-sm bg-base-content/10 -ml-1">K</kbd>
+        </div>
+      </div>
+    </section>
     """
   end
 end
