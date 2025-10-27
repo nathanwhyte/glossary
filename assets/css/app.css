@@ -107,3 +107,9 @@
 }
 
 /* This file is for your main application CSS */
+
+/* Prevent vertical scrolling at top level */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
