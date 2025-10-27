@@ -20,22 +20,27 @@ defmodule GlossaryWeb.HomeLive do
 
   defp home_content(assigns) do
     ~H"""
-    <section class="hero pt-32">
-      <div class="hero-content w-full flex-col gap-2">
-        <div class="text-base-content/60 items-center text-sm font-medium">
-          Use <code class="badge badge-sm bg-base-content/10 border-none">@tag</code>
-          and <code class="badge badge-sm bg-base-content/10 border-none">#subject</code>
-          to modify search.
-        </div>
-        <div class="text-base-content/60 text-sm font-medium">
-          Use the <code class="badge badge-sm bg-base-content/10 border-none">!</code>
-          prefix to generate an AI-assisted summary of results.
-        </div>
-        <div class="input mt-4 w-full">
-          <%!-- <.icon name="hero-magnifying-glass-micro" class="size-5 text-base-content/60" /> --%>
-          <input type="search" placeholder="Search" class="" />
+    <section class="pt-24">
+      <div class="w-full flex-col items-start space-y-2">
+        <h1 class="text-xl font-semibold">Glossary Search</h1>
+
+        <div class="input w-full">
+          <input type="search" placeholder="Search" />
           <kbd class="kbd kbd-sm bg-base-content/10">⌘</kbd>
           <kbd class="kbd kbd-sm bg-base-content/10 -ml-1">K</kbd>
+        </div>
+
+        <div class="flex justify-between pt-2">
+          <div class="text-base-content/60 items-center text-xs font-medium">
+            Use <code class="badge badge-xs bg-base-content/10 border-none">@tag</code>
+            and <code class="badge badge-xs bg-base-content/10 border-none">#subject</code>
+            to modify search.
+          </div>
+
+          <div class="text-base-content/60 text-xs font-medium">
+            Use the <code class="badge badge-xs bg-base-content/10 border-none">!</code>
+            prefix to generate an AI-assisted summary of results.
+          </div>
         </div>
       </div>
     </section>
