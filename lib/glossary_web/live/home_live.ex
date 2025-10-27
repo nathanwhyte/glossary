@@ -61,25 +61,25 @@ defmodule GlossaryWeb.HomeLive do
       <div class="grid w-full grid-cols-3 grid-rows-3 gap-4 py-2">
         <.quick_start_button
           action_name="New Entry"
-          action_link="/"
+          action_link="#"
           action_keys={["⌘", "shift", "O"]}
           disabled
         />
         <.quick_start_button
           action_name="View Last Entry"
-          action_link="/"
+          action_link="#"
           action_keys={["⌘", "shift", "S"]}
           disabled
         />
         <.quick_start_button
           action_name="Command Palette"
-          action_link="/"
+          action_link="#"
           action_keys={["⌘", "shift", "P"]}
           disabled
         />
-        <.quick_start_button action_name="View All Tags" action_link="/" disabled />
-        <.quick_start_button action_name="View All Subjects" action_link="/" disabled />
-        <.quick_start_button action_name="View All Projects" action_link="/" disabled />
+        <.quick_start_button action_name="View All Tags" action_link="#" disabled />
+        <.quick_start_button action_name="View All Subjects" action_link="#" disabled />
+        <.quick_start_button action_name="View All Projects" action_link="#" disabled />
       </div>
     </section>
     """
@@ -109,7 +109,7 @@ defmodule GlossaryWeb.HomeLive do
       )
 
     ~H"""
-    <.link navigate={~p"/"} class="">
+    <.link navigate={~p"/"}>
       <div class={@container_style}>
         <div class="flex h-full flex-1 flex-col justify-between text-lg">
           <span class="font-medium">
