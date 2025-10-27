@@ -41,6 +41,6 @@ defmodule GlossaryWeb.HomeLiveTest do
     assert has_element?(view, "span", "Get a Refresher")
     assert has_element?(view, "span", "View All Tags")
     assert has_element?(view, "span", "View All Subjects")
-    assert has_element?(view, "span", "View Projects")
+    assert has_element?(view, "span", "View All Projects")
   end
 end

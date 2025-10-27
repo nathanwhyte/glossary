@@ -55,7 +55,7 @@ defmodule GlossaryWeb.HomeLive do
     <section>
       <h1 class="text-xl font-semibold">Quick Start</h1>
 
-      <div class="grid w-full grid-cols-3 grid-rows-3 gap-6 py-2">
+      <div class="grid w-full grid-cols-3 grid-rows-3 gap-4 py-2">
         <.quick_start_button
           action_name="New Entry"
           action_link="/"
@@ -65,11 +65,12 @@ defmodule GlossaryWeb.HomeLive do
           action_name="View Last Entry"
           action_link="/"
           action_keys={["⌘", "shift", "S"]}
+          disabled
         />
-        <.quick_start_button action_name="Get a Refresher" action_link="/" />
-        <.quick_start_button action_name="View All Tags" action_link="/" />
-        <.quick_start_button action_name="View All Subjects" action_link="/" />
-        <.quick_start_button action_name="View Projects" action_link="/" />
+        <.quick_start_button action_name="Get a Refresher" action_link="/" disabled />
+        <.quick_start_button action_name="View All Tags" action_link="/" disabled />
+        <.quick_start_button action_name="View All Subjects" action_link="/" disabled />
+        <.quick_start_button action_name="View All Projects" action_link="/" disabled />
       </div>
     </section>
     """
@@ -78,28 +79,48 @@ defmodule GlossaryWeb.HomeLive do
   attr :action_name, :string, required: true
   attr :action_link, :string, required: true
   attr :action_keys, :list, default: []
+  attr :disabled, :boolean, default: false
 
   defp quick_start_button(assigns) do
-    ~H"""
-    <div class="bg-base-300/25 relative flex h-20 rounded-md rounded-md px-3 py-2 transition hover:bg-base-300 hover:cursor-pointer">
-      <.link navigate={~p"/"} class="absolute inset-0"></.link>
-      <div class="flex h-full flex-1 flex-col justify-between text-lg">
-        <span class="font-medium">
-          {@action_name}
-        </span>
-        <%= if length(@action_keys) > 0 do %>
-          <div class="pb-1">
-            <%= for key <- @action_keys do %>
-              <kbd class="kbd kbd-sm bg-base-content/10">{key}</kbd>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
+    base_style =
+      "relative flex h-20 rounded-md px-3 py-2 "
 
-      <div class="flex items-end pb-1">
-        <.icon name="hero-chevron-right-micro" class="size-5" />
+    assigns =
+      assign(
+        assigns,
+        :container_style,
+        cond do
+          assigns[:disabled] ->
+            base_style <>
+              " " <>
+              "cursor-default bg-base-content/5"
+
+          true ->
+            base_style <> " " <> "bg-base-300/75 cursor-pointer transition hover:bg-base-300"
+        end
+      )
+
+    ~H"""
+    <.link navigate={~p"/"} class="">
+      <div class={@container_style}>
+        <div class="flex h-full flex-1 flex-col justify-between text-lg">
+          <span class="font-medium">
+            {@action_name}
+          </span>
+          <%= if length(@action_keys) > 0 do %>
+            <div class="pb-1">
+              <%= for key <- @action_keys do %>
+                <kbd class="kbd kbd-sm bg-base-content/10">{key}</kbd>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex items-end pb-1">
+          <.icon name="hero-chevron-right-micro" class="size-5" />
+        </div>
       </div>
-    </div>
+    </.link>
     """
   end
 end
