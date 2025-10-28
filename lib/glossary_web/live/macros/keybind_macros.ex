@@ -35,17 +35,6 @@ defmodule GlossaryWeb.KeybindMacros do
   end
 
   @doc """
-  Macro for handling toggle events.
-  """
-  defmacro handle_toggle_event(event_name, assign_key) do
-    quote do
-      def handle_event(unquote(event_name), _params, socket) do
-        {:noreply, assign(socket, unquote(assign_key), !socket.assigns[unquote(assign_key)])}
-      end
-    end
-  end
-
-  @doc """
   Macro for handling keyboard events with leader key support.
   """
   defmacro keybind_listeners do
