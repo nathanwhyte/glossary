@@ -16,62 +16,54 @@ defmodule GlossaryWeb.HomeLive do
     {:noreply, assign(socket, show_search_modal: true)}
   end
 
-  @impl true
   def handle_event("close_search_modal", _params, socket) do
     {:noreply, assign(socket, show_search_modal: false)}
   end
 
-  @impl true
-  def handle_event("key_down", %{"key" => "Meta"}, socket) do
-    {:noreply, assign(socket, :leader_down, true)}
-  end
-
-  @impl true
-  def handle_event("key_down", %{"key" => "Control"}, socket) do
-    {:noreply, assign(socket, :leader_down, true)}
-  end
-
-  @impl true
-  def handle_event("key_up", %{"key" => "Meta"}, socket) do
-    {:noreply, assign(socket, :leader_down, false)}
-  end
-
-  @impl true
-  def handle_event("key_up", %{"key" => "Control"}, socket) do
-    {:noreply, assign(socket, :leader_down, false)}
-  end
-
-  @impl true
-  def handle_event("key_down", %{"key" => "k"}, socket) do
-    if socket.assigns.leader_down do
-      {:noreply, assign(socket, show_search_modal: !socket.assigns.show_search_modal)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_event("key_down", %{"key" => "Escape"}, socket) do
-    if socket.assigns.leader_down do
-      {:noreply, assign(socket, show_search_modal: false)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @impl true
   def handle_event("key_down", %{"key" => key}, socket) do
     case key do
-      _ -> {:noreply, socket}
+      "Meta" ->
+        {:noreply, assign(socket, :leader_down, true)}
+
+      "Control" ->
+        {:noreply, assign(socket, :leader_down, true)}
+
+      "k" ->
+        if socket.assigns.leader_down do
+          {:noreply, assign(socket, show_search_modal: !socket.assigns.show_search_modal)}
+        else
+          {:noreply, socket}
+        end
+
+      "Escape" ->
+        if socket.assigns.leader_down do
+          {:noreply, assign(socket, show_search_modal: false)}
+        else
+          {:noreply, socket}
+        end
+
+      _ ->
+        {:noreply, socket}
     end
   end
 
-  @impl true
+  def handle_event("key_up", %{"key" => key}, socket) do
+    case key do
+      "Meta" ->
+        {:noreply, assign(socket, :leader_down, false)}
+
+      "Control" ->
+        {:noreply, assign(socket, :leader_down, false)}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
   def handle_event("click_search", _params, socket) do
     {:noreply, assign(socket, show_search_modal: true)}
   end
 
-  @impl true
   def handle_event("modal_click_away", _params, socket) do
     Logger.debug("Modal clicked away")
     {:noreply, assign(socket, show_search_modal: false)}
