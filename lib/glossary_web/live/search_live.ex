@@ -20,6 +20,23 @@ defmodule GlossaryWeb.SearchLive do
     """
   end
 
+  attr :show, :boolean, default: true
+  attr :on_close, :any, required: true
+
+  def search_modal(assigns) do
+    ~H"""
+    <div class={if @show, do: "modal modal-open", else: "modal"}>
+      <div
+        phx-click-away="modal_click_away"
+        class="modal-box border-base-content/10 max-h-[75vh] mx-auto max-w-6xl space-y-6 border"
+      >
+        <.search_content />
+      </div>
+      <div class="modal-action"></div>
+    </div>
+    """
+  end
+
   def search_content(assigns) do
     ~H"""
     <div class="space-y-2">
@@ -45,23 +62,6 @@ defmodule GlossaryWeb.SearchLive do
       <h1 class="text-xl font-semibold">
         Results
       </h1>
-    </div>
-    """
-  end
-
-  attr :show, :boolean, default: true
-  attr :on_close, :any, required: true
-
-  def search_modal(assigns) do
-    ~H"""
-    <div class={if @show, do: "modal modal-open", else: "modal"}>
-      <div
-        phx-click-away="modal_click_away"
-        class="modal-box border-base-content/10 max-h-[75vh] mx-auto max-w-6xl space-y-6 border"
-      >
-        <.search_content />
-      </div>
-      <div class="modal-action"></div>
     </div>
     """
   end
