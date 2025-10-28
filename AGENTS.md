@@ -21,6 +21,7 @@ This repository is the **Glossary** Phoenix (Elixir) web application. Follow the
     - `endpoint.ex` – HTTP endpoint configuration
     - `router.ex` – route definitions
     - `components/` – reusable LiveView components
+    - `live/macros/` – custom macros for LiveView patterns
     - `controllers/` – traditional Phoenix controllers (if any)
     - `gettext.ex` – internationalization
     - `telemetry.ex` – metrics and monitoring
@@ -138,6 +139,115 @@ Configured hooks:
   - Use stateful components for complex interactions
   - Minimize socket assigns; only store what's needed
   - Use `Phoenix.Component` for reusable UI elements
+
+## Macros & Code Generation
+
+This project uses custom macros to reduce boilerplate and ensure consistent patterns across LiveViews.
+
+### KeybindMacros Module
+Located at `lib/glossary_web/live/macros/keybind_macros.ex`, this module provides macros for common LiveView event handling patterns:
+
+- **`pubsub_broadcast/3`** – Broadcasts messages to PubSub topics
+- **`pubsub_broadcast_on_event/4`** – Generates complete `handle_event/3` functions with PubSub broadcasting
+- **`keybind_listeners/0`** – Generates keyboard event handlers with leader key support (Cmd/Ctrl + K for search)
+
+### Usage Examples
+```elixir
+# Generate event handlers with PubSub broadcasting
+pubsub_broadcast_on_event("open_search_modal", :show_search_modal, true, "search_modal")
+
+# Generate keyboard listeners with leader key support
+keybind_listeners()
+```
+
+### Macro Guidelines
+- Keep macros focused on reducing repetitive patterns
+- Document macro behavior and parameters clearly
+- Test macro-generated code thoroughly
+- Use macros for LiveView event handling, not business logic
+
+## PubSub Communication
+
+This application uses Phoenix PubSub for real-time communication between LiveView processes.
+
+### Configuration
+- **PubSub Server**: `Glossary.PubSub` (configured in `application.ex`)
+- **Topics**: Use descriptive topic names (e.g., `"search_modal"`, `"notifications"`)
+
+### Common Patterns
+
+#### Broadcasting Messages
+```elixir
+# Direct broadcast
+Phoenix.PubSub.broadcast(Glossary.PubSub, "topic_name", {:event, value})
+
+# Using macros (recommended)
+pubsub_broadcast("topic_name", :assign_key, value)
+```
+
+#### Subscribing to Topics
+```elixir
+# In mount/3 when connected
+if connected?(socket) do
+  Phoenix.PubSub.subscribe(Glossary.PubSub, "topic_name")
+end
+
+# Handle messages in handle_info/2
+def handle_info({:event_name, value}, socket) do
+  {:noreply, assign(socket, :key, value)}
+end
+```
+
+### Current Topics
+- **`"search_modal"`** – Controls search modal visibility across the application
+  - Messages: `{:show_search_modal, boolean}`
+
+### Best Practices
+- Use descriptive topic names
+- Keep message formats consistent within topics
+- Subscribe only when necessary (in `mount/3` with `connected?/1` check)
+- Use macros for common broadcasting patterns
+- Test PubSub communication in LiveView tests
+
+## Search Modal Implementation
+
+The search modal is a key feature implemented using LiveView, PubSub, and JavaScript hooks.
+
+### Architecture
+- **Main Component**: `GlossaryWeb.SearchLive` – Handles modal state and rendering
+- **Parent Integration**: Rendered via `live_render/3` in `HomeLive`
+- **Communication**: PubSub topic `"search_modal"` for state synchronization
+- **JavaScript Hook**: `SearchModal` hook for focus management
+
+### Features
+- **Keyboard Shortcuts**: Cmd/Ctrl + K to open, Escape to close (when leader key is down)
+- **Click-to-Open**: Click search bar to open modal
+- **Auto-focus**: JavaScript hook automatically focuses search input when opened
+- **Click-away**: Click outside modal to close
+- **Attribute Badges**: Visual indicators for search modifiers (`@tag`, `#subject`, `&project`, `!`)
+
+### Components Used
+- **`attribute_badge/1`** – Renders search modifier badges
+- **`icon/1`** – Heroicons for UI elements
+- **DaisyUI Modal** – Base modal styling and behavior
+
+### Testing
+The search modal includes comprehensive tests covering:
+- PubSub message handling
+- Keyboard shortcut integration
+- JavaScript hook attachment
+- Modal state management
+- Integration with parent LiveView
+
+### Usage in Tests
+```elixir
+# Open modal via PubSub
+Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:show_search_modal, true})
+
+# Test keyboard shortcuts
+view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key" => "Meta"})
+view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key" => "k"})
+```
 
 ## Testing Guidelines
 - **Framework**: ExUnit with Phoenix test helpers
