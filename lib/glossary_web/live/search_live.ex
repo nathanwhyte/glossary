@@ -4,6 +4,8 @@ defmodule GlossaryWeb.SearchLive do
   """
   use GlossaryWeb, :live_view
 
+  import GlossaryWeb.Components.UiComponents, only: [attribute_badge: 1]
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -29,13 +31,11 @@ defmodule GlossaryWeb.SearchLive do
 
       <div class="flex justify-between pt-2">
         <div class="text-base-content/60 items-center text-xs font-medium">
-          Use <code class="badge badge-xs bg-base-content/10 border-none">@tag</code>, <code class="badge badge-xs bg-base-content/10 border-none">#subject</code>, and
-          <code class="badge badge-xs bg-base-content/10 border-none">&project</code>
-          to modify search.
+          Use <.attribute_badge attribute="@tag" />, <.attribute_badge attribute="#subject" />, and
+          <.attribute_badge attribute="&project" /> to modify search.
         </div>
-
         <div class="text-base-content/60 text-xs font-medium">
-          Use the <code class="badge badge-xs bg-base-content/10 border-none">!</code>
+          Use the <.attribute_badge attribute="!" />
           prefix to generate an AI-assisted summary of results.
         </div>
       </div>
