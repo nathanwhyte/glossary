@@ -17,10 +17,10 @@ defmodule GlossaryWeb.SearchLiveTest do
   end
 
   defp open_via_pubsub,
-    do: Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:show_search_modal, true})
+    do: Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:summon_modal, true})
 
   defp close_via_pubsub,
-    do: Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:show_search_modal, false})
+    do: Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:summon_modal, false})
 
   defp assert_open(html) do
     assert html =~ "modal-open"
@@ -48,14 +48,14 @@ defmodule GlossaryWeb.SearchLiveTest do
   end
 
   describe "handle_info/2" do
-    test "shows modal when receiving show_search_modal: true message", %{conn: conn} do
+    test "shows modal when receiving summon_modal: true message", %{conn: conn} do
       view = mount_home(conn)
       open_via_pubsub()
       html = render_search(view)
       assert_open(html)
     end
 
-    test "hides modal when receiving show_search_modal: false message", %{conn: conn} do
+    test "hides modal when receiving summon_modal: false message", %{conn: conn} do
       view = mount_home(conn)
       open_via_pubsub()
       assert render_search(view) =~ "modal-open"

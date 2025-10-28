@@ -154,7 +154,7 @@ Located at `lib/glossary_web/live/macros/keybind_macros.ex`, this module provide
 ### Usage Examples
 ```elixir
 # Generate event handlers with PubSub broadcasting
-pubsub_broadcast_on_event("open_search_modal", :show_search_modal, true, "search_modal")
+pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
 
 # Generate keyboard listeners with leader key support
 keybind_listeners()
@@ -200,7 +200,7 @@ end
 
 ### Current Topics
 - **`"search_modal"`** – Controls search modal visibility across the application
-  - Messages: `{:show_search_modal, boolean}`
+  - Messages: `{:summon_modal, boolean}`
 
 ### Best Practices
 - Use descriptive topic names
@@ -242,7 +242,7 @@ The search modal includes comprehensive tests covering:
 ### Usage in Tests
 ```elixir
 # Open modal via PubSub
-Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:show_search_modal, true})
+Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:summon_modal, true})
 
 # Test keyboard shortcuts
 view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key" => "Meta"})

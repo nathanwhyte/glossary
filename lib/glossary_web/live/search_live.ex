@@ -18,7 +18,7 @@ defmodule GlossaryWeb.SearchLive do
   end
 
   @impl true
-  def handle_info({:show_search_modal, show}, socket) do
+  def handle_info({:summon_modal, show}, socket) do
     {:noreply, assign(socket, show: show)}
   end
 

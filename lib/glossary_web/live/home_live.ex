@@ -13,9 +13,9 @@ defmodule GlossaryWeb.HomeLive do
   end
 
   # Use macros to generate handle_event functions
-  pubsub_broadcast_on_event("open_search_modal", :show_search_modal, true, "search_modal")
-  pubsub_broadcast_on_event("close_search_modal", :show_search_modal, false, "search_modal")
-  pubsub_broadcast_on_event("click_search", :show_search_modal, true, "search_modal")
+  pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
+  pubsub_broadcast_on_event("banish_modal", :summon_modal, false, "search_modal")
+  pubsub_broadcast_on_event("click_search", :summon_modal, true, "search_modal")
 
   keybind_listeners()
 

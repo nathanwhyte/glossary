@@ -51,14 +51,14 @@ defmodule GlossaryWeb.KeybindMacros do
           # broadcasted to HomeLive
           "k" ->
             if socket.assigns.leader_down do
-              pubsub_broadcast("search_modal", :show_search_modal, true)
+              pubsub_broadcast("search_modal", :summon_modal, true)
             end
 
             {:noreply, socket}
 
           "Escape" ->
             if socket.assigns.leader_down do
-              pubsub_broadcast("search_modal", :show_search_modal, false)
+              pubsub_broadcast("search_modal", :summon_modal, false)
             end
 
             {:noreply, socket}
