@@ -1,4 +1,4 @@
-defmodule GlossaryWeb.LiveKeybindMacros do
+defmodule GlossaryWeb.KeybindMacros do
   @moduledoc """
   Macros for common LiveView event handling patterns.
   """

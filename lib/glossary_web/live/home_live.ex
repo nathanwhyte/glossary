@@ -5,7 +5,7 @@ defmodule GlossaryWeb.HomeLive do
   use GlossaryWeb, :live_view
 
   require Logger
-  import GlossaryWeb.LiveKeybindMacros
+  import GlossaryWeb.KeybindMacros
 
   @impl true
   def mount(_params, _session, socket) do
