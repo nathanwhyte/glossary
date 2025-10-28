@@ -6,6 +6,8 @@ defmodule GlossaryWeb.SearchLive do
 
   import GlossaryWeb.Components.UiComponents, only: [attribute_badge: 1]
 
+  require Logger
+
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -28,7 +30,12 @@ defmodule GlossaryWeb.SearchLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={["modal", if(@show, do: "modal-open", else: "")]}>
+    <div
+      id="search-modal-container"
+      data-show={"#{@show}"}
+      phx-hook="SearchModal"
+      class={["modal", if(@show, do: "modal-open", else: "hidden")]}
+    >
       <div
         class="modal-box border-base-content/10 max-h-[75vh] mx-auto max-w-6xl space-y-6 border"
         phx-click-away="modal_click_away"
@@ -45,7 +52,7 @@ defmodule GlossaryWeb.SearchLive do
     <div class="space-y-2">
       <div class="input flex w-full items-center">
         <.icon name="hero-magnifying-glass-micro" class="size-4" />
-        <input type="search" placeholder="Search" class="flex-1" />
+        <input id="search-input" type="text" placeholder="Search" class="flex-1" />
         <kbd class="kbd kbd-xs bg-base-content/10">esc</kbd>
       </div>
 

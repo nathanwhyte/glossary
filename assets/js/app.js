@@ -23,16 +23,47 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks as colocatedHooks } from "phoenix-colocated/glossary";
-import { hooks as customHooks } from "../glossary_web/hooks";
 import topbar from "../vendor/topbar";
+
+/**
+ * @type {import("phoenix_live_view").HooksOptions}
+ */
+let Hooks = { ...colocatedHooks };
+
+/**
+ * @type {import("phoenix_live_view").Hook}
+ */
+Hooks.SearchModal = {
+  show() {
+    return this.el.dataset.show;
+  },
+
+  mounted() {
+    this.prevShow = this.show() === "true";
+  },
+
+  updated() {
+    const currentShow = this.show() === "true";
+
+    if (currentShow && !this.prevShow) {
+      setTimeout(() => {
+        const input = this.el.querySelector("#search-input");
+        if (input) input.focus();
+      }, 100);
+    }
+
+    this.prevShow = currentShow;
+  },
+};
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks, ...customHooks },
+  hooks: Hooks,
 });
 
 // Show progress bar on live navigation and form submits
@@ -83,10 +114,10 @@ if (process.env.NODE_ENV === "development") {
             reloader.openEditorAtDef(e.target);
           }
         },
-        true,
+        true
       );
 
       window.liveReloader = reloader;
-    },
+    }
   );
 }
