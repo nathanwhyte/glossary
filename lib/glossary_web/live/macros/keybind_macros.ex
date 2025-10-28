@@ -4,11 +4,31 @@ defmodule GlossaryWeb.KeybindMacros do
   """
 
   @doc """
-  Macro for handling simple assign events.
+  Macro for handling simple assign events with PubSub publishing.
   """
-  defmacro handle_assign_event(event_name, assign_key, value) do
+  defmacro pubsub_broadcast(pubsub_topic, assign_key, value) do
+    quote do
+      Phoenix.PubSub.broadcast(
+        Glossary.PubSub,
+        unquote(pubsub_topic),
+        {unquote(assign_key), unquote(value)}
+      )
+    end
+  end
+
+  @doc """
+  Macro for handling simple assign events with PubSub publishing.
+  """
+  defmacro pubsub_broadcast_on_event(event_name, assign_key, value, pubsub_topic) do
     quote do
       def handle_event(unquote(event_name), _params, socket) do
+        # not using pubsub_broadcast here, required re-quoting then unquoting again
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          unquote(pubsub_topic),
+          {unquote(assign_key), unquote(value)}
+        )
+
         {:noreply, assign(socket, unquote(assign_key), unquote(value))}
       end
     end
@@ -28,29 +48,31 @@ defmodule GlossaryWeb.KeybindMacros do
   @doc """
   Macro for handling keyboard events with leader key support.
   """
-  defmacro handle_keyboard_events do
+  defmacro keybind_listeners do
     quote do
       def handle_event("key_down", %{"key" => key}, socket) do
         case key do
+          # update state of caller module
           "Meta" ->
             {:noreply, assign(socket, :leader_down, true)}
 
           "Control" ->
             {:noreply, assign(socket, :leader_down, true)}
 
+          # broadcasted to HomeLive
           "k" ->
             if socket.assigns.leader_down do
-              {:noreply, assign(socket, show_search_modal: !socket.assigns.show_search_modal)}
-            else
-              {:noreply, socket}
+              pubsub_broadcast("search_modal", :show_search_modal, true)
             end
+
+            {:noreply, socket}
 
           "Escape" ->
             if socket.assigns.leader_down do
-              {:noreply, assign(socket, show_search_modal: false)}
-            else
-              {:noreply, socket}
+              pubsub_broadcast("search_modal", :show_search_modal, false)
             end
+
+            {:noreply, socket}
 
           _ ->
             {:noreply, socket}
@@ -58,6 +80,7 @@ defmodule GlossaryWeb.KeybindMacros do
       end
 
       def handle_event("key_up", %{"key" => key}, socket) do
+        # update state of caller module
         case key do
           "Meta" ->
             {:noreply, assign(socket, :leader_down, false)}

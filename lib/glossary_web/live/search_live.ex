@@ -8,27 +8,30 @@ defmodule GlossaryWeb.SearchLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Glossary.PubSub, "search_modal")
+    end
+
+    {:ok, assign(socket, show: false)}
+  end
+
+  @impl true
+  def handle_info({:show_search_modal, show}, socket) do
+    {:noreply, assign(socket, show: show)}
+  end
+
+  @impl true
+  def handle_event("modal_click_away", _params, socket) do
+    {:noreply, assign(socket, show: false)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-h-[75vh] mx-auto max-w-6xl space-y-6 pt-32">
-      <.search_content />
-    </div>
-    """
-  end
-
-  attr :show, :boolean, default: true
-  attr :on_close, :any, required: true
-
-  def search_modal(assigns) do
-    ~H"""
-    <div class={if @show, do: "modal modal-open", else: "modal"}>
+    <div class={["modal", if(@show, do: "modal-open", else: "")]}>
       <div
-        phx-click-away="modal_click_away"
         class="modal-box border-base-content/10 max-h-[75vh] mx-auto max-w-6xl space-y-6 border"
+        phx-click-away="modal_click_away"
       >
         <.search_content />
       </div>

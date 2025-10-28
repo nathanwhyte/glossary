@@ -9,20 +9,15 @@ defmodule GlossaryWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, show_search_modal: false, leader_down: false)}
+    {:ok, assign(socket, leader_down: false)}
   end
 
   # Use macros to generate handle_event functions
-  handle_assign_event("open_search_modal", :show_search_modal, true)
-  handle_assign_event("close_search_modal", :show_search_modal, false)
-  handle_assign_event("click_search", :show_search_modal, true)
-  handle_keyboard_events()
+  pubsub_broadcast_on_event("open_search_modal", :show_search_modal, true, "search_modal")
+  pubsub_broadcast_on_event("close_search_modal", :show_search_modal, false, "search_modal")
+  pubsub_broadcast_on_event("click_search", :show_search_modal, true, "search_modal")
 
-  @impl true
-  def handle_event("modal_click_away", _params, socket) do
-    Logger.debug("Modal clicked away")
-    {:noreply, assign(socket, show_search_modal: false)}
-  end
+  keybind_listeners()
 
   @impl true
   def render(assigns) do
@@ -32,12 +27,9 @@ defmodule GlossaryWeb.HomeLive do
         <.search_bar />
         <.quick_start_content />
       </div>
-
-      <GlossaryWeb.SearchLive.search_modal
-        show={@show_search_modal}
-        on_close="close_search_modal"
-      />
     </Layouts.app>
+
+    {live_render(@socket, GlossaryWeb.SearchLive, id: "search-modal")}
     """
   end
 
