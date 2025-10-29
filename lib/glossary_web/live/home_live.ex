@@ -60,20 +60,19 @@ defmodule GlossaryWeb.HomeLive do
       <div class="grid w-full grid-cols-3 grid-rows-3 gap-4 py-2">
         <.quick_start_button
           action_name="New Entry"
-          action_link="#"
-          action_keys={["⌘", "shift", "O"]}
-          disabled
+          action_link="/entries/new"
+          action_keys={["⌘", "shift", "o"]}
         />
         <.quick_start_button
           action_name="View Last Entry"
           action_link="#"
-          action_keys={["⌘", "shift", "S"]}
+          action_keys={["⌘", "shift", "s"]}
           disabled
         />
         <.quick_start_button
           action_name="Command Palette"
           action_link="#"
-          action_keys={["⌘", "shift", "P"]}
+          action_keys={["⌘", "shift", "p"]}
           disabled
         />
         <.quick_start_button action_name="View All Tags" action_link="#" disabled />
@@ -108,7 +107,7 @@ defmodule GlossaryWeb.HomeLive do
       )
 
     ~H"""
-    <.link navigate={~p"/"}>
+    <.link navigate={@action_link}>
       <div class={@container_style}>
         <div class="flex h-full flex-1 flex-col justify-between text-lg">
           <span class="font-medium">

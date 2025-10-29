@@ -30,17 +30,17 @@ defmodule GlossaryWeb.HomeLiveTest do
     assert has_element?(view, "span", "New Entry")
     assert has_element?(view, "kbd", "⌘")
     assert has_element?(view, "kbd", "shift")
-    assert has_element?(view, "kbd", "O")
+    assert has_element?(view, "kbd", "o")
 
     assert has_element?(view, "span", "View Last Entry")
     assert has_element?(view, "kbd", "⌘")
     assert has_element?(view, "kbd", "shift")
-    assert has_element?(view, "kbd", "S")
+    assert has_element?(view, "kbd", "s")
 
     assert has_element?(view, "span", "Command Palette")
     assert has_element?(view, "kbd", "⌘")
     assert has_element?(view, "kbd", "shift")
-    assert has_element?(view, "kbd", "P")
+    assert has_element?(view, "kbd", "p")
 
     # just links
     assert has_element?(view, "span", "View All Tags")
