@@ -48,6 +48,9 @@ defmodule GlossaryWeb.KeybindMacros do
           "Control" ->
             {:noreply, assign(socket, :leader_down, true)}
 
+          "Shift" ->
+            {:noreply, assign(socket, :shift_down, true)}
+
           # broadcasted to parent LiveView
           "k" ->
             if socket.assigns.leader_down do
@@ -57,7 +60,11 @@ defmodule GlossaryWeb.KeybindMacros do
             {:noreply, socket}
 
           "o" ->
-            {:noreply, push_navigate(socket, to: ~p"/entries/new")}
+            if socket.assigns.leader_down && socket.assigns.shift_down do
+              {:noreply, push_navigate(socket, to: ~p"/entries/new")}
+            else
+              {:noreply, socket}
+            end
 
           "Escape" ->
             if socket.assigns.leader_down do
@@ -79,6 +86,9 @@ defmodule GlossaryWeb.KeybindMacros do
 
           "Control" ->
             {:noreply, assign(socket, :leader_down, false)}
+
+          "Shift" ->
+            {:noreply, assign(socket, :shift_down, false)}
 
           _ ->
             {:noreply, socket}

@@ -9,7 +9,7 @@ defmodule GlossaryWeb.NewEntryLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, leader_down: false)}
+    {:ok, assign(socket, leader_down: false, shift_down: false)}
   end
 
   pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
@@ -22,7 +22,7 @@ defmodule GlossaryWeb.NewEntryLive do
     ~H"""
     <Layouts.app flash={@flash}>
       <div phx-window-keydown="key_down" phx-throttle="500" class="flex flex-col gap-12">
-        Hello
+        New Entry
       </div>
     </Layouts.app>
 

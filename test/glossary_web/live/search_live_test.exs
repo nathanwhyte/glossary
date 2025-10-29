@@ -167,6 +167,8 @@ defmodule GlossaryWeb.SearchLiveTest do
 
     test "modal container has correct data attributes for JS", %{conn: conn} do
       view = mount_home(conn)
+      # Ensure modal is closed before testing
+      close_via_pubsub()
       html = render_search(view)
       assert html =~ ~s(id="search-modal-container")
       assert html =~ ~s(data-show="false")

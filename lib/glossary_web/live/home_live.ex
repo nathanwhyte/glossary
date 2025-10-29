@@ -9,7 +9,7 @@ defmodule GlossaryWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, leader_down: false)}
+    {:ok, assign(socket, leader_down: false, shift_down: false)}
   end
 
   # Use macros to generate handle_event functions
