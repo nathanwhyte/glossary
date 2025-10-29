@@ -48,13 +48,16 @@ defmodule GlossaryWeb.KeybindMacros do
           "Control" ->
             {:noreply, assign(socket, :leader_down, true)}
 
-          # broadcasted to HomeLive
+          # broadcasted to parent LiveView
           "k" ->
             if socket.assigns.leader_down do
               pubsub_broadcast("search_modal", :summon_modal, true)
             end
 
             {:noreply, socket}
+
+          "o" ->
+            {:noreply, push_navigate(socket, to: ~p"/entries/new")}
 
           "Escape" ->
             if socket.assigns.leader_down do
