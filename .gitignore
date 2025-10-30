@@ -28,6 +28,9 @@ glossary-*.tar
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
 
+# Ignore Ecto-generated database schema file
+/priv/repo/structure.sql
+
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
