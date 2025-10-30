@@ -9,24 +9,7 @@ defmodule GlossaryWeb.NewEntryLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, leader_down: false, shift_down: false)}
-  end
-
-  @impl true
-  def handle_params(params, _url, socket) do
-    case socket.assigns.live_action do
-      :new ->
-        # socket =
-        #   socket
-        #   |> assign(:page_title, "New Entry")
-        #   |> assign(:article, %YourApp.Articles.Article{})
-        #   |> assign(:changeset, YourApp.Articles.change_article(%YourApp.Articles.Article{}))
-
-        {:noreply, socket}
-
-      _ ->
-        {:noreply, socket}
-    end
+    {:ok, assign(socket, leader_down: false, shift_down: false, entry: %Glossary.Entries.Entry{})}
   end
 
   pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
@@ -48,7 +31,7 @@ defmodule GlossaryWeb.NewEntryLive do
           id="title-editor"
           phx-hook="TitleEditor"
         >
-          <input type="hidden" name="entry[title]" id="entry_title" />
+          <input id="entry_title" type="hidden" name="entry[title]" value={@entry.title} />
         </div>
       </div>
     </Layouts.app>
