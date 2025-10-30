@@ -9,8 +9,6 @@ let TitleEditor = {
   mounted() {
     const hiddenInput = document.getElementById("entry_title");
 
-    console.log(hiddenInput.value);
-
     this.editor = new Editor({
       element: this.el,
       extensions: [
@@ -23,7 +21,13 @@ let TitleEditor = {
       autofocus: true,
       editorProps: {
         attributes: {
-          class: `prose max-w-none outline-none w-full text-3xl font-bold`,
+          class: `prose max-w-none outline-none w-full text-3xl font-bold rounded-md px-3 py-2 transition focus:bg-base-content/5`,
+        },
+        handleDOMEvents: {
+          blur: (_view, _event) => {
+            const title = this.editor.getText().trim();
+            this.pushEvent("title_blur", { title });
+          },
         },
       },
     });

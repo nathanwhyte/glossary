@@ -9,6 +9,7 @@ defmodule Glossary.Entries.Entry do
     field :slug, :string
     field :description, :string
     field :content, :string
+    # TODO: add `status` field (draft, published, archived, etc.)
 
     timestamps(type: :utc_datetime)
   end
@@ -17,6 +18,6 @@ defmodule Glossary.Entries.Entry do
   def changeset(entry, attrs) do
     entry
     |> cast(attrs, [:title, :slug, :description, :content])
-    |> validate_required([:title, :slug, :description, :content])
+    |> validate_required([:title, :slug])
   end
 end

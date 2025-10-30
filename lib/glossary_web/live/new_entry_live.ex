@@ -5,17 +5,33 @@ defmodule GlossaryWeb.NewEntryLive do
   use GlossaryWeb, :live_view
 
   require Logger
+
   import GlossaryWeb.KeybindMacros
+
+  alias Glossary.Entries.Entry
+  alias Glossary.Slug
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, leader_down: false, shift_down: false, entry: %Glossary.Entries.Entry{})}
+    {:ok, assign(socket, leader_down: false, shift_down: false, entry: %Entry{})}
   end
 
   pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
   pubsub_broadcast_on_event("banish_modal", :summon_modal, false, "search_modal")
 
   keybind_listeners()
+
+  @impl true
+  def handle_event("title_blur", %{"title" => title}, socket) do
+    slug = Slug.slugify(title)
+
+    # TODO: support marking as draft (or autosaving as a draft after title is updated)
+
+    # Update the in-memory entry struct
+    entry = %{socket.assigns.entry | title: title, slug: slug}
+
+    {:noreply, assign(socket, entry: entry)}
+  end
 
   @impl true
   def render(assigns) do
@@ -31,7 +47,7 @@ defmodule GlossaryWeb.NewEntryLive do
           id="title-editor"
           phx-hook="TitleEditor"
         >
-          <input id="entry_title" type="hidden" name="entry[title]" value={@entry.title} />
+          <input id="entry_title" type="hidden" name="entry[title]" />
         </div>
       </div>
     </Layouts.app>

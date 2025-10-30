@@ -9,7 +9,8 @@ defmodule Glossary.Repo.Migrations.CreateEntries do
       add :title, :string
       add :slug, :string
       add :description, :string
-      add :content, :text
+      add :content, :string
+      # TODO: add `status` field (draft, published, archived, etc.)
 
       timestamps(type: :utc_datetime)
     end
