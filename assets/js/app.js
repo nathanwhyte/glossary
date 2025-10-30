@@ -23,12 +23,13 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks as colocatedHooks } from "phoenix-colocated/glossary";
+import customHooks from "./hooks";
 import topbar from "../vendor/topbar";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
-let Hooks = { ...colocatedHooks };
+let Hooks = { ...colocatedHooks, ...customHooks };
 
 /**
  * @type {import("phoenix_live_view").Hook}
@@ -114,10 +115,10 @@ if (process.env.NODE_ENV === "development") {
             reloader.openEditorAtDef(e.target);
           }
         },
-        true
+        true,
       );
 
       window.liveReloader = reloader;
-    }
+    },
   );
 }

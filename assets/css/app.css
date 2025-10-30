@@ -92,6 +92,14 @@
   --noise: 0;
 }
 
+/* Styling for TipTap's Placeholder */
+@layer components {
+  .tiptap p.is-editor-empty:first-child::before {
+    @apply text-base-content/15 float-left h-0 pointer-events-none;
+    content: attr(data-placeholder);
+  }
+}
+
 /* Add variants based on LiveView classes */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
@@ -109,7 +117,8 @@
 /* This file is for your main application CSS */
 
 /* Prevent vertical scrolling at top level */
-html, body {
+html,
+body {
   height: 100%;
   overflow: hidden;
 }

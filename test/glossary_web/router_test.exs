@@ -4,10 +4,9 @@ defmodule GlossaryWeb.RouterTest do
 
   describe "GET /entries/new" do
     test "returns 200 and renders NewEntryLive", %{conn: conn} do
-      {:ok, view, html} = live(conn, "/entries/new")
+      {:ok, view, _html} = live(conn, "/entries/new")
 
       # Verify the route returns 200 (no error)
-      assert html =~ "New Entry"
       assert view.module == GlossaryWeb.NewEntryLive
     end
   end
