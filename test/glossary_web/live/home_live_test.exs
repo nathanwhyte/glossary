@@ -47,4 +47,14 @@ defmodule GlossaryWeb.HomeLiveTest do
     assert has_element?(view, "span", "View All Subjects")
     assert has_element?(view, "span", "View All Projects")
   end
+
+  test "New Entry quick action link exists and has correct url", %{conn: conn} do
+    {:ok, home_view, _html} = live(conn, "/")
+
+    # Verify the link exists and has the correct href
+    assert has_element?(home_view, "a[href=\"/entries/new\"]")
+
+    # Verify the link contains the "New Entry" text
+    assert has_element?(home_view, "a[href=\"/entries/new\"] span", "New Entry")
+  end
 end

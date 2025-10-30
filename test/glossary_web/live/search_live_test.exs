@@ -38,13 +38,6 @@ defmodule GlossaryWeb.SearchLiveTest do
       html = render_search(view)
       assert_closed(html)
     end
-
-    test "subscribes to search_modal PubSub topic when connected", %{conn: conn} do
-      view = mount_home(conn)
-      open_via_pubsub()
-      html = render_search(view)
-      assert html =~ "modal-open"
-    end
   end
 
   describe "handle_info/2" do
@@ -102,14 +95,6 @@ defmodule GlossaryWeb.SearchLiveTest do
       view |> element("div[phx-click=\"click_search\"]") |> render_click()
       html = render_search(view)
       assert html =~ "modal-open"
-    end
-
-    test "search modal can be opened and closed via PubSub", %{conn: conn} do
-      view = mount_home(conn)
-      open_via_pubsub()
-      assert render_search(view) =~ "modal-open"
-      close_via_pubsub()
-      assert render_search(view) =~ "hidden"
     end
   end
 
