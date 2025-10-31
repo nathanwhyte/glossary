@@ -1,14 +1,23 @@
 defmodule GlossaryWeb.RouterTest do
-  use GlossaryWeb.ConnCase, async: true
+  use GlossaryWeb.ConnCase
   import Phoenix.LiveViewTest
 
-  describe "GET /entries/:entry_id" do
-    test "returns 200 and renders EditEntryLive for existing entry", %{conn: conn} do
-      # Create a test entry
-      alias Glossary.Entries.Entry
-      alias Glossary.Repo
+  import Glossary.EntriesFixtures
 
-      {:ok, entry} = Repo.insert(%Entry{})
+  describe "routes" do
+    test "GET / mounts HomeLive", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/")
+      assert view.module == GlossaryWeb.HomeLive
+    end
+
+    test "GET /entries/:entry_id returns 200 for valid entry", %{conn: conn} do
+      entry = entry_fixture()
+      conn = get(conn, "/entries/#{entry.id}")
+      assert html_response(conn, 200)
+    end
+
+    test "GET /entries/:entry_id renders EditEntryLive for existing entry", %{conn: conn} do
+      entry = entry_fixture()
 
       {:ok, view, _html} = live(conn, "/entries/#{entry.id}")
 
@@ -61,6 +70,27 @@ defmodule GlossaryWeb.RouterTest do
 
       # Should still be on home page (not redirected)
       assert home_view.module == GlossaryWeb.HomeLive
+    end
+
+    test "creates entry in database on Cmd+Shift+O", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/")
+      import Glossary.Entries
+      initial_count = length(list_entries())
+
+      view
+      |> element("div[phx-window-keydown=\"key_down\"]")
+      |> render_keydown(%{"key" => "Meta"})
+
+      view
+      |> element("div[phx-window-keydown=\"key_down\"]")
+      |> render_keydown(%{"key" => "Shift"})
+
+      assert {:error, {:live_redirect, _}} =
+               view
+               |> element("div[phx-window-keydown=\"key_down\"]")
+               |> render_keydown(%{"key" => "o"})
+
+      assert length(list_entries()) == initial_count + 1
     end
   end
 end
