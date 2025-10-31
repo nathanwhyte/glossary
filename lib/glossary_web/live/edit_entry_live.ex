@@ -56,6 +56,14 @@ defmodule GlossaryWeb.EditEntryLive do
     {:noreply, socket}
   end
 
+  def handle_event("body_update", %{"body" => body}, socket) do
+    {:ok, _} =
+      Entry.changeset(socket.assigns.entry, %{body: body})
+      |> Repo.update()
+
+    {:noreply, socket}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -65,13 +73,27 @@ defmodule GlossaryWeb.EditEntryLive do
         id="edit-entry-container"
         phx-window-keydown="key_down"
         phx-window-keyup="key_up"
-        class="flex flex-col gap-4 pt-8"
+        class="flex h-full flex-col py-8"
       >
         <.title_section entry={@entry} />
 
-        <section>
+        <div class="divider px-3"></div>
+
+        <section class="h-full">
           <%!-- TODO: body input section --%>
           <%!--       support headers, code/quote blocks, font styles, etc. --%>
+
+          <div
+            id="body-editor"
+            phx-hook="BodyEditor"
+          >
+            <input
+              id="entry_body"
+              type="hidden"
+              name="entry[body]"
+              value={@entry.body}
+            />
+          </div>
         </section>
       </div>
     </Layouts.app>
@@ -107,8 +129,12 @@ defmodule GlossaryWeb.EditEntryLive do
         />
       </div>
 
-      <%!-- TODO: @tags and #topics line, similar to Linear's --%>
-      <%!--       no autosave here, update on blur or keybind  --%>
+      <div class="text-base-content/50 flex gap-2 px-3 py-2 text-sm font-medium">
+        <%!-- TODO: @tags and #topics line, similar to Linear's --%>
+        <%!--       no autosave here, update on blur or keybind  --%>
+        <span><i>@tags</i></span>
+        <span><i>#topics</i></span>
+      </div>
     </header>
     """
   end

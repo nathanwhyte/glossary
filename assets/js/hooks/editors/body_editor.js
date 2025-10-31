@@ -16,24 +16,12 @@ let BodyEditor = {
 
     this.editor = new Editor({
       element: this.el,
-      extensions: [
-        StarterKit.extend({
-          addKeyboardShortcuts() {
-            return {
-              Enter: () => true, // prevent line breaks
-            };
-          },
-          addInputRules() {
-            return []; // disables heading/list input rules that add new blocks
-          },
-        }),
-        Placeholder,
-      ],
+      extensions: [StarterKit, Placeholder],
       content: hiddenInput.value,
       autofocus: true,
       editorProps: {
         attributes: {
-          class: `prose outline-none w-full text-3xl font-semibold rounded-md px-3 py-2 transition`,
+          class: `prose outline-none size-full px-3 py-2`,
         },
       },
       onUpdate: ({ editor }) => {
