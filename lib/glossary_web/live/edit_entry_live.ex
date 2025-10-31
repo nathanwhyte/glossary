@@ -11,7 +11,7 @@ defmodule GlossaryWeb.EditEntryLive do
 
   Entries that are blank when this component unmounts will be dropped.
   Otherwise, the entry will remain marked as "draft" until the user hits
-  the submit button.
+  the submit button or marks the entry as "published".
   """
   use GlossaryWeb, :live_view
 
@@ -59,44 +59,57 @@ defmodule GlossaryWeb.EditEntryLive do
   @impl true
   def render(assigns) do
     ~H"""
+    <%!-- TODO: "saving" and "saved" indicators --%>
     <Layouts.app flash={@flash}>
       <div
         id="edit-entry-container"
         phx-window-keydown="key_down"
         phx-window-keyup="key_up"
-        phx-update="ignore"
         class="flex flex-col gap-4 pt-8"
       >
-        <%!-- TODO: "saving" and "saved" indicators --%>
-        <header>
-          <div
-            id="title-editor"
-            phx-hook="TitleEditor"
-          >
-            <input
-              id="entry_title"
-              type="hidden"
-              name="entry[title]"
-              value={@entry.title}
-            />
-          </div>
+        <.title_section entry={@entry} />
 
-          <div
-            id="description-editor"
-            phx-hook="DescriptionEditor"
-          >
-            <input
-              id="entry_description"
-              type="hidden"
-              name="entry[description]"
-              value={@entry.description}
-            />
-          </div>
-        </header>
+        <section>
+          <%!-- TODO: body input section --%>
+          <%!--       support headers, code/quote blocks, font styles, etc. --%>
+        </section>
       </div>
     </Layouts.app>
 
     {live_render(@socket, GlossaryWeb.SearchLive, id: "search-modal")}
+    """
+  end
+
+  defp title_section(assigns) do
+    ~H"""
+    <header>
+      <div
+        id="title-editor"
+        phx-hook="TitleEditor"
+      >
+        <input
+          id="entry_title"
+          type="hidden"
+          name="entry[title]"
+          value={assigns.entry.title}
+        />
+      </div>
+
+      <div
+        id="description-editor"
+        phx-hook="DescriptionEditor"
+      >
+        <input
+          id="entry_description"
+          type="hidden"
+          name="entry[description]"
+          value={assigns.entry.description}
+        />
+      </div>
+
+      <%!-- TODO: @tags and #topics line, similar to Linear's --%>
+      <%!--       no autosave here, update on blur or keybind  --%>
+    </header>
     """
   end
 end
