@@ -17,7 +17,16 @@ let DescriptionEditor = {
     this.editor = new Editor({
       element: this.el,
       extensions: [
-        StarterKit,
+        StarterKit.extend({
+          addKeyboardShortcuts() {
+            return {
+              Enter: () => true, // prevent line breaks
+            };
+          },
+          addInputRules() {
+            return []; // disables heading/list input rules that add new blocks
+          },
+        }),
         Placeholder.configure({
           placeholder: "Description",
         }),
