@@ -129,7 +129,7 @@ defmodule GlossaryWeb.SearchLiveTest do
       assert html =~ "hidden"
     end
 
-    test "Escape does not close modal when leader key is not down", %{conn: conn} do
+    test "Escape closes modal regardless of leader key state", %{conn: conn} do
       view = mount_home(conn)
       open_via_pubsub()
       assert render_search(view) =~ "modal-open"
@@ -139,7 +139,7 @@ defmodule GlossaryWeb.SearchLiveTest do
       |> render_keydown(%{"key" => "Escape"})
 
       html = render_search(view)
-      assert html =~ "modal-open"
+      assert html =~ "hidden"
     end
   end
 

@@ -76,10 +76,7 @@ defmodule GlossaryWeb.KeybindMacros do
             end
 
           "Escape" ->
-            if socket.assigns.leader_down do
-              pubsub_broadcast("search_modal", :summon_modal, false)
-            end
-
+            pubsub_broadcast("search_modal", :summon_modal, false)
             {:noreply, socket}
 
           _ ->
