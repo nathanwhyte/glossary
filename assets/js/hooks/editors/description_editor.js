@@ -1,7 +1,7 @@
 import { Editor } from "@tiptap/core";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
-import { debounce } from "./utils";
+import { debounce } from "./editor_utils";
 
 /**
  * @type {import("phoenix_live_view").Hook}

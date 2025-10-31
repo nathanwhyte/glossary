@@ -1,5 +1,5 @@
-import TitleEditor from "./title_editor";
-import DescriptionEditor from "./description_editor";
+import TitleEditor from "./editors/title_editor";
+import DescriptionEditor from "./editors/description_editor";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}

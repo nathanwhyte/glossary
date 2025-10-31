@@ -1,3 +1,4 @@
+// Generalized debounce for emitting onChange events to LiveView
 export function debounce(func, delay) {
   let timer;
   return function (...args) {
