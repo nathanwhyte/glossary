@@ -23,7 +23,11 @@ defmodule GlossaryWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <div phx-window-keydown="key_down" phx-throttle="500" class="flex flex-col gap-12">
+      <div
+        phx-window-keydown="key_down"
+        phx-window-keyup="key_up"
+        class="flex flex-col gap-12"
+      >
         <.search_bar />
         <.quick_start_content />
       </div>

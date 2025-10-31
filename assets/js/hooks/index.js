@@ -1,4 +1,5 @@
 import TitleEditor from "./title_editor";
+import DescriptionEditor from "./description_editor";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}
@@ -6,5 +7,6 @@ import TitleEditor from "./title_editor";
 let customHooks = {};
 
 customHooks.TitleEditor = TitleEditor;
+customHooks.DescriptionEditor = DescriptionEditor;
 
 export default customHooks;

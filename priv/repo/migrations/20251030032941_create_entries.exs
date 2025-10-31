@@ -6,11 +6,10 @@ defmodule Glossary.Repo.Migrations.CreateEntries do
 
     create table(:entries, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :title, :string
-      add :slug, :string
-      add :description, :string
-      add :content, :string
-      # TODO: add `status` field (draft, published, archived, etc.)
+      add :title, :string, default: ""
+      add :description, :string, default: ""
+      add :content, :string, default: ""
+      add :status, :string, default: "draft"
 
       timestamps(type: :utc_datetime)
     end

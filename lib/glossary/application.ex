@@ -15,7 +15,9 @@ defmodule Glossary.Application do
       # Start a worker by calling: Glossary.Worker.start_link(arg)
       # {Glossary.Worker, arg},
       # Start to serve requests, typically the last entry
-      GlossaryWeb.Endpoint
+      GlossaryWeb.Endpoint,
+      # with default options
+      {Cachex, [:glossary_cache]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

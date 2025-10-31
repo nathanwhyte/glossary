@@ -5,11 +5,10 @@ defmodule Glossary.Entries.Entry do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "entries" do
-    field :title, :string
-    field :slug, :string
-    field :description, :string
-    field :content, :string
-    # TODO: add `status` field (draft, published, archived, etc.)
+    field :title, :string, default: ""
+    field :description, :string, default: ""
+    field :content, :string, default: ""
+    field :status, Ecto.Enum, values: [:draft, :published, :archived], default: :draft
 
     timestamps(type: :utc_datetime)
   end
@@ -17,7 +16,7 @@ defmodule Glossary.Entries.Entry do
   @doc false
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:title, :slug, :description, :content])
-    |> validate_required([:title, :slug])
+    |> cast(attrs, [:title, :description, :content, :status])
+    |> validate_required([:status])
   end
 end

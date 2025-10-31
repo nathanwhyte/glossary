@@ -18,7 +18,7 @@ defmodule GlossaryWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive
-    live "/entries/new", NewEntryLive
+    live "/entries/:entry_id", EditEntryLive
   end
 
   # Other scopes may use custom stacks.

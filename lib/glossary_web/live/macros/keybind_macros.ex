@@ -3,6 +3,9 @@ defmodule GlossaryWeb.KeybindMacros do
   Macros for common LiveView event handling patterns.
   """
 
+  alias Glossary.Repo
+  alias Glossary.Entries.Entry
+
   @doc """
   Macro for handling simple assign events with PubSub publishing.
   """
@@ -49,7 +52,11 @@ defmodule GlossaryWeb.KeybindMacros do
             {:noreply, assign(socket, :leader_down, true)}
 
           "Shift" ->
-            {:noreply, assign(socket, :shift_down, true)}
+            if socket.assigns.leader_down do
+              {:noreply, assign(socket, :shift_down, true)}
+            else
+              {:noreply, socket}
+            end
 
           # broadcasted to parent LiveView
           "k" ->
@@ -61,7 +68,9 @@ defmodule GlossaryWeb.KeybindMacros do
 
           "o" ->
             if socket.assigns.leader_down && socket.assigns.shift_down do
-              {:noreply, push_navigate(socket, to: ~p"/entries/new")}
+              # TODO: cull empty entries
+              {:ok, new_entry} = Repo.insert(%Entry{})
+              {:noreply, push_navigate(socket, to: ~p"/entries/#{new_entry.id}")}
             else
               {:noreply, socket}
             end

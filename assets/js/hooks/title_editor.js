@@ -12,7 +12,16 @@ let TitleEditor = {
     this.editor = new Editor({
       element: this.el,
       extensions: [
-        StarterKit,
+        StarterKit.extend({
+          addKeyboardShortcuts() {
+            return {
+              Enter: () => true, // prevent line breaks
+            };
+          },
+          addInputRules() {
+            return []; // disables heading/list input rules that add new blocks
+          },
+        }),
         Placeholder.configure({
           placeholder: "Entry Title",
         }),
@@ -21,7 +30,7 @@ let TitleEditor = {
       autofocus: true,
       editorProps: {
         attributes: {
-          class: `prose max-w-none outline-none w-full text-3xl font-bold rounded-md px-3 py-2 transition focus:bg-base-content/5`,
+          class: `prose outline-none w-full text-3xl font-bold rounded-md px-3 py-2 transition`,
         },
         handleDOMEvents: {
           blur: (_view, _event) => {
