@@ -8,7 +8,7 @@ defmodule Glossary.Repo.Migrations.CreateEntries do
       add :id, :binary_id, primary_key: true
       add :title, :string, default: ""
       add :description, :string, default: ""
-      add :content, :text, default: ""
+      add :body, :text, default: ""
       add :status, :string, default: "draft"
 
       timestamps(type: :utc_datetime)

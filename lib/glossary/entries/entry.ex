@@ -7,7 +7,7 @@ defmodule Glossary.Entries.Entry do
   schema "entries" do
     field :title, :string, default: ""
     field :description, :string, default: ""
-    field :content, :string, default: ""
+    field :body, :string, default: ""
     field :status, Ecto.Enum, values: [:draft, :published, :archived], default: :draft
 
     timestamps(type: :utc_datetime)
@@ -16,7 +16,7 @@ defmodule Glossary.Entries.Entry do
   @doc false
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:title, :description, :content, :status])
+    |> cast(attrs, [:title, :description, :body, :status])
     |> validate_required([:status])
   end
 end
