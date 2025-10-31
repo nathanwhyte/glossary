@@ -1,6 +1,7 @@
 import { Editor } from "@tiptap/core";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
+import { debounce } from "./utils";
 
 /**
  * @type {import("phoenix_live_view").Hook}
@@ -8,6 +9,10 @@ import StarterKit from "@tiptap/starter-kit";
 let DescriptionEditor = {
   mounted() {
     const hiddenInput = document.getElementById("entry_description");
+
+    const debouncedPush = debounce((description) => {
+      this.pushEvent("description_update", { description });
+    }, 500);
 
     this.editor = new Editor({
       element: this.el,
@@ -23,18 +28,14 @@ let DescriptionEditor = {
         attributes: {
           class: `prose outline-none w-full text-sm font-medium rounded-md px-3 py-1 transition italic text-base-content/50`,
         },
-        handleDOMEvents: {
-          blur: (_view, _event) => {
-            const description = this.editor.getText().trim();
-            this.pushEvent("description_blur", { description });
-          },
-        },
+      },
+      onUpdate: ({ editor }) => {
+        debouncedPush(editor.getText().trim());
       },
     });
   },
 
   destroyed() {
-    console.log("Destroying description editor");
     this.editor?.destroy();
   },
 };

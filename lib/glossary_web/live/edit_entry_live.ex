@@ -38,7 +38,7 @@ defmodule GlossaryWeb.EditEntryLive do
   keybind_listeners()
 
   @impl true
-  def handle_event("title_blur", %{"title" => title}, socket) do
+  def handle_event("title_update", %{"title" => title}, socket) do
     # TODO: support marking as draft (or autosaving as a draft after title is updated)
 
     {:ok, _} =
@@ -48,7 +48,7 @@ defmodule GlossaryWeb.EditEntryLive do
     {:noreply, socket}
   end
 
-  def handle_event("description_blur", %{"description" => description}, socket) do
+  def handle_event("description_update", %{"description" => description}, socket) do
     {:ok, _} =
       Entry.changeset(socket.assigns.entry, %{description: description})
       |> Repo.update()
@@ -67,12 +67,18 @@ defmodule GlossaryWeb.EditEntryLive do
         phx-update="ignore"
         class="flex flex-col gap-4 pt-8"
       >
+        <%!-- TODO: "saving" and "saved" indicators --%>
         <header>
           <div
             id="title-editor"
             phx-hook="TitleEditor"
           >
-            <input id="entry_title" type="hidden" name="entry[title]" value={@entry.title} />
+            <input
+              id="entry_title"
+              type="hidden"
+              name="entry[title]"
+              value={@entry.title}
+            />
           </div>
 
           <div
