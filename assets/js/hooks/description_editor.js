@@ -30,7 +30,7 @@ let DescriptionEditor = {
         },
       },
       onUpdate: ({ editor }) => {
-        debouncedPush(editor.getText().trim());
+        debouncedPush(editor.getHTML());
       },
     });
   },
