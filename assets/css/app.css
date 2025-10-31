@@ -92,11 +92,73 @@
   --noise: 0;
 }
 
-/* Styling for TipTap's Placeholder */
 @layer components {
-  .tiptap p.is-editor-empty:first-child::before {
-    @apply text-base-content/15 float-left h-0 pointer-events-none;
-    content: attr(data-placeholder);
+  /* Custom styling for TipTap components */
+  .tiptap {
+    /* First child margin reset */
+    :first-child {
+      margin-top: 0;
+    }
+
+    /* Placeholder */
+    p.is-editor-empty:first-child::before {
+      @apply text-base-content/15 float-left h-0 pointer-events-none;
+      content: attr(data-placeholder);
+    }
+
+    /* Lists */
+    ul {
+      @apply list-disc list-outside;
+      padding: 0 1rem;
+      margin: 0rem 1rem 0rem 0.4rem;
+
+      ul {
+        @apply list-[circle] list-outside;
+
+        ul {
+          @apply list-[square] list-outside;
+        }
+      }
+
+      li p {
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+      }
+    }
+
+    ol {
+      @apply list-decimal list-outside;
+      padding: 0 1rem;
+      margin: 0rem 1rem 0rem 0.4rem;
+
+      ol {
+        @apply list-[lower-alpha] list-outside;
+
+        ol {
+          @apply list-[lower-roman] list-outside;
+        }
+      }
+
+      li p {
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+      }
+    }
+
+    /* Code (Mark) */
+    code {
+      @apply bg-transparent text-inherit p-0;
+      padding-inline: 0.25em !important;
+    }
+
+    /* CodeBlock (Node) */
+    pre {
+      @apply bg-neutral rounded-md text-neutral-content font-mono my-2 px-3 py-2;
+
+      code {
+        @apply bg-transparent text-inherit text-sm p-0;
+      }
+    }
   }
 }
 
