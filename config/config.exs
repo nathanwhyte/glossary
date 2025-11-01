@@ -9,7 +9,9 @@ import Config
 
 config :glossary,
   ecto_repos: [Glossary.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime, binary_id: true],
+  migration_primary_key: [type: :binary_id],
+  migration_foreign_key: [type: :binary_id]
 
 # Configures the endpoint
 config :glossary, GlossaryWeb.Endpoint,

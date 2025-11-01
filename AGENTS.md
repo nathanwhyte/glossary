@@ -3,6 +3,7 @@
 This repository is the **Glossary** Phoenix (Elixir) web application. Follow these guidelines for consistent, reliable contributions.
 
 ## Project Overview
+
 - **App Name**: Glossary
 - **Framework**: Phoenix 1.8+ with LiveView
 - **Database**: PostgreSQL via Ecto
@@ -12,6 +13,7 @@ This repository is the **Glossary** Phoenix (Elixir) web application. Follow the
 - **Local URL**: http://localhost:4000
 
 ## Project Structure & Module Organization
+
 - **Core application code** (`lib/`):
   - `lib/glossary/` – domain, contexts, business logic, and Ecto schemas
     - `application.ex` – OTP application supervisor
@@ -40,6 +42,7 @@ This repository is the **Glossary** Phoenix (Elixir) web application. Follow the
   - Compiled assets and public files (favicon, robots.txt)
 
 **Conventions**:
+
 - One module per file
 - Use `Glossary.Context` and `Glossary.Context.Schema` patterns
 - Contexts expose public APIs; keep implementation details private
@@ -47,6 +50,7 @@ This repository is the **Glossary** Phoenix (Elixir) web application. Follow the
 ## Getting Started
 
 ### Initial Setup
+
 ```bash
 # Clone and navigate to the repo
 cd glossary
@@ -63,25 +67,27 @@ iex -S mix phx.server
 ```
 
 ### Common Mix Tasks
-| Command | Purpose |
-|---------|---------|
-| `mix setup` | Full setup: deps, DB, migrations, seeds, assets |
-| `mix deps.get` | Install/update dependencies |
-| `mix ecto.setup` | Create DB, run migrations, seed data |
-| `mix ecto.reset` | Drop and recreate DB (destructive!) |
-| `mix ecto.migrate` | Run pending migrations |
-| `mix ecto.rollback` | Rollback last migration |
-| `mix phx.server` | Start development server |
-| `iex -S mix phx.server` | Start server with interactive Elixir shell |
-| `mix test` | Run full test suite |
-| `mix test test/path/to/file_test.exs` | Run specific test file |
-| `mix test --only focus:true` | Run only focused tests (@tag :focus) |
-| `mix format` | Format all Elixir code |
-| `mix compile --warnings-as-errors` | Strict compilation check |
-| `mix deps.unlock --unused` | Remove unused dependencies |
-| `mix precommit` | Run pre-commit checks (compile, format, test) |
+
+| Command                               | Purpose                                         |
+| ------------------------------------- | ----------------------------------------------- |
+| `mix setup`                           | Full setup: deps, DB, migrations, seeds, assets |
+| `mix deps.get`                        | Install/update dependencies                     |
+| `mix ecto.setup`                      | Create DB, run migrations, seed data            |
+| `mix ecto.reset`                      | Drop and recreate DB (destructive!)             |
+| `mix ecto.migrate`                    | Run pending migrations                          |
+| `mix ecto.rollback`                   | Rollback last migration                         |
+| `mix phx.server`                      | Start development server                        |
+| `iex -S mix phx.server`               | Start server with interactive Elixir shell      |
+| `mix test`                            | Run full test suite                             |
+| `mix test test/path/to/file_test.exs` | Run specific test file                          |
+| `mix test --only focus:true`          | Run only focused tests (@tag :focus)            |
+| `mix format`                          | Format all Elixir code                          |
+| `mix compile --warnings-as-errors`    | Strict compilation check                        |
+| `mix deps.unlock --unused`            | Remove unused dependencies                      |
+| `mix precommit`                       | Run pre-commit checks (compile, format, test)   |
 
 ### Asset Pipeline
+
 - **Tailwind CSS**: Utility-first CSS framework
   - `mix tailwind glossary` – compile CSS
   - `mix tailwind.install` – install Tailwind binary
@@ -94,17 +100,21 @@ iex -S mix phx.server
   - `mix assets.deploy` – build and minify for production
 
 ### Pre-commit Hooks
+
 This project uses `pre-commit` for automated checks:
+
 - **Setup** (one-time): `pip install pre-commit && pre-commit install`
 - **Hooks run automatically** on `git commit`
 - **Manual run**: `pre-commit run --all-files`
 
 Configured hooks:
+
 - YAML validation, trailing whitespace, EOF fixes
 - Merge conflict detection
 - `mix precommit` (compile, format, test)
 
 ## Coding Style & Naming Conventions
+
 - **Formatter**: Elixir formatter with Phoenix/Ecto plugins
   - 2-space indentation (enforced by formatter)
   - Run `mix format` before committing
@@ -124,6 +134,7 @@ Configured hooks:
   - Example: `Glossary.Accounts.get_user(id)` not `Repo.get(User, id)`
 
 ## Phoenix LiveView Guidelines
+
 - **Component organization**:
   - Reusable components: `lib/glossary_web/components/`
   - Page LiveViews: `lib/glossary_web/live/`
@@ -145,6 +156,7 @@ Configured hooks:
 This project uses custom macros to reduce boilerplate and ensure consistent patterns across LiveViews.
 
 ### KeybindMacros Module
+
 Located at `lib/glossary_web/live/macros/keybind_macros.ex`, this module provides macros for common LiveView event handling patterns:
 
 - **`pubsub_broadcast/3`** – Broadcasts messages to PubSub topics
@@ -152,6 +164,7 @@ Located at `lib/glossary_web/live/macros/keybind_macros.ex`, this module provide
 - **`keybind_listeners/0`** – Generates keyboard event handlers with leader key support (Cmd/Ctrl + K for search)
 
 ### Usage Examples
+
 ```elixir
 # Generate event handlers with PubSub broadcasting
 pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
@@ -161,6 +174,7 @@ keybind_listeners()
 ```
 
 ### Macro Guidelines
+
 - Keep macros focused on reducing repetitive patterns
 - Document macro behavior and parameters clearly
 - Test macro-generated code thoroughly
@@ -171,12 +185,14 @@ keybind_listeners()
 This application uses Phoenix PubSub for real-time communication between LiveView processes.
 
 ### Configuration
+
 - **PubSub Server**: `Glossary.PubSub` (configured in `application.ex`)
 - **Topics**: Use descriptive topic names (e.g., `"search_modal"`, `"notifications"`)
 
 ### Common Patterns
 
 #### Broadcasting Messages
+
 ```elixir
 # Direct broadcast
 Phoenix.PubSub.broadcast(Glossary.PubSub, "topic_name", {:event, value})
@@ -186,6 +202,7 @@ pubsub_broadcast("topic_name", :assign_key, value)
 ```
 
 #### Subscribing to Topics
+
 ```elixir
 # In mount/3 when connected
 if connected?(socket) do
@@ -199,10 +216,12 @@ end
 ```
 
 ### Current Topics
+
 - **`"search_modal"`** – Controls search modal visibility across the application
   - Messages: `{:summon_modal, boolean}`
 
 ### Best Practices
+
 - Use descriptive topic names
 - Keep message formats consistent within topics
 - Subscribe only when necessary (in `mount/3` with `connected?/1` check)
@@ -214,12 +233,14 @@ end
 The search modal is a key feature implemented using LiveView, PubSub, and JavaScript hooks.
 
 ### Architecture
+
 - **Main Component**: `GlossaryWeb.SearchLive` – Handles modal state and rendering
 - **Parent Integration**: Rendered via `live_render/3` in `HomeLive`
 - **Communication**: PubSub topic `"search_modal"` for state synchronization
 - **JavaScript Hook**: `SearchModal` hook for focus management
 
 ### Features
+
 - **Keyboard Shortcuts**: Cmd/Ctrl + K to open, Escape to close (when leader key is down)
 - **Click-to-Open**: Click search bar to open modal
 - **Auto-focus**: JavaScript hook automatically focuses search input when opened
@@ -227,12 +248,15 @@ The search modal is a key feature implemented using LiveView, PubSub, and JavaSc
 - **Attribute Badges**: Visual indicators for search modifiers (`@tag`, `#subject`, `&project`, `!`)
 
 ### Components Used
+
 - **`attribute_badge/1`** – Renders search modifier badges
 - **`icon/1`** – Heroicons for UI elements
 - **DaisyUI Modal** – Base modal styling and behavior
 
 ### Testing
+
 The search modal includes comprehensive tests covering:
+
 - PubSub message handling
 - Keyboard shortcut integration
 - JavaScript hook attachment
@@ -240,6 +264,7 @@ The search modal includes comprehensive tests covering:
 - Integration with parent LiveView
 
 ### Usage in Tests
+
 ```elixir
 # Open modal via PubSub
 Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:summon_modal, true})
@@ -250,27 +275,20 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
 ```
 
 ## Testing Guidelines
-- **Framework**: ExUnit with Phoenix test helpers
-- **Test types**:
-  - `DataCase` – database/context tests (business logic)
-  - `ConnCase` – controller tests (traditional requests)
-  - `LiveCase` – LiveView tests (interactive UI)
-- **File organization**:
-  - Tests mirror `lib/` structure
-  - Name files `*_test.exs`
-  - Place in corresponding `test/` subdirectories
-- **Writing tests**:
-  - Keep tests isolated and deterministic
-  - Use factories/fixtures for test data
-  - Clean up database state automatically (Ecto sandbox)
-- **Running tests**:
-  - `mix test` – full suite
-  - `mix test test/specific_test.exs` – single file
-  - `mix test test/specific_test.exs:42` – single test at line 42
-  - Add `@tag :focus` and run `mix test --only focus:true`
-  - Use `@moduletag :capture_log` to suppress logs in tests
+
+- **Focus**: Prioritise coverage for core glossary flows—context APIs, the search modal LiveView, and PubSub wiring—rather than chasing every UI permutation. Keep low-impact polish under manual QA.
+- **Layout**: Mirror `lib/` contexts inside `test/`. Stand up files like `test/glossary/entries_test.exs` to exercise `Glossary.*` DataCase code before relocating LiveView specs out of `test/glossary_web/live/`.
+- **Fixtures**: Centralise reusable data builders in `test/support/fixtures/` and expose them via modules such as `Glossary.EntriesFixtures`. Replace duplicated `create_entry/1` helpers (see `test/glossary_web/live/edit_entry_live_test.exs` and `test/glossary_web/live/search_live_test.exs`) with calls into that fixture module.
+- **Case templates**: Introduce `GlossaryWeb.LiveCase` wrapping `Phoenix.LiveViewTest`. Move helpers like `mount_home/1`, `render_search/1`, and the search modal PubSub open/close shorthands there, alongside broadcast assertion helpers.
+- **Setup**: Use `setup` callbacks to prepare shared state (e.g., build entries once in `test/glossary_web/router_test.exs` and `test/glossary_web/live/edit_entry_live_test.exs`) and pass assigns such as `%{entry: entry}` to reduce inline Repo calls.
+- **Assertions**: Prefer `assert_redirect/2` for navigation checks and rely on the LiveCase broadcast helpers for PubSub expectations. Add `@moduletag :capture_log` to PubSub-heavy suites to keep CI output quiet.
+- **Organisation**: Split live specs into focused `describe` blocks per behaviour—rendering vs. hooks vs. keyboard shortcuts—and tag slow, end-to-end flows with `@tag :slow` so contributors can filter them.
+- **Macros**: Add regression coverage for LiveView macros under `test/glossary_web/live/macros/keybind_macros_test.exs` by defining throwaway modules that `use` the macro and asserting the generated callbacks.
+- **Async**: Keep database-backed LiveView tests synchronous unless the shared sandbox is configured. Reserve `async: true` for controller/view tests such as `test/glossary_web/controllers/error_html_test.exs`.
+- **Execution**: Run `mix test` before merge and consider wiring a targeted command (e.g., `mix test --only live`) so the LiveView surface can be validated independently once tagging lands.
 
 ## Database & Ecto
+
 - **Repo**: `Glossary.Repo`
 - **Migrations**:
   - Generate: `mix ecto.gen.migration create_things`
@@ -284,6 +302,7 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
   - Keep schema modules under their context
 
 ## Deployment & Production
+
 - **Environment configs**:
   - `config/config.exs` – shared config
   - `config/dev.exs` – development
@@ -305,6 +324,7 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
   - Set up monitoring (Phoenix LiveDashboard, telemetry)
 
 ## Git & Commit Guidelines
+
 - **Commit messages**:
   - Use imperative mood: "Add feature" not "Added feature"
   - Keep subject line under 50 chars
@@ -321,6 +341,7 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
   - Request reviews from appropriate team members
 
 ## Security & Configuration
+
 - **Secrets management**:
   - Never commit secrets, API keys, passwords
   - Use environment variables for sensitive config
@@ -335,6 +356,7 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
   - Keep dependencies updated; review security advisories
 
 ## Troubleshooting
+
 - **Port already in use**: Change port in `config/dev.exs` or kill process on port 4000
 - **Database connection errors**: Ensure PostgreSQL is running; check credentials in `config/dev.exs`
 - **Asset compilation issues**: Run `mix assets.setup` then `mix assets.build`
@@ -343,6 +365,7 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
 - **Test database issues**: `MIX_ENV=test mix ecto.reset`
 
 ## Additional Resources
+
 - [Phoenix Framework](https://www.phoenixframework.org/)
 - [Phoenix LiveView Docs](https://hexdocs.pm/phoenix_live_view/)
 - [Ecto Documentation](https://hexdocs.pm/ecto/)

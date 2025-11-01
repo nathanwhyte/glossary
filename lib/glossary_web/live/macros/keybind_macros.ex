@@ -3,6 +3,9 @@ defmodule GlossaryWeb.KeybindMacros do
   Macros for common LiveView event handling patterns.
   """
 
+  alias Glossary.Repo
+  alias Glossary.Entries.Entry
+
   @doc """
   Macro for handling simple assign events with PubSub publishing.
   """
@@ -48,7 +51,14 @@ defmodule GlossaryWeb.KeybindMacros do
           "Control" ->
             {:noreply, assign(socket, :leader_down, true)}
 
-          # broadcasted to HomeLive
+          "Shift" ->
+            if socket.assigns.leader_down do
+              {:noreply, assign(socket, :shift_down, true)}
+            else
+              {:noreply, socket}
+            end
+
+          # broadcasted to parent LiveView
           "k" ->
             if socket.assigns.leader_down do
               pubsub_broadcast("search_modal", :summon_modal, true)
@@ -56,11 +66,17 @@ defmodule GlossaryWeb.KeybindMacros do
 
             {:noreply, socket}
 
-          "Escape" ->
-            if socket.assigns.leader_down do
-              pubsub_broadcast("search_modal", :summon_modal, false)
+          "o" ->
+            if socket.assigns.leader_down && socket.assigns.shift_down do
+              # TODO: cull empty entries
+              {:ok, new_entry} = Repo.insert(%Entry{})
+              {:noreply, push_navigate(socket, to: ~p"/entries/#{new_entry.id}")}
+            else
+              {:noreply, socket}
             end
 
+          "Escape" ->
+            pubsub_broadcast("search_modal", :summon_modal, false)
             {:noreply, socket}
 
           _ ->
@@ -76,6 +92,9 @@ defmodule GlossaryWeb.KeybindMacros do
 
           "Control" ->
             {:noreply, assign(socket, :leader_down, false)}
+
+          "Shift" ->
+            {:noreply, assign(socket, :shift_down, false)}
 
           _ ->
             {:noreply, socket}

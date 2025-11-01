@@ -65,7 +65,7 @@ defmodule GlossaryWeb.Layouts do
       <.navbar />
 
       <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-5xl space-y-4">
+        <div class="mx-auto h-full max-w-5xl space-y-4">
           {render_slot(@inner_block)}
         </div>
       </main>
