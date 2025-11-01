@@ -106,6 +106,37 @@
       content: attr(data-placeholder);
     }
 
+    /* TODO: add link (anchor) styling */
+
+    /* Headers */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply mt-5 mb-2 text-pretty;
+    }
+
+    h1 {
+      @apply text-3xl font-semibold;
+    }
+
+    h2 {
+      @apply text-2xl font-semibold;
+    }
+
+    h3 {
+      @apply text-xl font-semibold;
+    }
+
+    h4,
+    h5,
+    h6 {
+      @apply text-lg font-medium;
+    }
+
+    /* TODO: pressing tab should only indent current bullet */
     /* Lists */
     ul {
       @apply list-disc list-outside;
