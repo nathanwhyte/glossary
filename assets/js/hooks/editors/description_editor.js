@@ -35,7 +35,7 @@ let DescriptionEditor = {
       autofocus: false,
       editorProps: {
         attributes: {
-          class: `prose outline-none w-full text-sm font-medium rounded-md px-3 py-1 transition italic text-base-content/50`,
+          class: `prose outline-none w-full text-sm font-medium px-3 py-1 italic text-base-content/50`,
         },
       },
       onUpdate: ({ editor }) => {
