@@ -24,6 +24,20 @@ defmodule GlossaryWeb.RouterTest do
       # Verify the route returns 200 and renders EditEntryLive
       assert view.module == GlossaryWeb.EditEntryLive
     end
+
+    test "GET /entries/new creates new entry and redirects to edit page", %{conn: conn} do
+      alias Glossary.Entries
+      initial_count = length(Entries.list_entries())
+
+      assert {:error, {:live_redirect, %{to: redirect_to}}} =
+               live(conn, "/entries/new")
+
+      # Verify redirect is to /entries/:entry_id pattern
+      assert redirect_to =~ ~r|/entries/[a-f0-9-]{36}|
+
+      # Verify entry was created in database
+      assert length(Entries.list_entries()) == initial_count + 1
+    end
   end
 
   describe "keybind listeners" do
