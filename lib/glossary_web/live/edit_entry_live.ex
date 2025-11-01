@@ -26,8 +26,6 @@ defmodule GlossaryWeb.EditEntryLive do
   def mount(%{"entry_id" => entry_id}, _session, socket) do
     # TODO: show error flash if Ecto has trouble loading the entry
 
-    Logger.info("rendered")
-
     entry = Repo.get(Entry, entry_id)
     {:ok, assign(socket, leader_down: false, shift_down: false, entry: entry)}
   end
