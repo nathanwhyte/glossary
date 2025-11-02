@@ -32,13 +32,13 @@ defmodule Glossary.EntriesTest do
 
   describe "create_entry/1" do
     test "creates an entry with valid attributes" do
-      valid_attrs = %{title: "Test", description: "Description", body: "Body", status: :draft}
+      valid_attrs = %{title: "Test", description: "Description", body: "Body", status: :Draft}
 
       assert {:ok, %Entry{} = entry} = Entries.create_entry(valid_attrs)
       assert entry.title == "Test"
       assert entry.description == "Description"
       assert entry.body == "Body"
-      assert entry.status == :draft
+      assert entry.status == :Draft
     end
 
     test "creates an entry with default values" do
@@ -46,12 +46,12 @@ defmodule Glossary.EntriesTest do
       assert entry.title == ""
       assert entry.description == ""
       assert entry.body == ""
-      assert entry.status == :draft
+      assert entry.status == :Draft
     end
 
     test "creates entry with minimal required attrs" do
-      assert {:ok, %Entry{} = entry} = Entries.create_entry(%{status: :draft})
-      assert entry.status == :draft
+      assert {:ok, %Entry{} = entry} = Entries.create_entry(%{status: :Draft})
+      assert entry.status == :Draft
       assert entry.title == ""
     end
 
@@ -78,9 +78,9 @@ defmodule Glossary.EntriesTest do
     end
 
     test "allows status transitions" do
-      entry = entry_fixture(%{status: :draft})
-      assert {:ok, updated} = Entries.update_entry(entry, %{status: :published})
-      assert updated.status == :published
+      entry = entry_fixture(%{status: :Draft})
+      assert {:ok, updated} = Entries.update_entry(entry, %{status: :Published})
+      assert updated.status == :Published
     end
 
     test "fails to update entry with invalid attributes" do
@@ -118,7 +118,7 @@ defmodule Glossary.EntriesTest do
         title: "Test Title",
         description: "Test Description",
         body: "Test Body",
-        status: :published
+        status: :Published
       }
 
       changeset = Entry.changeset(%Entry{}, attrs)
@@ -134,7 +134,7 @@ defmodule Glossary.EntriesTest do
     end
 
     test "validates status enum values" do
-      valid_statuses = [:draft, :published, :archived]
+      valid_statuses = [:Draft, :Published, :Archived]
 
       for status <- valid_statuses do
         changeset = Entry.changeset(%Entry{}, %{status: status})
@@ -152,7 +152,7 @@ defmodule Glossary.EntriesTest do
         title: "Title",
         description: "Description",
         body: "Body",
-        status: :draft
+        status: :Draft
       }
 
       changeset = Entry.changeset(%Entry{}, attrs)
@@ -162,7 +162,7 @@ defmodule Glossary.EntriesTest do
     end
 
     test "uses default values when attrs empty" do
-      changeset = Entry.changeset(%Entry{}, %{status: :draft})
+      changeset = Entry.changeset(%Entry{}, %{status: :Draft})
       assert Map.get(changeset.changes, :title) == nil || Map.get(changeset.changes, :title) == ""
     end
   end

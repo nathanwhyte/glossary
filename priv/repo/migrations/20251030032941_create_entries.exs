@@ -9,7 +9,7 @@ defmodule Glossary.Repo.Migrations.CreateEntries do
       add :title, :string, default: ""
       add :description, :string, default: ""
       add :body, :text, default: ""
-      add :status, :string, default: "draft"
+      add :status, :string, default: "Draft"
 
       timestamps(type: :utc_datetime)
     end

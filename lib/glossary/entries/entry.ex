@@ -8,7 +8,7 @@ defmodule Glossary.Entries.Entry do
     field :title, :string, default: ""
     field :description, :string, default: ""
     field :body, :string, default: ""
-    field :status, Ecto.Enum, values: [:draft, :published, :archived], default: :draft
+    field :status, Ecto.Enum, values: [:Draft, :Published, :Archived], default: :Draft
 
     timestamps(type: :utc_datetime)
   end

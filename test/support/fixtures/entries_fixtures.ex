@@ -15,7 +15,7 @@ defmodule Glossary.EntriesFixtures do
         title: "Test Entry",
         description: "Test Description",
         body: "Test Body",
-        status: :draft
+        status: :Draft
       })
       |> Entries.create_entry()
 
