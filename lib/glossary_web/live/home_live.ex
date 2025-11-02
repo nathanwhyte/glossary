@@ -4,30 +4,20 @@ defmodule GlossaryWeb.HomeLive do
   """
   use GlossaryWeb, :live_view
 
-  require Logger
-
   import GlossaryWeb.KeybindMacros
-  import Ecto.Query, only: [from: 2]
 
+  alias Glossary.Entries
   alias Glossary.Entries.Entry
-  alias Glossary.Repo
 
   @impl true
   def mount(_params, _session, socket) do
     # IDEA: cache the latest 5 entries
     #       invalidate on new entry creation (?)
 
-    timezone = get_connect_params(socket)["timezone"] || "UTC"
+    params = get_connect_params(socket) || %{}
+    timezone = params["timezone"] || "UTC"
 
-    recent_entries =
-      Repo.all(
-        from(e in Entry,
-          order_by: [desc: e.updated_at],
-          limit: 3
-        )
-      )
-
-    Logger.info("HomeLive mounted with entries: #{inspect(recent_entries)}")
+    recent_entries = Entries.list_recent_entries(3)
 
     {:ok,
      assign(socket,
@@ -59,9 +49,15 @@ defmodule GlossaryWeb.HomeLive do
 
         <section>
           <h1 class="text-xl font-semibold">Recent Entries</h1>
-          <div class="grid w-full grid-flow-row auto-rows-auto grid-cols-1 gap-y-4 py-2">
-            <.entry_card :for={entry <- @recent_entries} entry={entry} timezone={@timezone} />
-          </div>
+          <%= if Enum.empty?(@recent_entries) do %>
+            <div class="text-base-content/25 py-16 text-center text-xl font-semibold italic">
+              No entries yet.
+            </div>
+          <% else %>
+            <div class="grid w-full grid-flow-row auto-rows-auto grid-cols-1 gap-y-4 py-2">
+              <.entry_card :for={entry <- @recent_entries} entry={entry} timezone={@timezone} />
+            </div>
+          <% end %>
         </section>
       </div>
     </Layouts.app>
@@ -164,6 +160,7 @@ defmodule GlossaryWeb.HomeLive do
     <div class="card card-sm border-base-content/5 border shadow-md">
       <div class="card-body">
         <%= if @entry.title != "" do %>
+          <%!-- TipTap HTML content - StarterKit provides basic sanitization --%>
           <div class="recent-entry-title">
             {Phoenix.HTML.raw(@entry.title)}
           </div>
@@ -173,12 +170,16 @@ defmodule GlossaryWeb.HomeLive do
           </div>
         <% end %>
         <div :if={@entry.description != ""} class="recent-entry-description">
+          <%!-- TipTap HTML content - StarterKit provides basic sanitization --%>
           {Phoenix.HTML.raw(@entry.description)}
         </div>
         <div class="flex items-center gap-3 pt-1">
           <.status_indicator status={@entry.status} />
+          <%!-- TODO: load actual value when project relation is added --%>
           <.project_select project="None" />
+          <%!-- TODO: load actual value when topics relation is added --%>
           <.topic_badges topics={[]} />
+          <%!-- TODO: load actual value when tags relation is added --%>
           <.tag_badges tags={[]} />
         </div>
         <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
@@ -187,7 +188,7 @@ defmodule GlossaryWeb.HomeLive do
     """
   end
 
-  attr :status, :string, required: true
+  attr :status, :atom, required: true
 
   defp status_indicator(assigns) do
     base_style = "badge badge-sm join-item font-medium"
@@ -197,7 +198,7 @@ defmodule GlossaryWeb.HomeLive do
         assigns,
         :style,
         base_style <>
-          if(assigns[:status] == "Published",
+          if(assigns[:status] == :Published,
             do: " badge-success",
             else: " badge-warning"
           )
@@ -293,8 +294,13 @@ defmodule GlossaryWeb.HomeLive do
   attr :timezone, :string, required: true
 
   defp last_updated_timestamp(assigns) do
-    assigns =
-      assign(assigns, :updated_localized, DateTime.shift_zone!(assigns.updated, assigns.timezone))
+    updated_localized =
+      case DateTime.shift_zone(assigns.updated, assigns.timezone) do
+        {:ok, dt} -> dt
+        {:error, _reason} -> assigns.updated
+      end
+
+    assigns = assign(assigns, :updated_localized, updated_localized)
 
     ~H"""
     <div class="text-base-content/50 pt-1 text-xs">

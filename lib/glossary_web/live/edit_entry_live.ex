@@ -15,8 +15,6 @@ defmodule GlossaryWeb.EditEntryLive do
   """
   use GlossaryWeb, :live_view
 
-  require Logger
-
   import GlossaryWeb.KeybindMacros
 
   alias Glossary.Entries.Entry

@@ -6,8 +6,6 @@ defmodule GlossaryWeb.SearchLive do
 
   import GlossaryWeb.Components.UiComponents, only: [attribute_badge: 1]
 
-  require Logger
-
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
