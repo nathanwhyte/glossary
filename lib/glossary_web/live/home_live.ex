@@ -5,13 +5,37 @@ defmodule GlossaryWeb.HomeLive do
   use GlossaryWeb, :live_view
 
   require Logger
+
   import GlossaryWeb.KeybindMacros
+  import Ecto.Query, only: [from: 2]
 
   alias Glossary.Entries.Entry
+  alias Glossary.Repo
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, leader_down: false, shift_down: false)}
+    # IDEA: cache the latest 5 entries
+    #       invalidate on new entry creation (?)
+
+    timezone = get_connect_params(socket)["timezone"] || "UTC"
+
+    recent_entries =
+      Repo.all(
+        from(e in Entry,
+          order_by: [desc: e.updated_at],
+          limit: 3
+        )
+      )
+
+    Logger.info("HomeLive mounted with entries: #{inspect(recent_entries)}")
+
+    {:ok,
+     assign(socket,
+       leader_down: false,
+       shift_down: false,
+       timezone: timezone,
+       recent_entries: recent_entries
+     )}
   end
 
   # Use macros to generate handle_event functions
@@ -28,11 +52,17 @@ defmodule GlossaryWeb.HomeLive do
       <div
         phx-window-keydown="key_down"
         phx-window-keyup="key_up"
-        class="flex flex-col gap-12"
+        class="flex flex-col gap-12 py-8"
       >
         <.search_bar />
         <.quick_start_content />
-        <.recent_entries />
+
+        <section>
+          <h1 class="text-xl font-semibold">Recent Entries</h1>
+          <div class="grid w-full grid-flow-row auto-rows-auto grid-cols-1 gap-y-4 py-2">
+            <.entry_card :for={entry <- @recent_entries} entry={entry} timezone={@timezone} />
+          </div>
+        </section>
       </div>
     </Layouts.app>
 
@@ -42,7 +72,7 @@ defmodule GlossaryWeb.HomeLive do
 
   defp search_bar(assigns) do
     ~H"""
-    <section class="pt-32">
+    <section>
       <div class="w-full flex-col items-start space-y-2">
         <h1 class="text-xl font-semibold">Glossary Search</h1>
 
@@ -113,13 +143,9 @@ defmodule GlossaryWeb.HomeLive do
           <span class="font-medium">
             {@action_name}
           </span>
-          <%= if length(@action_keys) > 0 do %>
-            <div class="pb-1">
-              <%= for key <- @action_keys do %>
-                <kbd class="kbd kbd-sm bg-base-content/10">{key}</kbd>
-              <% end %>
-            </div>
-          <% end %>
+          <div :if={length(@action_keys) > 0} class="space-x-1 pb-1">
+            <kbd :for={key <- @action_keys} class="kbd kbd-sm bg-base-content/10">{key}</kbd>
+          </div>
         </div>
 
         <div class="flex items-end pb-1">
@@ -130,87 +156,33 @@ defmodule GlossaryWeb.HomeLive do
     """
   end
 
-  defp recent_entries(assigns) do
-    # TODO: add "last updated" timestamp
-    ~H"""
-    <section>
-      <h1 class="text-xl font-semibold">Recent Entries</h1>
-      <div class="grid w-full grid-flow-row auto-rows-auto grid-cols-1 gap-y-4 py-2">
-        <.entry_card />
-        <div class="card card-sm border-base-content/10 border shadow-md">
-          <div class="card-body space-y-1">
-            <h2 class="card-title px-1 text-2xl">
-              Entry Title 2
-            </h2>
-            <div class="text-base-content/50 prose w-full px-1 text-sm font-medium italic outline-none">
-              This is a brief summary or excerpt of the entry content to give users an idea of what it's about.
-            </div>
-            <div class="flex items-center gap-3 text-sm">
-              <div class="join">
-                <div class="badge badge-sm bg-base-content/5 join-item">Status</div>
-                <div class="badge badge-success badge-sm join-item font-semibold ">
-                  Published
-                </div>
-              </div>
-              <div class="join">
-                <div class="badge badge badge-sm bg-base-content/5 join-item">
-                  Project
-                </div>
-                <div class="badge badge-secondary badge-sm join-item font-semibold">
-                  Project 1 <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
-                </div>
-              </div>
-              <div class="space-x-1 pl-1">
-                <span class="text-[0.75rem]">Topics</span>
-                <div class="badge badge-info badge-sm font-semibold">
-                  Topic 1
-                </div>
-                <div class="badge badge-info badge-sm font-semibold">
-                  Topic 2
-                </div>
-              </div>
-              <div class="space-x-1 pl-1">
-                <span class="text-[0.75rem]">Tags</span>
-                <div class="badge badge-primary badge-sm font-semibold">
-                  Tag 1
-                </div>
-                <div class="badge badge-primary badge-sm font-semibold">Tag 2</div>
-              </div>
-            </div>
-            <div class="text-base-content/50 px-1 text-xs">
-              Updated
-              <span class="font-semibold">
-                {DateTime.now!("America/Chicago") |> Calendar.strftime("%a, %m/%d/%y")}
-              </span>
-              at
-              <span class="font-semibold">
-                {DateTime.now!("America/Chicago") |> Calendar.strftime("%H:%M")}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    """
-  end
-
-  attr :entry, Entry, default: %Entry{}
+  attr :entry, Entry, required: true
+  attr :timezone, :string, required: true
 
   defp entry_card(assigns) do
     ~H"""
     <div class="card card-sm border-base-content/5 border shadow-md">
-      <.link navigate="#" class="card-body">
-        <h2 class="card-title px-1 text-2xl">
-          Entry Title 1
-        </h2>
-        <p class="text-base-content/50 prose w-full px-1 text-sm font-medium italic outline-none">
-          This is a brief summary or excerpt of the entry content to give users an idea of what it's about.
-        </p>
-        <div class="flex gap-3">
-          <.status_indicator status="Published" />
-          <.project_select />
+      <div class="card-body">
+        <%= if @entry.title != "" do %>
+          <div class="recent-entry-title">
+            {Phoenix.HTML.raw(@entry.title)}
+          </div>
+        <% else %>
+          <div class="recent-entry-title text-base-content/25 italic">
+            No Title
+          </div>
+        <% end %>
+        <div :if={@entry.description != ""} class="recent-entry-description">
+          {Phoenix.HTML.raw(@entry.description)}
         </div>
-      </.link>
+        <div class="flex items-center gap-3 pt-1">
+          <.status_indicator status={@entry.status} />
+          <.project_select project="None" />
+          <.topic_badges topics={[]} />
+          <.tag_badges tags={[]} />
+        </div>
+        <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
+      </div>
     </div>
     """
   end
@@ -232,7 +204,7 @@ defmodule GlossaryWeb.HomeLive do
       )
 
     ~H"""
-    <div class="join pt-1">
+    <div class="join">
       <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
         Status
       </span>
@@ -260,12 +232,79 @@ defmodule GlossaryWeb.HomeLive do
       )
 
     ~H"""
-    <div class="join pt-1">
+    <div class="join">
       <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
         Project
       </span>
       <span class={@style}>
         {@project} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
+      </span>
+    </div>
+    """
+  end
+
+  # IDEA: if length(@topics) > 3, move excess to dropdown menu
+
+  attr :topics, :list, required: true
+
+  defp topic_badges(assigns) do
+    ~H"""
+    <div class="flex items-center gap-1.5">
+      <div class="text-[0.75rem]">Topics</div>
+      <%= if length(@topics) <= 0 do %>
+        <div class="text-base-content/25 pl-1 font-semibold italic">
+          None
+        </div>
+      <% else %>
+        <%= for topic <- @topics do %>
+          <div class="badge badge-info badge-sm font-semibold">
+            #{topic}
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    """
+  end
+
+  # IDEA: if length(@tags) > 3, move excess to dropdown menu
+
+  attr :tags, :list, required: true
+
+  defp tag_badges(assigns) do
+    ~H"""
+    <div class="flex items-center gap-1.5">
+      <div class="text-[0.75rem]">Tags</div>
+      <%= if length(@tags) <= 0 do %>
+        <div class="text-base-content/25 pl-1 font-semibold italic">
+          None
+        </div>
+      <% else %>
+        <%= for tag <- @tags do %>
+          <div class="badge badge-primary badge-sm font-semibold">
+            @{tag}
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    """
+  end
+
+  attr :updated, DateTime, required: true
+  attr :timezone, :string, required: true
+
+  defp last_updated_timestamp(assigns) do
+    assigns =
+      assign(assigns, :updated_localized, DateTime.shift_zone!(assigns.updated, assigns.timezone))
+
+    ~H"""
+    <div class="text-base-content/50 pt-1 text-xs">
+      Updated
+      <span class="font-semibold">
+        {@updated_localized |> Calendar.strftime("%a, %m/%d/%y")}
+      </span>
+      at
+      <span class="font-semibold">
+        {@updated_localized |> Calendar.strftime("%H:%M")}
       </span>
     </div>
     """

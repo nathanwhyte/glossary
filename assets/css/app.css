@@ -92,6 +92,22 @@
   --noise: 0;
 }
 
+.recent-entry-title {
+  @apply card-title prose font-semibold text-2xl;
+
+  code {
+    padding-inline: 0.25em !important;
+  }
+}
+
+.recent-entry-description {
+  @apply prose text-sm font-medium italic text-base-content/50;
+
+  code {
+    padding-inline: 0.25em !important;
+  }
+}
+
 @layer components {
   /* Custom styling for TipTap components */
   .tiptap {

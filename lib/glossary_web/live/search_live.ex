@@ -34,7 +34,7 @@ defmodule GlossaryWeb.SearchLive do
       id="search-modal-container"
       data-show={"#{@show}"}
       phx-hook="SearchModal"
-      class={["modal", if(@show, do: "modal-open", else: "hidden")]}
+      class={["modal backdrop-blur-xs", if(@show, do: "modal-open", else: "hidden")]}
     >
       <div
         class="modal-box border-base-content/10 max-h-[75vh] mx-auto max-w-6xl space-y-6 border"
@@ -58,8 +58,9 @@ defmodule GlossaryWeb.SearchLive do
 
       <div class="flex justify-between pt-2">
         <div class="text-base-content/60 items-center text-xs font-medium">
-          Use <.attribute_badge attribute="@tag" />, <.attribute_badge attribute="#subject" />, and
-          <.attribute_badge attribute="&project" /> to modify search.
+          Use <.attribute_badge attribute="&project" />,
+          <.attribute_badge attribute="#subject" />, and <.attribute_badge attribute="@tag" />
+          to modify search.
         </div>
         <div class="text-base-content/60 text-xs font-medium">
           Use the <.attribute_badge attribute="!" />

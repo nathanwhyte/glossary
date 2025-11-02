@@ -126,7 +126,7 @@ defmodule GlossaryWeb.Layouts do
   def theme_toggle(assigns) do
     ~H"""
     <div class="card border-base-300 bg-base-300 relative flex flex-row items-center rounded-full border-2">
-      <div class="border-1 border-base-200 bg-base-100 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left] absolute left-0 h-full w-1/3 rounded-full brightness-200" />
+      <div class="border-base-200 bg-base-100 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left] absolute left-0 h-full w-1/3 rounded-full border brightness-200" />
 
       <button
         class="flex w-1/3 cursor-pointer p-2"

@@ -78,9 +78,6 @@ defmodule GlossaryWeb.EditEntryLive do
         <div class="divider px-3"></div>
 
         <section class="h-full">
-          <%!-- TODO: body input section --%>
-          <%!--       support headers, code/quote blocks, font styles, etc. --%>
-
           <div
             id="body-editor"
             phx-hook="BodyEditor"
