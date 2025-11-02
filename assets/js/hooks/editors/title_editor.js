@@ -35,7 +35,7 @@ let TitleEditor = {
       autofocus: true,
       editorProps: {
         attributes: {
-          class: `prose outline-none w-full text-3xl font-semibold rounded-md px-3 py-2 transition`,
+          class: `prose outline-none w-full text-3xl font-semibold px-3 py-2`,
         },
       },
       onUpdate: ({ editor }) => {

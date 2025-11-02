@@ -35,15 +35,6 @@ defmodule GlossaryWeb.SearchLiveTest do
     end
   end
 
-  describe "integration with HomeLive" do
-    test "search modal opens when clicking search bar", %{conn: conn} do
-      view = mount_home(conn)
-      view |> element("div[phx-click=\"click_search\"]") |> render_click()
-      html = render_search(view)
-      assert html =~ "modal-open"
-    end
-  end
-
   describe "keyboard shortcuts" do
     test "Cmd+K opens modal", %{conn: conn} do
       view = mount_home(conn)

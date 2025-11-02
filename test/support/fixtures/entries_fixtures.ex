@@ -15,7 +15,7 @@ defmodule Glossary.EntriesFixtures do
         title: "Test Entry",
         description: "Test Description",
         body: "Test Body",
-        status: :draft
+        status: :Draft
       })
       |> Entries.create_entry()
 
@@ -26,21 +26,21 @@ defmodule Glossary.EntriesFixtures do
   Generate a published entry.
   """
   def published_entry_fixture(attrs \\ %{}) do
-    entry_fixture(Map.merge(attrs, %{status: :published}))
+    entry_fixture(Map.merge(attrs, %{status: :Published}))
   end
 
   @doc """
   Generate a draft entry.
   """
   def draft_entry_fixture(attrs \\ %{}) do
-    entry_fixture(Map.merge(attrs, %{status: :draft}))
+    entry_fixture(Map.merge(attrs, %{status: :Draft}))
   end
 
   @doc """
   Generate an archived entry.
   """
   def archived_entry_fixture(attrs \\ %{}) do
-    entry_fixture(Map.merge(attrs, %{status: :archived}))
+    entry_fixture(Map.merge(attrs, %{status: :Archived}))
   end
 
   @doc """

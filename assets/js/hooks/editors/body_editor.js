@@ -18,7 +18,6 @@ let BodyEditor = {
       element: this.el,
       extensions: [StarterKit, Placeholder],
       content: hiddenInput.value,
-      autofocus: true,
       editorProps: {
         attributes: {
           class: `prose outline-none size-full px-3 py-2`,

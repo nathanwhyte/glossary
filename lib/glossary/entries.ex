@@ -47,4 +47,18 @@ defmodule Glossary.Entries do
   def list_entries do
     Repo.all(Entry)
   end
+
+  @doc """
+  Returns the most recently updated entries, limited to the specified count.
+  """
+  def list_recent_entries(limit \\ 3) do
+    import Ecto.Query
+
+    Repo.all(
+      from(e in Entry,
+        order_by: [desc: e.updated_at],
+        limit: ^limit
+      )
+    )
+  end
 end

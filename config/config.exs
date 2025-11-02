@@ -7,6 +7,9 @@
 # General application configuration
 import Config
 
+# set up `tzdata` as the time zone database
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
 config :glossary,
   ecto_repos: [Glossary.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true],

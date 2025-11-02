@@ -61,9 +61,11 @@ const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: { _csrf_token: csrfToken },
+  params: { _csrf_token: csrfToken, timezone: timeZone },
   hooks: Hooks,
 });
 

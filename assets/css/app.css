@@ -43,7 +43,7 @@
   --color-info-content: oklch(9.5% 0.015 316.3);
   --color-success: oklch(75.8% 0.104 137);
   --color-success-content: oklch(9.5% 0.015 316.3);
-  --color-warning: oklch(90.4% 0.075 319.8);
+  --color-warning: oklch(0.83 0.128 66.29);
   --color-warning-content: oklch(9.5% 0.015 316.3);
   --color-error: oklch(64.5% 0.141 350.5);
   --color-error-content: oklch(9.5% 0.015 316.3);
@@ -78,7 +78,7 @@
   --color-info-content: oklch(0.095 0.015 316.3);
   --color-success: oklch(0.758 0.104 137);
   --color-success-content: oklch(0.095 0.015 316.3);
-  --color-warning: oklch(0.904 0.075 319.8);
+  --color-warning: oklch(0.83 0.128 66.29);
   --color-warning-content: oklch(0.095 0.015 316.3);
   --color-error: oklch(0.645 0.141 350.5);
   --color-error-content: oklch(0.095 0.015 316.3);
@@ -90,6 +90,22 @@
   --border: 1px;
   --depth: 0;
   --noise: 0;
+}
+
+.recent-entry-title {
+  @apply card-title prose font-semibold text-2xl;
+
+  code {
+    padding-inline: 0.25em !important;
+  }
+}
+
+.recent-entry-description {
+  @apply prose text-sm font-medium italic text-base-content/50;
+
+  code {
+    padding-inline: 0.25em !important;
+  }
 }
 
 @layer components {
@@ -106,6 +122,37 @@
       content: attr(data-placeholder);
     }
 
+    /* TODO: add link (anchor) styling */
+
+    /* Headers */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply mt-5 mb-2 text-pretty;
+    }
+
+    h1 {
+      @apply text-3xl font-semibold;
+    }
+
+    h2 {
+      @apply text-2xl font-semibold;
+    }
+
+    h3 {
+      @apply text-xl font-semibold;
+    }
+
+    h4,
+    h5,
+    h6 {
+      @apply text-lg font-medium;
+    }
+
+    /* TODO: pressing tab should only indent current bullet */
     /* Lists */
     ul {
       @apply list-disc list-outside;
