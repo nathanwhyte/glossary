@@ -3,7 +3,7 @@ defmodule Glossary.Entries do
   The Entries context provides functions for managing glossary entries.
   """
 
-  alias Glossary.Entries.{Entry, Project, Tag, Topic}
+  alias Glossary.Entries.Entry
   alias Glossary.Repo
 
   @doc """
