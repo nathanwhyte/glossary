@@ -1,5 +1,6 @@
 import { Editor } from "@tiptap/core";
 import { Placeholder } from "@tiptap/extensions";
+import { Typography } from "@tiptap/extension-typography";
 import StarterKit from "@tiptap/starter-kit";
 import { debounce } from "./editor_utils";
 
@@ -16,7 +17,19 @@ let BodyEditor = {
 
     this.editor = new Editor({
       element: this.el,
-      extensions: [StarterKit, Placeholder],
+      extensions: [
+        StarterKit,
+        Placeholder,
+        Typography.configure({
+          openDoubleQuote: false,
+          closeDoubleQuote: false,
+          openSingleQuote: false,
+          closeSingleQuote: false,
+          oneHalf: false,
+          oneQuarter: false,
+          threeQuarters: false,
+        }),
+      ],
       content: hiddenInput.value,
       editorProps: {
         attributes: {

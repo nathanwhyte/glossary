@@ -51,14 +51,18 @@ defmodule Glossary.Entries do
   @doc """
   Returns the most recently updated entries, limited to the specified count.
   """
-  def list_recent_entries(limit \\ 3) do
+  def list_recent_entries(limit \\ 5) do
     import Ecto.Query
 
-    Repo.all(
-      from(e in Entry,
-        order_by: [desc: e.updated_at],
-        limit: ^limit
+    # split the query to load all entries, not just the ones with relations
+    entries =
+      Repo.all(
+        from e in Entry,
+          select: [:id, :title, :description, :status, :updated_at, :project_id],
+          order_by: [desc: e.updated_at],
+          limit: ^limit
       )
-    )
+
+    Repo.preload(entries, [:project, :topics, :tags])
   end
 end

@@ -2,6 +2,7 @@ import { Editor } from "@tiptap/core";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
 import { debounce } from "./editor_utils";
+import { Typography } from "@tiptap/extension-typography";
 
 /**
  * @type {import("phoenix_live_view").Hook}
@@ -29,6 +30,15 @@ let TitleEditor = {
         }),
         Placeholder.configure({
           placeholder: "Entry Title",
+        }),
+        Typography.configure({
+          openDoubleQuote: false,
+          closeDoubleQuote: false,
+          openSingleQuote: false,
+          closeSingleQuote: false,
+          oneHalf: false,
+          oneQuarter: false,
+          threeQuarters: false,
         }),
       ],
       content: hiddenInput.value,

@@ -399,6 +399,11 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
 - **Dependencies issues**: Try `mix deps.clean --all && mix deps.get`
 - **Compilation errors**: Run `mix clean && mix compile`
 - **Test database issues**: `MIX_ENV=test mix ecto.reset`
+- **Test failures after schema changes**: If tests fail after creating or modifying migrations or database schemas, try running `MIX_ENV=test mix ecto.reset` to drop and recreate the test database with all migrations applied. This is especially important after:
+  - Creating new migrations
+  - Modifying existing migrations
+  - Adding or changing schema fields
+  - Changing table structures or indexes
 
 ## Additional Resources
 

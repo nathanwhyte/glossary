@@ -7,17 +7,20 @@ defmodule GlossaryWeb.HomeLive do
   import GlossaryWeb.KeybindMacros
 
   alias Glossary.Entries
-  alias Glossary.Entries.Entry
+  alias Glossary.Entries.{Entry, Project}
+
+  require Logger
 
   @impl true
   def mount(_params, _session, socket) do
-    # IDEA: cache the latest 5 entries
-    #       invalidate on new entry creation (?)
-
     params = get_connect_params(socket) || %{}
     timezone = params["timezone"] || "UTC"
 
-    recent_entries = Entries.list_recent_entries(3)
+    recent_entries = Entries.list_recent_entries(5)
+
+    for entry <- recent_entries do
+      Logger.info("Entry: #{inspect(entry.topics)}\n")
+    end
 
     {:ok,
      assign(socket,
@@ -42,7 +45,7 @@ defmodule GlossaryWeb.HomeLive do
       <div
         phx-window-keydown="key_down"
         phx-window-keyup="key_up"
-        class="flex flex-col gap-12 py-8"
+        class="flex flex-col gap-8 py-8"
       >
         <.search_bar />
         <.quick_start_content />
@@ -175,12 +178,9 @@ defmodule GlossaryWeb.HomeLive do
         </div>
         <div class="flex items-center gap-3 pt-1">
           <.status_indicator status={@entry.status} />
-          <%!-- TODO: load actual value when project relation is added --%>
-          <.project_select project="None" />
-          <%!-- TODO: load actual value when topics relation is added --%>
-          <.topic_badges topics={[]} />
-          <%!-- TODO: load actual value when tags relation is added --%>
-          <.tag_badges tags={[]} />
+          <.project_select project={@entry.project} />
+          <.topic_badges topics={@entry.topics} />
+          <.tag_badges tags={@entry.tags} />
         </div>
         <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
       </div>
@@ -191,7 +191,7 @@ defmodule GlossaryWeb.HomeLive do
   attr :status, :atom, required: true
 
   defp status_indicator(assigns) do
-    base_style = "badge badge-sm join-item font-medium"
+    base_style = "badge badge-xs join-item font-medium"
 
     assigns =
       assign(
@@ -206,7 +206,7 @@ defmodule GlossaryWeb.HomeLive do
 
     ~H"""
     <div class="join">
-      <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
+      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
         Status
       </span>
       <span class={@style}>
@@ -216,29 +216,32 @@ defmodule GlossaryWeb.HomeLive do
     """
   end
 
-  attr :project, :string, default: "None"
+  attr :project, Project, default: nil
 
   defp project_select(assigns) do
-    base_style = "badge badge-sm join-item font-medium"
+    base_style = "badge badge-xs join-item font-medium"
 
     assigns =
       assign(
         assigns,
         :style,
         base_style <>
-          if(assigns[:project] == "None",
+          if(is_nil(assigns[:project]),
             do: " border-base-content/10",
             else: " badge-secondary"
           )
       )
+      |> assign_new(:project_name, fn ->
+        if is_nil(assigns[:project]), do: "None", else: assigns.project.name
+      end)
 
     ~H"""
     <div class="join">
-      <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
+      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
         Project
       </span>
       <span class={@style}>
-        {@project} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
+        {@project_name} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
       </span>
     </div>
     """
@@ -250,16 +253,16 @@ defmodule GlossaryWeb.HomeLive do
 
   defp topic_badges(assigns) do
     ~H"""
-    <div class="flex items-center gap-1.5">
-      <div class="text-[0.75rem]">Topics</div>
+    <div class="flex items-center gap-1.5 text-xs">
+      <div>Topics</div>
       <%= if length(@topics) <= 0 do %>
         <div class="text-base-content/25 pl-1 font-semibold italic">
           None
         </div>
       <% else %>
         <%= for topic <- @topics do %>
-          <div class="badge badge-info badge-sm font-semibold">
-            #{topic}
+          <div class="badge badge-info badge-xs font-semibold">
+            #{topic.name}
           </div>
         <% end %>
       <% end %>
@@ -273,16 +276,16 @@ defmodule GlossaryWeb.HomeLive do
 
   defp tag_badges(assigns) do
     ~H"""
-    <div class="flex items-center gap-1.5">
-      <div class="text-[0.75rem]">Tags</div>
+    <div class="flex items-center gap-1.5 text-xs">
+      <div>Tags</div>
       <%= if length(@tags) <= 0 do %>
         <div class="text-base-content/25 pl-1 font-semibold italic">
           None
         </div>
       <% else %>
         <%= for tag <- @tags do %>
-          <div class="badge badge-primary badge-sm font-semibold">
-            @{tag}
+          <div class="badge badge-primary badge-xs font-semibold">
+            @{tag.name}
           </div>
         <% end %>
       <% end %>

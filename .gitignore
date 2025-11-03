@@ -42,3 +42,6 @@ npm-debug.log
 .idea/
 .vscode/
 .cursor/
+
+# OS-specific
+.DS_Store
