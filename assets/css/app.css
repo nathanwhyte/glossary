@@ -95,6 +95,10 @@
 .recent-entry-title {
   @apply card-title prose font-semibold text-2xl;
 
+  p {
+    @apply truncate;
+  }
+
   code {
     padding-inline: 0.25em !important;
   }

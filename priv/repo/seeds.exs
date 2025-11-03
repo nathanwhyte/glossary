@@ -40,7 +40,8 @@ Repo.insert!(%Project{
 })
 
 Repo.insert!(%Entry{
-  title: "<p>Test Title with <code>code</code></p>",
+  title:
+    "<p>Test Title with <code>code</code>, and it gets much, much, much longer to see if it gets properly truncated by the div</p>",
   description: "<p>This is a description with <code>code</code></p>",
   body:
     "<h1>This is an h1</h1><ul><li><p>level 1</p><ul><li><p>level 2</p><ul><li><p>level 3</p></li></ul></li></ul></li></ul><h2>This is an h2</h2><ol><li><p>level 1</p><ol><li><p>level 2</p><ol><li><p>level 3</p></li></ol></li></ol></li></ol><h3>This is an h3</h3><pre><code>this is a code block</code></pre><p>this is some <code>inline code</code></p>",

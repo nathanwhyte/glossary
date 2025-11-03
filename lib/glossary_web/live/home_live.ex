@@ -162,16 +162,22 @@ defmodule GlossaryWeb.HomeLive do
     ~H"""
     <div class="card card-sm border-base-content/5 border shadow-md">
       <div class="card-body">
-        <%= if @entry.title != "" do %>
-          <%!-- TipTap HTML content - StarterKit provides basic sanitization --%>
-          <div class="recent-entry-title">
-            {Phoenix.HTML.raw(@entry.title)}
+        <div class="flex items-center gap-2">
+          <%= if @entry.title != "" do %>
+            <div class="recent-entry-title flex-1 truncate">
+              <span class="truncate">
+                {Phoenix.HTML.raw(@entry.title)}
+              </span>
+            </div>
+          <% else %>
+            <div class="recent-entry-title text-base-content/25 italic">
+              No Title
+            </div>
+          <% end %>
+          <div class="text-base-content/50 mx-1 shrink-0">
+            <.icon name="hero-ellipsis-horizontal-mini" class="size-5" />
           </div>
-        <% else %>
-          <div class="recent-entry-title text-base-content/25 italic">
-            No Title
-          </div>
-        <% end %>
+        </div>
         <div :if={@entry.description != ""} class="recent-entry-description">
           <%!-- TipTap HTML content - StarterKit provides basic sanitization --%>
           {Phoenix.HTML.raw(@entry.description)}
