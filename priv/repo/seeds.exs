@@ -10,7 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Glossary.Entries.{Entry, Project}
+alias Glossary.Entries.{Entry, EntryTag, Project, Tag}
 alias Glossary.Repo
 
 if Mix.env() != :dev do
@@ -50,6 +50,21 @@ Repo.insert!(%Entry{
   description: "<p>Test empty title.</p>",
   status: :Draft,
   project_id: "10000000-0000-0000-0000-000000000000"
+})
+
+Repo.insert!(%Tag{
+  id: "00000000-1000-0000-0000-000000000000",
+  name: "testing"
+})
+
+Repo.insert!(%EntryTag{
+  entry_id: "00000000-0000-0000-0000-000000000001",
+  tag_id: "00000000-1000-0000-0000-000000000000"
+})
+
+Repo.insert!(%EntryTag{
+  entry_id: "00000000-0000-0000-0000-000000000002",
+  tag_id: "00000000-1000-0000-0000-000000000000"
 })
 
 Repo.insert!(%Entry{

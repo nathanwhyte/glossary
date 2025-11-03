@@ -1,0 +1,25 @@
+defmodule Glossary.Entries.Tag do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  alias Glossary.Entries.Entry
+
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
+  schema "tags" do
+    field :name, :string
+
+    many_to_many :entries, Entry,
+      join_through: "entries_tags",
+      on_replace: :delete
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(tag, attrs) do
+    tag
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+  end
+end

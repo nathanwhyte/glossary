@@ -3,7 +3,7 @@ defmodule Glossary.Entries do
   The Entries context provides functions for managing glossary entries.
   """
 
-  alias Glossary.Entries.Entry
+  alias Glossary.Entries.{Entry, Project, Tag}
   alias Glossary.Repo
 
   @doc """
@@ -51,18 +51,21 @@ defmodule Glossary.Entries do
   @doc """
   Returns the most recently updated entries, limited to the specified count.
   """
-  def list_recent_entries(limit \\ 3) do
+  def list_recent_entries(limit \\ 5) do
     import Ecto.Query
 
+    # split the query to load all entries, not just the ones with relations
     entries =
       Repo.all(
-        from(e in Entry,
+        from e in Entry,
+          select: [:id, :title, :description, :updated_at, :project_id],
           order_by: [desc: e.updated_at],
           limit: ^limit
-        ),
-        preload: [:project]
       )
 
-    Repo.preload(entries, [:project])
+    Repo.preload(entries,
+      project: from(p in Project, select: [:id, :name]),
+      tags: from(t in Tag, select: [:id, :name])
+    )
   end
 end

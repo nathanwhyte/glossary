@@ -9,12 +9,18 @@ defmodule GlossaryWeb.HomeLive do
   alias Glossary.Entries
   alias Glossary.Entries.{Entry, Project}
 
+  require Logger
+
   @impl true
   def mount(_params, _session, socket) do
     params = get_connect_params(socket) || %{}
     timezone = params["timezone"] || "UTC"
 
     recent_entries = Entries.list_recent_entries(5)
+
+    for entry <- recent_entries do
+      Logger.info("Entry: #{inspect(entry)}\n")
+    end
 
     {:ok,
      assign(socket,
@@ -39,7 +45,7 @@ defmodule GlossaryWeb.HomeLive do
       <div
         phx-window-keydown="key_down"
         phx-window-keyup="key_up"
-        class="flex flex-col gap-12 py-8"
+        class="flex flex-col gap-8 py-8"
       >
         <.search_bar />
         <.quick_start_content />
@@ -176,7 +182,7 @@ defmodule GlossaryWeb.HomeLive do
           <%!-- TODO: load actual value when topics relation is added --%>
           <.topic_badges topics={[]} />
           <%!-- TODO: load actual value when tags relation is added --%>
-          <.tag_badges tags={[]} />
+          <.tag_badges tags={@entry.tags} />
         </div>
         <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
       </div>
@@ -272,16 +278,16 @@ defmodule GlossaryWeb.HomeLive do
 
   defp tag_badges(assigns) do
     ~H"""
-    <div class="flex items-center gap-1.5">
-      <div class="text-[0.75rem]">Tags</div>
+    <div class="flex items-center gap-1.5 text-xs">
+      <div>Tags</div>
       <%= if length(@tags) <= 0 do %>
         <div class="text-base-content/25 pl-1 font-semibold italic">
           None
         </div>
       <% else %>
         <%= for tag <- @tags do %>
-          <div class="badge badge-primary badge-sm font-semibold">
-            @{tag}
+          <div class="badge badge-primary badge-xs font-semibold">
+            @{tag.name}
           </div>
         <% end %>
       <% end %>
