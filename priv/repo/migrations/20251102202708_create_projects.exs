@@ -1,4 +1,4 @@
-defmodule Glossary.Repo.Migrations.AddProjects do
+defmodule Glossary.Repo.Migrations.CreateProjects do
   use Ecto.Migration
 
   def change do
