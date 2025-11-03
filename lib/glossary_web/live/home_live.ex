@@ -191,7 +191,7 @@ defmodule GlossaryWeb.HomeLive do
   attr :status, :atom, required: true
 
   defp status_indicator(assigns) do
-    base_style = "badge badge-sm join-item font-medium"
+    base_style = "badge badge-xs join-item font-medium"
 
     assigns =
       assign(
@@ -206,7 +206,7 @@ defmodule GlossaryWeb.HomeLive do
 
     ~H"""
     <div class="join">
-      <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
+      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
         Status
       </span>
       <span class={@style}>
@@ -219,7 +219,7 @@ defmodule GlossaryWeb.HomeLive do
   attr :project, Project, default: nil
 
   defp project_select(assigns) do
-    base_style = "badge badge-sm join-item font-medium"
+    base_style = "badge badge-xs join-item font-medium"
 
     assigns =
       assign(
@@ -237,7 +237,7 @@ defmodule GlossaryWeb.HomeLive do
 
     ~H"""
     <div class="join">
-      <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
+      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
         Project
       </span>
       <span class={@style}>
