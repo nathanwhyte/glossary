@@ -1,6 +1,7 @@
 defmodule Glossary.Entries.Entry do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Glossary.Entries.Project
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -9,6 +10,8 @@ defmodule Glossary.Entries.Entry do
     field :description, :string, default: ""
     field :body, :string, default: ""
     field :status, Ecto.Enum, values: [:Draft, :Published, :Archived], default: :Draft
+
+    belongs_to :project, Project
 
     timestamps(type: :utc_datetime)
   end
