@@ -7,8 +7,6 @@ defmodule Glossary.Entries.EntryTag do
   schema "entries_tags" do
     belongs_to :entry, Entry, type: :binary_id
     belongs_to :tag, Tag, type: :binary_id
-
-    timestamps(type: :utc_datetime)
   end
 
   @doc false
