@@ -7,17 +7,14 @@ defmodule GlossaryWeb.HomeLive do
   import GlossaryWeb.KeybindMacros
 
   alias Glossary.Entries
-  alias Glossary.Entries.Entry
+  alias Glossary.Entries.{Entry, Project}
 
   @impl true
   def mount(_params, _session, socket) do
-    # IDEA: cache the latest 5 entries
-    #       invalidate on new entry creation (?)
-
     params = get_connect_params(socket) || %{}
     timezone = params["timezone"] || "UTC"
 
-    recent_entries = Entries.list_recent_entries(3)
+    recent_entries = Entries.list_recent_entries(5)
 
     {:ok,
      assign(socket,
@@ -175,8 +172,7 @@ defmodule GlossaryWeb.HomeLive do
         </div>
         <div class="flex items-center gap-3 pt-1">
           <.status_indicator status={@entry.status} />
-          <%!-- TODO: load actual value when project relation is added --%>
-          <.project_select project="None" />
+          <.project_select project={@entry.project} />
           <%!-- TODO: load actual value when topics relation is added --%>
           <.topic_badges topics={[]} />
           <%!-- TODO: load actual value when tags relation is added --%>
@@ -216,7 +212,7 @@ defmodule GlossaryWeb.HomeLive do
     """
   end
 
-  attr :project, :string, default: "None"
+  attr :project, Project, default: nil
 
   defp project_select(assigns) do
     base_style = "badge badge-sm join-item font-medium"
@@ -226,11 +222,14 @@ defmodule GlossaryWeb.HomeLive do
         assigns,
         :style,
         base_style <>
-          if(assigns[:project] == "None",
+          if(is_nil(assigns[:project]),
             do: " border-base-content/10",
             else: " badge-secondary"
           )
       )
+      |> assign_new(:project_name, fn ->
+        if is_nil(assigns[:project]), do: "None", else: assigns.project.name
+      end)
 
     ~H"""
     <div class="join">
@@ -238,7 +237,7 @@ defmodule GlossaryWeb.HomeLive do
         Project
       </span>
       <span class={@style}>
-        {@project} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
+        {@project_name} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
       </span>
     </div>
     """

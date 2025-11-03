@@ -20,7 +20,7 @@ defmodule GlossaryWeb.HomeLiveTest do
       assert has_element?(view, "h1", "Recent Entries")
     end
 
-    test "renders multiple entries and limits to 3 most recent", %{conn: conn} do
+    test "renders multiple entries and limits to 5 most recent", %{conn: conn} do
       # Create 5 entries to verify limit
       _entry1 = entry_fixture(%{title: "Entry One"})
       _entry2 = entry_fixture(%{title: "Entry Two"})
@@ -32,7 +32,7 @@ defmodule GlossaryWeb.HomeLiveTest do
 
       # Verify we only show 3 entries by counting entry title divs
       entry_count = html |> String.split("recent-entry-title") |> length() |> Kernel.-(1)
-      assert entry_count == 3
+      assert entry_count == 5
 
       # Verify at least some entries are rendered (we can't predict which 3 will be shown)
       assert html =~ "Entry One" || html =~ "Entry Two" || html =~ "Entry Three" ||

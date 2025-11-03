@@ -54,11 +54,15 @@ defmodule Glossary.Entries do
   def list_recent_entries(limit \\ 3) do
     import Ecto.Query
 
-    Repo.all(
-      from(e in Entry,
-        order_by: [desc: e.updated_at],
-        limit: ^limit
+    entries =
+      Repo.all(
+        from(e in Entry,
+          order_by: [desc: e.updated_at],
+          limit: ^limit
+        ),
+        preload: [:project]
       )
-    )
+
+    Repo.preload(entries, [:project])
   end
 end
