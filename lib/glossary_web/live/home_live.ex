@@ -19,7 +19,7 @@ defmodule GlossaryWeb.HomeLive do
     recent_entries = Entries.list_recent_entries(5)
 
     for entry <- recent_entries do
-      Logger.info("Entry: #{inspect(entry)}\n")
+      Logger.info("Entry: #{inspect(entry.topics)}\n")
     end
 
     {:ok,
@@ -179,9 +179,7 @@ defmodule GlossaryWeb.HomeLive do
         <div class="flex items-center gap-3 pt-1">
           <.status_indicator status={@entry.status} />
           <.project_select project={@entry.project} />
-          <%!-- TODO: load actual value when topics relation is added --%>
-          <.topic_badges topics={[]} />
-          <%!-- TODO: load actual value when tags relation is added --%>
+          <.topic_badges topics={@entry.topics} />
           <.tag_badges tags={@entry.tags} />
         </div>
         <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
@@ -255,16 +253,16 @@ defmodule GlossaryWeb.HomeLive do
 
   defp topic_badges(assigns) do
     ~H"""
-    <div class="flex items-center gap-1.5">
-      <div class="text-[0.75rem]">Topics</div>
+    <div class="flex items-center gap-1.5 text-xs">
+      <div>Topics</div>
       <%= if length(@topics) <= 0 do %>
         <div class="text-base-content/25 pl-1 font-semibold italic">
           None
         </div>
       <% else %>
         <%= for topic <- @topics do %>
-          <div class="badge badge-info badge-sm font-semibold">
-            #{topic}
+          <div class="badge badge-info badge-xs font-semibold">
+            #{topic.name}
           </div>
         <% end %>
       <% end %>

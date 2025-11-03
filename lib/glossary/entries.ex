@@ -3,7 +3,7 @@ defmodule Glossary.Entries do
   The Entries context provides functions for managing glossary entries.
   """
 
-  alias Glossary.Entries.{Entry, Project, Tag}
+  alias Glossary.Entries.{Entry, Project, Tag, Topic}
   alias Glossary.Repo
 
   @doc """
@@ -58,14 +58,11 @@ defmodule Glossary.Entries do
     entries =
       Repo.all(
         from e in Entry,
-          select: [:id, :title, :description, :updated_at, :project_id],
+          select: [:id, :title, :description, :status, :updated_at, :project_id],
           order_by: [desc: e.updated_at],
           limit: ^limit
       )
 
-    Repo.preload(entries,
-      project: from(p in Project, select: [:id, :name]),
-      tags: from(t in Tag, select: [:id, :name])
-    )
+    Repo.preload(entries, [:project, :topics, :tags])
   end
 end
