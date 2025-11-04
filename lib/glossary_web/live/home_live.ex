@@ -118,7 +118,7 @@ defmodule GlossaryWeb.HomeLive do
 
   defp quick_start_button(assigns) do
     base_style =
-      "relative flex h-20 rounded-md border border-base-content/10 px-3 py-2 shadow-sm"
+      "relative flex h-20 rounded-md border border-base-content/20 px-3 py-2 shadow-sm"
 
     assigns =
       assign(
@@ -160,14 +160,12 @@ defmodule GlossaryWeb.HomeLive do
 
   defp entry_card(assigns) do
     ~H"""
-    <div class="card card-sm border-base-content/5 border shadow-md">
+    <div class="card card-sm border-base-content/20 border shadow-md">
       <div class="card-body">
         <div class="flex items-center gap-2">
           <%= if @entry.title != "" do %>
-            <div class="recent-entry-title flex-1 truncate">
-              <span class="truncate">
-                {Phoenix.HTML.raw(@entry.title)}
-              </span>
+            <div class="recent-entry-title">
+              {Phoenix.HTML.raw(@entry.title)}
             </div>
           <% else %>
             <div class="recent-entry-title text-base-content/25 italic">
@@ -179,7 +177,6 @@ defmodule GlossaryWeb.HomeLive do
           </div>
         </div>
         <div :if={@entry.description != ""} class="recent-entry-description">
-          <%!-- TipTap HTML content - StarterKit provides basic sanitization --%>
           {Phoenix.HTML.raw(@entry.description)}
         </div>
         <div class="flex items-center gap-3 pt-1">
@@ -188,7 +185,13 @@ defmodule GlossaryWeb.HomeLive do
           <.topic_badges topics={@entry.topics} />
           <.tag_badges tags={@entry.tags} />
         </div>
-        <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
+
+        <div class="flex items-center justify-between">
+          <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
+          <.button class="btn btn-ghost btn-xs" navigate={~p"/entries/#{@entry.id}"}>
+            Edit <.icon name="hero-pencil-square-micro" class="size-3.5" />
+          </.button>
+        </div>
       </div>
     </div>
     """

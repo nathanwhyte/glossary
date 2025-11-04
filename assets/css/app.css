@@ -93,7 +93,7 @@
 }
 
 .recent-entry-title {
-  @apply card-title prose font-semibold text-2xl;
+  @apply card-title prose font-semibold text-2xl flex-1 truncate;
 
   p {
     @apply truncate;
@@ -106,6 +106,10 @@
 
 .recent-entry-description {
   @apply prose text-sm font-medium italic text-base-content/50;
+
+  p {
+    @apply truncate;
+  }
 
   code {
     padding-inline: 0.25em !important;
