@@ -17,7 +17,7 @@ defmodule Glossary.Entries do
   def get_entry(id), do: Repo.get(Entry, id)
 
   @doc """
-  Gets a single entry and it's relations.
+  Gets a single entry and its relations.
   """
   def get_entry_details(id) do
     Repo.get(Entry, id)
