@@ -75,8 +75,6 @@ defmodule GlossaryWeb.EditEntryLive do
         Logger.error("Failed to update entry body: #{inspect(changeset.errors)}")
         {:noreply, socket}
     end
-
-    {:noreply, socket}
   end
 
   @impl true
