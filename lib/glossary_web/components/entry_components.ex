@@ -47,7 +47,11 @@ defmodule GlossaryWeb.Components.EntryComponents do
         </div>
         <div class="flex items-center gap-3 pt-1">
           <.status_indicator status={@entry.status} />
-          <.project_select project={@entry.project} recent_projects={@recent_projects} />
+          <.project_select
+            project={@entry.project}
+            entry_id={@entry.id}
+            recent_projects={@recent_projects}
+          />
           <.topic_badges topics={@entry.topics} />
           <.tag_badges tags={@entry.tags} />
         </div>
@@ -104,10 +108,11 @@ defmodule GlossaryWeb.Components.EntryComponents do
 
   ## Examples
 
-      <.project_select project={project} />
-      <.project_select project={nil} />
+      <.project_select project={project} entry_id={entry.id} recent_projects={projects} />
+      <.project_select project={nil} entry_id={entry.id} recent_projects={projects} />
   """
   attr :project, Project, default: nil, doc: "the entry's project, or nil if none"
+  attr :entry_id, :string, required: true, doc: "the entry's ID"
   attr :recent_projects, :list, required: true, doc: "list of recent projects for selection"
 
   def project_select(assigns) do
@@ -133,9 +138,9 @@ defmodule GlossaryWeb.Components.EntryComponents do
       <div class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
         Project
       </div>
-      <div class="dropdown">
-        <div tabindex="0" role="button" class={@style}>
-          {@project_name}
+      <div class="dropdown" id={"project-dropdown-#{@entry_id}"}>
+        <div tabindex="0" role="button" class={@style} id={"project-button-#{@entry_id}"}>
+          <span id={"project-name-#{@entry_id}"}>{@project_name}</span>
           <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
         </div>
         <div
@@ -151,8 +156,12 @@ defmodule GlossaryWeb.Components.EntryComponents do
             </span>
             <div :for={project <- @recent_projects} class="dropdown-item">
               <div
+                id={"project-select-#{@entry_id}-#{project.id}"}
                 phx-click="change_project"
+                phx-value-entry_id={@entry_id}
                 phx-value-project_id={project.id}
+                phx-value-project_name={project.name}
+                phx-hook="ProjectSelect"
                 class="text-base-content w-full cursor-pointer rounded-md p-2 font-medium hover:bg-base-content/5"
               >
                 {project.name}

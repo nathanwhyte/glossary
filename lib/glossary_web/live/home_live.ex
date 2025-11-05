@@ -40,11 +40,19 @@ defmodule GlossaryWeb.HomeLive do
 
   keybind_listeners()
 
-  # @impl true
-  # def handle_event("change_project", %{"project_id" => project_id}, socket) do
-  #   Logger.info("Changing project to ID: #{project_id}")
-  #   {:noreply, socket}
-  # end
+  @impl true
+  def handle_event(
+        "change_project",
+        %{"entry_id" => entry_id, "project_id" => project_id},
+        socket
+      ) do
+    entry = Entries.get_entry!(entry_id)
+
+    {:ok, _} =
+      Entries.update_entry(entry, %{project_id: project_id})
+
+    {:noreply, socket}
+  end
 
   @impl true
   def render(assigns) do

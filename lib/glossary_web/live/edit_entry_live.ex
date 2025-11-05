@@ -19,10 +19,10 @@ defmodule GlossaryWeb.EditEntryLive do
   import GlossaryWeb.Components.EntryComponents
 
   alias Glossary.{Entries, Entries.Entry}
-  alias Glossary.{Projects, Entries.Project}
+  alias Glossary.Projects
   alias Glossary.Repo
 
-  import Logger
+  require Logger
 
   @impl true
   def mount(%{"entry_id" => entry_id}, _session, socket) do
@@ -162,10 +162,12 @@ defmodule GlossaryWeb.EditEntryLive do
       </div>
 
       <div class="text-base-content/50 flex gap-4 px-3 py-2 text-sm font-medium">
-        <%!-- TODO: project, tags, and topics line, similar to Linear's --%>
-        <%!--       no autosave here, update on blur or keybind  --%>
         <.status_indicator status={assigns.entry.status} />
-        <.project_select project={assigns.entry.project} recent_projects={assigns.recent_projects} />
+        <.project_select
+          project={assigns.entry.project}
+          entry_id={assigns.entry.id}
+          recent_projects={assigns.recent_projects}
+        />
         <.tag_badges tags={assigns.entry.tags} />
         <.topic_badges topics={assigns.entry.topics} />
       </div>

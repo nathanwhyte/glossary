@@ -22,7 +22,7 @@ defmodule Glossary.Entries.Entry do
   @doc false
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:title, :description, :body, :status])
+    |> cast(attrs, [:title, :description, :body, :status, :project_id])
     |> validate_required([:status])
   end
 end
