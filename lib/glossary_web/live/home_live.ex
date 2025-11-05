@@ -5,9 +5,9 @@ defmodule GlossaryWeb.HomeLive do
   use GlossaryWeb, :live_view
 
   import GlossaryWeb.KeybindMacros
+  import GlossaryWeb.Components.EntryComponents
 
-  alias Glossary.Entries
-  alias Glossary.Entries.{Entry, Project}
+  alias Glossary.{Entries, Projects}
 
   require Logger
 
@@ -17,6 +17,7 @@ defmodule GlossaryWeb.HomeLive do
     timezone = params["timezone"] || "UTC"
 
     recent_entries = Entries.list_recent_entries(5)
+    recent_projects = Projects.list_recent_projects(5)
 
     for entry <- recent_entries do
       Logger.info("Entry: #{inspect(entry.topics)}\n")
@@ -27,7 +28,8 @@ defmodule GlossaryWeb.HomeLive do
        leader_down: false,
        shift_down: false,
        timezone: timezone,
-       recent_entries: recent_entries
+       recent_entries: recent_entries,
+       recent_projects: recent_projects
      )}
   end
 
@@ -37,6 +39,21 @@ defmodule GlossaryWeb.HomeLive do
   pubsub_broadcast_on_event("click_search", :summon_modal, true, "search_modal")
 
   keybind_listeners()
+
+  @impl true
+  def handle_event(
+        "change_project",
+        %{"entry_id" => entry_id, "project_id" => project_id},
+        socket
+      ) do
+    project_id = if project_id == "", do: nil, else: project_id
+    entry = Entries.get_entry!(entry_id)
+
+    {:ok, _} =
+      Entries.update_entry(entry, %{project_id: project_id})
+
+    {:noreply, socket}
+  end
 
   @impl true
   def render(assigns) do
@@ -51,14 +68,25 @@ defmodule GlossaryWeb.HomeLive do
         <.quick_start_content />
 
         <section>
-          <h1 class="text-xl font-semibold">Recent Entries</h1>
+          <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold">Recent Entries</h1>
+            <%!-- TODO: route to "all entries" view (not implemented yet) --%>
+            <.button class="btn btn-ghost btn-xs" navigate={~p"/"}>
+              View All <.icon name="hero-chevron-right-micro" class="size-3.5 -mr-0.5" />
+            </.button>
+          </div>
           <%= if Enum.empty?(@recent_entries) do %>
             <div class="text-base-content/25 py-16 text-center text-xl font-semibold italic">
               No entries yet.
             </div>
           <% else %>
             <div class="grid w-full grid-flow-row auto-rows-auto grid-cols-1 gap-y-4 py-2">
-              <.entry_card :for={entry <- @recent_entries} entry={entry} timezone={@timezone} />
+              <.entry_card
+                :for={entry <- @recent_entries}
+                entry={entry}
+                timezone={@timezone}
+                recent_projects={@recent_projects}
+              />
             </div>
           <% end %>
         </section>
@@ -152,179 +180,6 @@ defmodule GlossaryWeb.HomeLive do
         </div>
       </div>
     </.link>
-    """
-  end
-
-  attr :entry, Entry, required: true
-  attr :timezone, :string, required: true
-
-  defp entry_card(assigns) do
-    ~H"""
-    <div class="card card-sm border-base-content/20 border shadow-md">
-      <div class="card-body">
-        <div class="flex items-center gap-2">
-          <%= if @entry.title != "" do %>
-            <div class="recent-entry-title">
-              {Phoenix.HTML.raw(@entry.title)}
-            </div>
-          <% else %>
-            <div class="recent-entry-title text-base-content/25 italic">
-              No Title
-            </div>
-          <% end %>
-          <div class="text-base-content/50 mx-1 shrink-0">
-            <.icon name="hero-ellipsis-horizontal-mini" class="size-5" />
-          </div>
-        </div>
-        <div :if={@entry.description != ""} class="recent-entry-description">
-          {Phoenix.HTML.raw(@entry.description)}
-        </div>
-        <div class="flex items-center gap-3 pt-1">
-          <.status_indicator status={@entry.status} />
-          <.project_select project={@entry.project} />
-          <.topic_badges topics={@entry.topics} />
-          <.tag_badges tags={@entry.tags} />
-        </div>
-
-        <div class="flex items-center justify-between">
-          <.last_updated_timestamp updated={@entry.updated_at} timezone={@timezone} />
-          <.button class="btn btn-ghost btn-xs" navigate={~p"/entries/#{@entry.id}"}>
-            Edit <.icon name="hero-pencil-square-micro" class="size-3.5" />
-          </.button>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  attr :status, :atom, required: true
-
-  defp status_indicator(assigns) do
-    base_style = "badge badge-xs join-item font-medium"
-
-    assigns =
-      assign(
-        assigns,
-        :style,
-        base_style <>
-          if(assigns[:status] == :Published,
-            do: " badge-success",
-            else: " badge-warning"
-          )
-      )
-
-    ~H"""
-    <div class="join">
-      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
-        Status
-      </span>
-      <span class={@style}>
-        {@status}
-      </span>
-    </div>
-    """
-  end
-
-  attr :project, Project, default: nil
-
-  defp project_select(assigns) do
-    base_style = "badge badge-xs join-item font-medium"
-
-    assigns =
-      assign(
-        assigns,
-        :style,
-        base_style <>
-          if(is_nil(assigns[:project]),
-            do: " border-base-content/10",
-            else: " badge-secondary"
-          )
-      )
-      |> assign_new(:project_name, fn ->
-        if is_nil(assigns[:project]), do: "None", else: assigns.project.name
-      end)
-
-    ~H"""
-    <div class="join">
-      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
-        Project
-      </span>
-      <span class={@style}>
-        {@project_name} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
-      </span>
-    </div>
-    """
-  end
-
-  # IDEA: if length(@topics) > 3, move excess to dropdown menu
-
-  attr :topics, :list, required: true
-
-  defp topic_badges(assigns) do
-    ~H"""
-    <div class="flex items-center gap-1.5 text-xs">
-      <div>Topics</div>
-      <%= if length(@topics) <= 0 do %>
-        <div class="text-base-content/25 pl-1 font-semibold italic">
-          None
-        </div>
-      <% else %>
-        <%= for topic <- @topics do %>
-          <div class="badge badge-info badge-xs font-semibold">
-            #{topic.name}
-          </div>
-        <% end %>
-      <% end %>
-    </div>
-    """
-  end
-
-  # IDEA: if length(@tags) > 3, move excess to dropdown menu
-
-  attr :tags, :list, required: true
-
-  defp tag_badges(assigns) do
-    ~H"""
-    <div class="flex items-center gap-1.5 text-xs">
-      <div>Tags</div>
-      <%= if length(@tags) <= 0 do %>
-        <div class="text-base-content/25 pl-1 font-semibold italic">
-          None
-        </div>
-      <% else %>
-        <%= for tag <- @tags do %>
-          <div class="badge badge-primary badge-xs font-semibold">
-            @{tag.name}
-          </div>
-        <% end %>
-      <% end %>
-    </div>
-    """
-  end
-
-  attr :updated, DateTime, required: true
-  attr :timezone, :string, required: true
-
-  defp last_updated_timestamp(assigns) do
-    updated_localized =
-      case DateTime.shift_zone(assigns.updated, assigns.timezone) do
-        {:ok, dt} -> dt
-        {:error, _reason} -> assigns.updated
-      end
-
-    assigns = assign(assigns, :updated_localized, updated_localized)
-
-    ~H"""
-    <div class="text-base-content/50 pt-1 text-xs">
-      Updated
-      <span class="font-semibold">
-        {@updated_localized |> Calendar.strftime("%a, %m/%d/%y")}
-      </span>
-      at
-      <span class="font-semibold">
-        {@updated_localized |> Calendar.strftime("%H:%M")}
-      </span>
-    </div>
     """
   end
 end

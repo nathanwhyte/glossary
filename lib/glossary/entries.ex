@@ -17,6 +17,14 @@ defmodule Glossary.Entries do
   def get_entry(id), do: Repo.get(Entry, id)
 
   @doc """
+  Gets a single entry and its relations.
+  """
+  def get_entry_details(id) do
+    Repo.get(Entry, id)
+    |> Repo.preload([:project, :topics, :tags])
+  end
+
+  @doc """
   Creates a new entry.
   """
   def create_entry(attrs \\ %{}) do
@@ -54,15 +62,13 @@ defmodule Glossary.Entries do
   def list_recent_entries(limit \\ 5) do
     import Ecto.Query
 
-    # split the query to load all entries, not just the ones with relations
-    entries =
-      Repo.all(
-        from e in Entry,
-          select: [:id, :title, :description, :status, :updated_at, :project_id],
-          order_by: [desc: e.updated_at],
-          limit: ^limit
-      )
-
-    Repo.preload(entries, [:project, :topics, :tags])
+    # use 2 separate queries to load all entries, not just the ones with relations
+    Repo.all(
+      from e in Entry,
+        select: [:id, :title, :description, :status, :updated_at, :project_id],
+        order_by: [desc: e.updated_at],
+        limit: ^limit
+    )
+    |> Repo.preload([:project, :topics, :tags])
   end
 end

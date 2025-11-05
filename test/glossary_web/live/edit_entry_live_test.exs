@@ -2,6 +2,7 @@ defmodule GlossaryWeb.EditEntryLiveTest do
   use GlossaryWeb.LiveCase
 
   alias Glossary.Entries
+  alias Glossary.Repo
 
   describe "mount/3" do
     test "mounts EditEntryLive with entry from database", %{conn: conn} do
@@ -89,6 +90,71 @@ defmodule GlossaryWeb.EditEntryLiveTest do
 
       updated_entry = Entries.get_entry(entry.id)
       assert updated_entry.body == "<h1>Heading</h1><p>Content</p>"
+    end
+  end
+
+  describe "change_project event handler" do
+    test "sets a project on an entry", %{conn: conn} do
+      entry = entry_fixture()
+      project = project_fixture(%{name: "Test Project"})
+      view = mount_edit_entry(conn, entry)
+
+      # Verify entry has no project initially
+      assert entry.project_id == nil
+
+      # Trigger the change_project event directly (no need to open dropdown in tests)
+      view
+      |> element("div[phx-click=\"change_project\"][phx-value-project_id=\"#{project.id}\"]")
+      |> render_click()
+
+      # Re-fetch from database to verify update
+      updated_entry = Glossary.Entries.get_entry_details(entry.id)
+      assert updated_entry.project_id == project.id
+      assert updated_entry.project.name == "Test Project"
+    end
+
+    test "clears project when None is selected", %{conn: conn} do
+      entry = entry_with_project_fixture(%{name: "Test Project"}, %{title: "Test Entry"})
+      view = mount_edit_entry(conn, entry)
+
+      # Verify entry has a project initially
+      assert entry.project_id != nil
+
+      # Trigger the change_project event with empty project_id
+      view
+      |> element("div[phx-click=\"change_project\"][phx-value-project_id=\"\"]")
+      |> render_click()
+
+      # Re-fetch from database to verify project is cleared
+      updated_entry = Glossary.Entries.get_entry_details(entry.id)
+      assert updated_entry.project_id == nil
+      assert updated_entry.project == nil
+    end
+
+    test "changes from one project to another", %{conn: conn} do
+      project1 = project_fixture(%{name: "Project One"})
+      project2 = project_fixture(%{name: "Project Two"})
+
+      # Create entry with first project
+      entry = entry_fixture()
+
+      entry
+      |> Repo.preload(:project)
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.put_assoc(:project, project1)
+      |> Repo.update!()
+
+      view = mount_edit_entry(conn, entry)
+
+      # Trigger the change_project event to switch to project2
+      view
+      |> element("div[phx-click=\"change_project\"][phx-value-project_id=\"#{project2.id}\"]")
+      |> render_click()
+
+      # Re-fetch from database to verify project changed
+      updated_entry = Glossary.Entries.get_entry_details(entry.id)
+      assert updated_entry.project_id == project2.id
+      assert updated_entry.project.name == "Project Two"
     end
   end
 
