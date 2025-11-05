@@ -7,7 +7,7 @@ defmodule GlossaryWeb.HomeLive do
   import GlossaryWeb.KeybindMacros
   import GlossaryWeb.Components.EntryComponents
 
-  alias Glossary.Entries
+  alias Glossary.{Entries, Projects}
 
   require Logger
 
@@ -17,6 +17,7 @@ defmodule GlossaryWeb.HomeLive do
     timezone = params["timezone"] || "UTC"
 
     recent_entries = Entries.list_recent_entries(5)
+    recent_projects = Projects.list_recent_projects(5)
 
     for entry <- recent_entries do
       Logger.info("Entry: #{inspect(entry.topics)}\n")
@@ -27,7 +28,8 @@ defmodule GlossaryWeb.HomeLive do
        leader_down: false,
        shift_down: false,
        timezone: timezone,
-       recent_entries: recent_entries
+       recent_entries: recent_entries,
+       recent_projects: recent_projects
      )}
   end
 
@@ -37,6 +39,12 @@ defmodule GlossaryWeb.HomeLive do
   pubsub_broadcast_on_event("click_search", :summon_modal, true, "search_modal")
 
   keybind_listeners()
+
+  # @impl true
+  # def handle_event("change_project", %{"project_id" => project_id}, socket) do
+  #   Logger.info("Changing project to ID: #{project_id}")
+  #   {:noreply, socket}
+  # end
 
   @impl true
   def render(assigns) do
@@ -53,6 +61,10 @@ defmodule GlossaryWeb.HomeLive do
         <section>
           <div class="flex items-center justify-between">
             <h1 class="text-xl font-semibold">Recent Entries</h1>
+            <%!-- TODO: route to "all entries" view (not implemented yet) --%>
+            <.button class="btn btn-ghost btn-xs" navigate={~p"/"}>
+              View All <.icon name="hero-chevron-right-micro" class="size-3.5 -mr-0.5" />
+            </.button>
           </div>
           <%= if Enum.empty?(@recent_entries) do %>
             <div class="text-base-content/25 py-16 text-center text-xl font-semibold italic">
@@ -60,7 +72,12 @@ defmodule GlossaryWeb.HomeLive do
             </div>
           <% else %>
             <div class="grid w-full grid-flow-row auto-rows-auto grid-cols-1 gap-y-4 py-2">
-              <.entry_card :for={entry <- @recent_entries} entry={entry} timezone={@timezone} />
+              <.entry_card
+                :for={entry <- @recent_entries}
+                entry={entry}
+                timezone={@timezone}
+                recent_projects={@recent_projects}
+              />
             </div>
           <% end %>
         </section>

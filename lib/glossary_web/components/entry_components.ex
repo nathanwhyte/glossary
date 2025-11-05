@@ -20,6 +20,10 @@ defmodule GlossaryWeb.Components.EntryComponents do
   attr :entry, Entry, required: true, doc: "the entry to display"
   attr :timezone, :string, required: true, doc: "the timezone for displaying timestamps"
 
+  attr :recent_projects, :list,
+    required: true,
+    doc: "list of recent projects for project selection"
+
   def entry_card(assigns) do
     ~H"""
     <div class="card card-sm border-base-content/20 border shadow-md">
@@ -43,7 +47,7 @@ defmodule GlossaryWeb.Components.EntryComponents do
         </div>
         <div class="flex items-center gap-3 pt-1">
           <.status_indicator status={@entry.status} />
-          <.project_select project={@entry.project} />
+          <.project_select project={@entry.project} recent_projects={@recent_projects} />
           <.topic_badges topics={@entry.topics} />
           <.tag_badges tags={@entry.tags} />
         </div>
@@ -70,7 +74,7 @@ defmodule GlossaryWeb.Components.EntryComponents do
   attr :status, :atom, required: true, doc: "the entry status (:Published or :Draft)"
 
   def status_indicator(assigns) do
-    base_style = "badge badge-xs join-item font-medium"
+    base_style = "badge badge-sm join-item font-medium"
 
     assigns =
       assign(
@@ -85,7 +89,7 @@ defmodule GlossaryWeb.Components.EntryComponents do
 
     ~H"""
     <div class="join">
-      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
+      <span class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
         Status
       </span>
       <span class={@style}>
@@ -104,9 +108,11 @@ defmodule GlossaryWeb.Components.EntryComponents do
       <.project_select project={nil} />
   """
   attr :project, Project, default: nil, doc: "the entry's project, or nil if none"
+  attr :recent_projects, :list, required: true, doc: "list of recent projects for selection"
 
   def project_select(assigns) do
-    base_style = "badge badge-xs join-item font-medium"
+    base_style =
+      "badge transition cursor-pointer badge-sm join-item font-medium"
 
     assigns =
       assign(
@@ -114,8 +120,8 @@ defmodule GlossaryWeb.Components.EntryComponents do
         :style,
         base_style <>
           if(is_nil(assigns[:project]),
-            do: " border-base-content/10",
-            else: " badge-secondary"
+            do: " border-base-content/10 hover:bg-base-content/5",
+            else: " badge-secondary border-secondary/50 bg-secondary/75 hover:bg-secondary"
           )
       )
       |> assign_new(:project_name, fn ->
@@ -123,13 +129,39 @@ defmodule GlossaryWeb.Components.EntryComponents do
       end)
 
     ~H"""
-    <div class="join">
-      <span class="badge badge-xs bg-base-content/5 border-base-content/10 join-item">
+    <div class="join flex items-center">
+      <div class="badge badge-sm bg-base-content/5 border-base-content/10 join-item">
         Project
-      </span>
-      <span class={@style}>
-        {@project_name} <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
-      </span>
+      </div>
+      <div class="dropdown">
+        <div tabindex="0" role="button" class={@style}>
+          {@project_name}
+          <.icon name="hero-chevron-up-down-micro" class="size-3 -mx-0.5" />
+        </div>
+        <div
+          tabindex="-1"
+          class="menu dropdown-content border-base-content/10 bg-base-100 rounded-box z-1 min-w-3xs mt-1.5 max-w-xs border p-2 shadow-md"
+        >
+          <%= if is_nil(@recent_projects) or length(@recent_projects) == 0 do %>
+            <div class="text-base-content/50 p-2 italic">No recent projects</div>
+          <% else %>
+            <%!-- IDEA: "search projects" input --%>
+            <span class="text-base-content/50 px-1 pt-0.5 pb-1 text-xs">
+              Change Project
+            </span>
+            <div :for={project <- @recent_projects} class="dropdown-item">
+              <div
+                phx-click="change_project"
+                phx-value-project_id={project.id}
+                class="text-base-content w-full cursor-pointer rounded-md p-2 font-medium hover:bg-base-content/5"
+              >
+                {project.name}
+              </div>
+            </div>
+            <%!-- TODO: "create new project" input --%>
+          <% end %>
+        </div>
+      </div>
     </div>
     """
   end
@@ -154,7 +186,7 @@ defmodule GlossaryWeb.Components.EntryComponents do
         </div>
       <% else %>
         <%= for topic <- @topics do %>
-          <div class="badge badge-info badge-xs font-semibold">
+          <div class="badge badge-info badge-sm font-semibold">
             #{topic.name}
           </div>
         <% end %>
@@ -183,7 +215,7 @@ defmodule GlossaryWeb.Components.EntryComponents do
         </div>
       <% else %>
         <%= for tag <- @tags do %>
-          <div class="badge badge-primary badge-xs font-semibold">
+          <div class="badge badge-primary badge-sm font-semibold">
             @{tag.name}
           </div>
         <% end %>

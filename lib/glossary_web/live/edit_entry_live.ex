@@ -16,16 +16,28 @@ defmodule GlossaryWeb.EditEntryLive do
   use GlossaryWeb, :live_view
 
   import GlossaryWeb.KeybindMacros
+  import GlossaryWeb.Components.EntryComponents
 
-  alias Glossary.Entries.Entry
+  alias Glossary.{Entries, Entries.Entry}
+  alias Glossary.{Projects, Entries.Project}
   alias Glossary.Repo
+
+  import Logger
 
   @impl true
   def mount(%{"entry_id" => entry_id}, _session, socket) do
     # TODO: show error flash if Ecto has trouble loading the entry
 
-    entry = Repo.get(Entry, entry_id)
-    {:ok, assign(socket, leader_down: false, shift_down: false, entry: entry)}
+    entry = Entries.get_entry_details(entry_id)
+    recent_projects = Projects.list_recent_projects(5)
+
+    {:ok,
+     assign(socket,
+       leader_down: false,
+       shift_down: false,
+       entry: entry,
+       recent_projects: recent_projects
+     )}
   end
 
   pubsub_broadcast_on_event("summon_modal", :summon_modal, true, "search_modal")
@@ -53,8 +65,26 @@ defmodule GlossaryWeb.EditEntryLive do
   end
 
   def handle_event("body_update", %{"body" => body}, socket) do
+    Entry.changeset(socket.assigns.entry, %{body: body})
+    |> Repo.update()
+    |> case do
+      {:ok, updated_entry} ->
+        {:noreply, assign(socket, :entry, updated_entry)}
+
+      {:error, changeset} ->
+        Logger.error("Failed to update entry body: #{inspect(changeset.errors)}")
+        {:noreply, socket}
+    end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("change_project", %{"project_id" => project_id}, socket) do
+    Logger.info("Changing #{inspect(socket.assigns.entry)} to ID: #{project_id}")
+
     {:ok, _} =
-      Entry.changeset(socket.assigns.entry, %{body: body})
+      Entry.changeset(socket.assigns.entry, %{project_id: project_id})
       |> Repo.update()
 
     {:noreply, socket}
@@ -71,7 +101,7 @@ defmodule GlossaryWeb.EditEntryLive do
         phx-window-keyup="key_up"
         class="flex h-full flex-col py-8"
       >
-        <.title_section entry={@entry} />
+        <.title_section entry={@entry} recent_projects={@recent_projects} />
 
         <div class="divider px-3"></div>
 
@@ -95,19 +125,28 @@ defmodule GlossaryWeb.EditEntryLive do
     """
   end
 
+  attr :entry, Entry, required: true, doc: "the entry being edited"
+  attr :recent_projects, :list, required: true, doc: "list of recent projects for selection"
+
   defp title_section(assigns) do
     ~H"""
     <header>
-      <div
-        id="title-editor"
-        phx-hook="TitleEditor"
-      >
-        <input
-          id="entry_title"
-          type="hidden"
-          name="entry[title]"
-          value={assigns.entry.title}
-        />
+      <div class="flex px-3 py-2">
+        <div
+          id="title-editor"
+          phx-hook="TitleEditor"
+          class="flex-1"
+        >
+          <input
+            id="entry_title"
+            type="hidden"
+            name="entry[title]"
+            value={assigns.entry.title}
+          />
+        </div>
+
+        <%!-- TODO: options/actions menu, e.g. "mark as draft/published" --%>
+        <.icon name="hero-ellipsis-horizontal-mini" class="size-6 mt-2 mr-1" />
       </div>
 
       <div
@@ -122,11 +161,13 @@ defmodule GlossaryWeb.EditEntryLive do
         />
       </div>
 
-      <div class="text-base-content/50 flex gap-2 px-3 py-2 text-sm font-medium">
-        <%!-- TODO: @tags and #topics line, similar to Linear's --%>
+      <div class="text-base-content/50 flex gap-4 px-3 py-2 text-sm font-medium">
+        <%!-- TODO: project, tags, and topics line, similar to Linear's --%>
         <%!--       no autosave here, update on blur or keybind  --%>
-        <span><i>@tags</i></span>
-        <span><i>#topics</i></span>
+        <.status_indicator status={assigns.entry.status} />
+        <.project_select project={assigns.entry.project} recent_projects={assigns.recent_projects} />
+        <.tag_badges tags={assigns.entry.tags} />
+        <.topic_badges topics={assigns.entry.topics} />
       </div>
     </header>
     """
