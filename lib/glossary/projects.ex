@@ -14,7 +14,7 @@ defmodule Glossary.Projects do
   end
 
   @doc """
-  Lists all projects.
+  Lists the most recently updated projects, limited to the specified count.
   """
   def list_recent_projects(limit \\ 5) do
     import Ecto.Query
