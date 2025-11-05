@@ -46,6 +46,7 @@ defmodule GlossaryWeb.HomeLive do
         %{"entry_id" => entry_id, "project_id" => project_id},
         socket
       ) do
+    project_id = if project_id == "", do: nil, else: project_id
     entry = Entries.get_entry!(entry_id)
 
     {:ok, _} =

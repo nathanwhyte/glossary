@@ -81,6 +81,7 @@ defmodule GlossaryWeb.EditEntryLive do
 
   @impl true
   def handle_event("change_project", %{"project_id" => project_id}, socket) do
+    project_id = if project_id == "", do: nil, else: project_id
     Logger.info("Changing #{inspect(socket.assigns.entry)} to ID: #{project_id}")
 
     {:ok, _} =

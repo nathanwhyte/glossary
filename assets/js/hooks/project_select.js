@@ -16,9 +16,16 @@ const ProjectSelect = {
         if (dropdown) {
           const button = dropdown.querySelector('[role="button"]');
           if (button) {
-            // Update the badge style to show it's selected
-            button.classList.remove("border-base-content/10", "hover:bg-base-content/5");
-            button.classList.add("badge-secondary", "border-secondary/50", "bg-secondary/75", "hover:bg-secondary");
+            // Update badge style based on whether it's "None" or a project
+            if (projectName === "None") {
+              // Remove project styles and add default styles
+              button.classList.remove("badge-secondary", "border-secondary/50", "bg-secondary/75", "hover:bg-secondary");
+              button.classList.add("border-base-content/10", "hover:bg-base-content/5");
+            } else {
+              // Remove default styles and add project styles
+              button.classList.remove("border-base-content/10", "hover:bg-base-content/5");
+              button.classList.add("badge-secondary", "border-secondary/50", "bg-secondary/75", "hover:bg-secondary");
+            }
           }
         }
 

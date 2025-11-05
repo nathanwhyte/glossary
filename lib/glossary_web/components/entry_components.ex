@@ -147,13 +147,24 @@ defmodule GlossaryWeb.Components.EntryComponents do
           tabindex="-1"
           class="menu dropdown-content border-base-content/10 bg-base-100 rounded-box z-1 min-w-3xs mt-1.5 max-w-xs border p-2 shadow-md"
         >
-          <%= if is_nil(@recent_projects) or length(@recent_projects) == 0 do %>
-            <div class="text-base-content/50 p-2 italic">No recent projects</div>
-          <% else %>
-            <%!-- IDEA: "search projects" input --%>
-            <span class="text-base-content/50 px-1 pt-0.5 pb-1 text-xs">
-              Change Project
-            </span>
+          <%!-- IDEA: "search projects" input --%>
+          <span class="text-base-content/50 px-1 pt-0.5 pb-1 text-xs">
+            Change Project
+          </span>
+          <div class="dropdown-item">
+            <div
+              id={"project-select-#{@entry_id}-none"}
+              phx-click="change_project"
+              phx-value-entry_id={@entry_id}
+              phx-value-project_id=""
+              phx-value-project_name="None"
+              phx-hook="ProjectSelect"
+              class="text-base-content w-full cursor-pointer rounded-md p-2 font-medium hover:bg-base-content/5"
+            >
+              None
+            </div>
+          </div>
+          <%= if not (is_nil(@recent_projects) or length(@recent_projects) == 0) do %>
             <div :for={project <- @recent_projects} class="dropdown-item">
               <div
                 id={"project-select-#{@entry_id}-#{project.id}"}
@@ -167,8 +178,8 @@ defmodule GlossaryWeb.Components.EntryComponents do
                 {project.name}
               </div>
             </div>
-            <%!-- TODO: "create new project" input --%>
           <% end %>
+          <%!-- TODO: "create new project" input --%>
         </div>
       </div>
     </div>
