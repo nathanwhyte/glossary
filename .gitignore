@@ -45,3 +45,6 @@ npm-debug.log
 
 # OS-specific
 .DS_Store
+
+# Kubernetes secrets (template is secrets.yaml.template)
+k8s/secrets.yaml

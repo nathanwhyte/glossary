@@ -351,6 +351,11 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
   mix phx.digest     # Generate asset digests (included in assets.deploy)
   MIX_ENV=prod mix release
   ```
+- **Release module** (`lib/glossary/release.ex`):
+  - Provides `Glossary.Release.migrate()` for running migrations in production releases
+  - Uses `Ecto.Migrator` to run migrations without Mix
+  - Automatically runs migrations on container startup via the `server` script
+  - See [Phoenix Releases Documentation](https://hexdocs.pm/phoenix/releases.html#ecto-migrations)
 - **Production checklist**:
   - Set `SECRET_KEY_BASE` (generate with `mix phx.gen.secret`)
   - Configure `DATABASE_URL` or database credentials
@@ -358,6 +363,60 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
   - Configure mailer settings (SMTP, etc.)
   - Enable SSL/TLS in production
   - Set up monitoring (Phoenix LiveDashboard, telemetry)
+- **Docker deployment**:
+  - The Dockerfile follows the official Phoenix template pattern
+  - Migrations run automatically on container startup via `/app/bin/server`
+  - The `server` script calls `./migrate` before starting the Phoenix server
+  - Manual migrations: `/app/bin/glossary eval "Glossary.Release.migrate()"`
+
+## Kubernetes Deployment
+
+The application includes Kubernetes manifests in the `k8s/` directory for deployment to a Kubernetes cluster.
+
+### Directory Structure
+
+- **`k8s/`** – Root directory containing:
+  - `namespace.yaml` – Namespace definition
+  - `configmap.yaml` – Shared ConfigMap for application and PostgreSQL configuration
+  - `secrets.yaml` – Shared Secret template (contains example values; must be updated)
+- **`k8s/glossary/`** – Application manifests:
+  - `deployment.yaml` – Application deployment with persistent storage
+  - `service.yaml` – ClusterIP service (port 4000 → container port 4000)
+  - `pvc.yaml` – Persistent volume claim (10Gi, longhorn-nvme StorageClass)
+  - `ingress.yaml` – Traefik Ingress configuration (optional, alternative to Cloudflare Tunnel)
+  - `cloudflared.yaml` – Cloudflare Tunnel deployment (optional, for secure external access)
+- **`k8s/postgres/`** – PostgreSQL manifests:
+  - `deployment.yaml` – PostgreSQL 16 deployment
+  - `service.yaml` – ClusterIP service (port 5432)
+  - `pvc.yaml` – Persistent volume claim (20Gi, longhorn-nvme StorageClass)
+
+### Key Configuration Points
+
+- **Shared Resources**: Both application and PostgreSQL use the same `glossary-config` ConfigMap and `glossary-secrets` Secret from the root directory
+- **Service Ports**: Application service exposes port 4000 (targets container port 4000); Ingress and Cloudflare Tunnel reference port 4000
+- **Storage**: Application uses `longhorn-nvme` StorageClass with 10Gi persistent volume; PostgreSQL uses 20Gi
+- **Security**: Application runs as non-root user (UID 65534, `nobody`)
+- **Health Checks**: HTTP liveness/readiness probes on `/` for application; `pg_isready` for PostgreSQL
+
+### Deployment Workflow
+
+1. **Build Docker image**: `docker build -t your-registry/glossary:v1.0.0 .`
+   - The Dockerfile follows the official Phoenix template pattern
+   - Includes Node.js for asset compilation
+   - Uses multi-stage build for optimized final image
+   - Migrations run automatically on container startup
+2. **Update secrets**: Edit `k8s/secrets.yaml` with base64-encoded values (or use `kubectl create secret`)
+3. **Update config**: Edit `k8s/configmap.yaml` with your hostname and settings
+4. **Deploy**: Follow the Quick Start guide in `k8s/README.md`
+
+### Important Notes
+
+- **Secrets**: The `secrets.yaml` file contains example encoded values. Always replace these with your actual secrets before deploying
+- **Image**: Update `glossary/deployment.yaml` with your actual Docker image reference
+- **Ingress vs Tunnel**: Choose either Ingress (Traefik) or Cloudflare Tunnel for external access, not both
+- **Database Migrations**: Migrations run automatically on container startup via the `server` script. Manual migration is also available if needed (see `k8s/README.md`)
+
+For detailed deployment instructions, see `k8s/README.md`.
 
 ## Git & Commit Guidelines
 

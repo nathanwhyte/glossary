@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+
+# Run database migrations before starting the server
+# Uses Glossary.Release.migrate() as documented in:
+# https://hexdocs.pm/phoenix/releases.html#ecto-migrations
+./migrate
+
+# Start the Phoenix server
+PHX_SERVER=true exec ./glossary start
