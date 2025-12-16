@@ -1,0 +1,94 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glossary
+  namespace: glossary
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534  # nobody user
+        fsGroup: 65534
+      containers:
+        - name: glossary
+          image: nathanwhyte/glossary:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: PHX_SERVER
+              value: "true"
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: PORT
+            - name: PHX_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: PHX_HOST
+            - name: POOL_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: POOL_SIZE
+            - name: MIX_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: MIX_ENV
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: glossary-secrets
+                  key: DATABASE_URL
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: glossary-secrets
+                  key: SECRET_KEY_BASE
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: glossary-storage
+

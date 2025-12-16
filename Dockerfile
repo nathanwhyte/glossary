@@ -1,22 +1,22 @@
 # Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
 # instead of Alpine to avoid DNS resolution issues in production.
 #
-# https://hub.docker.com/r/hexpm/elixir/tags?name=ubuntu
-# https://hub.docker.com/_/ubuntu/tags
+# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
+# https://hub.docker.com/_/ubuntu?tab=tags
 #
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian/tags?name=bookworm-20250929-slim - for the release image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=trixie-20250908-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: docker.io/hexpm/elixir:1.17.3-erlang-27.3.4.3-debian-bookworm-20250929-slim
+#   - Ex: hexpm/elixir:1.18.4-erlang-27.3.4.3-debian-trixie-20250908-slim
 #
-ARG ELIXIR_VERSION=1.17.3
+ARG ELIXIR_VERSION=1.18.4
 ARG OTP_VERSION=27.3.4.3
-ARG DEBIAN_VERSION=bookworm-20250929-slim
+ARG DEBIAN_VERSION=trixie-20250908-slim
 
-ARG BUILDER_IMAGE="docker.io/hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
-ARG RUNNER_IMAGE="docker.io/debian:${DEBIAN_VERSION}"
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
 FROM ${BUILDER_IMAGE} AS builder
 
@@ -71,6 +71,7 @@ RUN mix assets.deploy
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
+COPY rel rel
 RUN mix release
 
 # start a new build stage so that the final image will only contain
@@ -78,7 +79,7 @@ RUN mix release
 FROM ${RUNNER_IMAGE} AS final
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses5 locales ca-certificates \
+  && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 locales ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
 # Set the locale
@@ -94,7 +95,6 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
-ENV PHX_SERVER=true
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/glossary ./
@@ -106,5 +106,4 @@ USER nobody
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
 # ENTRYPOINT ["/tini", "--"]
 
-CMD ["/app/bin/glossary", "start"]
-
+CMD ["/app/bin/server"]
