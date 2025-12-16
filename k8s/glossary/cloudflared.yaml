@@ -1,0 +1,81 @@
+---
+# Cloudflare Tunnel Secret
+# Replace <TOKEN_BASE64> with your base64-encoded Cloudflare tunnel token
+#
+# To get the token:
+# 1. Go to Cloudflare Zero Trust dashboard → Networks → Tunnels
+# 2. Create or select a tunnel
+# 3. Copy the token
+# 4. Encode it: echo -n "your-token-here" | base64
+#
+# To create the secret:
+# kubectl create secret generic glossary-cloudflared-token \
+#   --from-literal=TOKEN='your-token-here' \
+#   -n glossary
+#
+# NOTE: This is an example template. Create the actual secret using kubectl or
+# fill in the placeholders and apply this file.
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: glossary-cloudflared-token
+  namespace: glossary
+type: Opaque
+data:
+  TOKEN: ZXlKaElqb2laVGxtTVRkalpEQTJNekV4TTJObFlUbGpNbVUzTTJNek1ESTVOekV3TmpZaUxDSjBJam9pT0dOaE16azVPR010TmpBMU1TMDBZV0kwTFRnNE5ETXRPR016TkRBMk5qSXpaRFUySWl3aWN5STZJbGx0U1RGT1JGVXdXbFJaZEZsWFZUTk5RekF3V2xSUk1VeFVaekZPUjBWMFdXcEJNVTE2VVROT2JVNXFXbFJqZUNKOQ==
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudflared
+  namespace: glossary
+automountServiceAccountToken: false
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: glossary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      serviceAccountName: cloudflared
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: network
+                    operator: NotIn
+                    values:
+                      - wifi
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args:
+            - tunnel
+            - --no-autoupdate
+            - run
+            - --token-file=/etc/cloudflared/token
+          volumeMounts:
+            - name: tokenfile
+              mountPath: /etc/cloudflared
+              readOnly: true
+      volumes:
+        - name: tokenfile
+          secret:
+            secretName: glossary-cloudflared-token
+            items:
+              - key: TOKEN
+                path: token
