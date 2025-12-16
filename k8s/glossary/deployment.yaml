@@ -24,6 +24,12 @@ spec:
         - name: glossary
           image: nathanwhyte/glossary:latest
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false  # App needs to write to /app/storage volume
           ports:
             - name: http
               containerPort: 4000
@@ -83,7 +89,7 @@ spec:
             httpGet:
               path: /
               port: 4000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3

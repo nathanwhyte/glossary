@@ -381,7 +381,7 @@ The application includes Kubernetes manifests in the `k8s/` directory for deploy
   - `secrets.yaml` – Shared Secret template (contains example values; must be updated)
 - **`k8s/glossary/`** – Application manifests:
   - `deployment.yaml` – Application deployment with persistent storage
-  - `service.yaml` – ClusterIP service (port 80 → container port 4000)
+  - `service.yaml` – ClusterIP service (port 4000 → container port 4000)
   - `pvc.yaml` – Persistent volume claim (10Gi, longhorn-nvme StorageClass)
   - `ingress.yaml` – Traefik Ingress configuration (optional, alternative to Cloudflare Tunnel)
   - `cloudflared.yaml` – Cloudflare Tunnel deployment (optional, for secure external access)
@@ -393,7 +393,7 @@ The application includes Kubernetes manifests in the `k8s/` directory for deploy
 ### Key Configuration Points
 
 - **Shared Resources**: Both application and PostgreSQL use the same `glossary-config` ConfigMap and `glossary-secrets` Secret from the root directory
-- **Service Ports**: Application service exposes port 80 (targets container port 4000); Ingress and Cloudflare Tunnel reference port 80
+- **Service Ports**: Application service exposes port 4000 (targets container port 4000); Ingress and Cloudflare Tunnel reference port 4000
 - **Storage**: Application uses `longhorn-nvme` StorageClass with 10Gi persistent volume; PostgreSQL uses 20Gi
 - **Security**: Application runs as non-root user (UID 65534, `nobody`)
 - **Health Checks**: HTTP liveness/readiness probes on `/` for application; `pg_isready` for PostgreSQL
