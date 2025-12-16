@@ -273,10 +273,14 @@ The application PVC provides 10Gi of persistent storage mounted at `/app/storage
 ### Health Checks
 
 **Application:**
-- **Liveness Probe**: HTTP GET on `/` every 10 seconds (starts after 30s)
-  - Uses root path `/` which is acceptable for Phoenix apps as they respond even if the database is temporarily unavailable
-  - For stricter health checks, consider implementing a dedicated `/health` endpoint that doesn't depend on the database
-- **Readiness Probe**: HTTP GET on `/` every 5 seconds (starts after 30s to allow for migrations)
+- **Liveness Probe**: HTTP GET on `/health` every 10 seconds (starts after 30s)
+  - Checks if the application process is running
+  - Does not check database connectivity to avoid unnecessary pod restarts
+  - Returns 200 OK if the application is alive
+- **Readiness Probe**: HTTP GET on `/health/ready` every 5 seconds (starts after 30s to allow for migrations)
+  - Checks if the application is ready to serve traffic, including database connectivity
+  - Returns 200 OK if ready, 503 Service Unavailable if database is disconnected
+  - This prevents traffic from being routed to pods that cannot serve requests
 
 **PostgreSQL:**
 - **Startup Probe**: `pg_isready` check every 5 seconds (allows up to 60s for initial startup)

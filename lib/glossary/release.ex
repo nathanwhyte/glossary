@@ -25,7 +25,21 @@ defmodule Glossary.Release do
 
   def rollback(repo, version) do
     load_app()
-    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
+
+    case Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version)) do
+      {:ok, _, _} ->
+        require Logger
+        Logger.info("Successfully rolled back #{inspect(repo)} to version #{version}")
+
+      {:error, error} ->
+        require Logger
+
+        Logger.error(
+          "Rollback failed for #{inspect(repo)} to version #{version}: #{inspect(error)}"
+        )
+
+        raise "Rollback failed for #{inspect(repo)} to version #{version}: #{inspect(error)}"
+    end
   end
 
   defp repos do

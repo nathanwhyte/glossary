@@ -27,7 +27,7 @@ spec:
         app: db
     spec:
       securityContext:
-        runAsNonRoot: false  # PostgreSQL requires root for initialization
+        runAsNonRoot: true  # Container runs as postgres user (UID 999), not root
         runAsUser: 999  # postgres user in official image
         fsGroup: 999
       containers:
