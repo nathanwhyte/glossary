@@ -6,6 +6,8 @@ defmodule GlossaryWeb.NewEntryLive do
   """
   use GlossaryWeb, :live_view
 
+  on_mount {GlossaryWeb.UserAuthHooks, :ensure_authenticated}
+
   alias Glossary.Entries.Entry
   alias Glossary.Repo
 

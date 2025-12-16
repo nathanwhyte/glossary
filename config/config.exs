@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :glossary, :scopes,
+  user: [
+    default: true,
+    module: Glossary.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :binary_id,
+    schema_table: :users,
+    test_data_fixture: Glossary.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 # set up `tzdata` as the time zone database
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 

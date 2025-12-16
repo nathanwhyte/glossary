@@ -15,6 +15,8 @@ defmodule GlossaryWeb.EditEntryLive do
   """
   use GlossaryWeb, :live_view
 
+  on_mount {GlossaryWeb.UserAuthHooks, :ensure_authenticated}
+
   import GlossaryWeb.KeybindMacros
   import GlossaryWeb.Components.EntryComponents
 
@@ -93,7 +95,7 @@ defmodule GlossaryWeb.EditEntryLive do
   def render(assigns) do
     ~H"""
     <%!-- TODO: "saving" and "saved" indicators --%>
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div
         id="edit-entry-container"
         phx-window-keydown="key_down"
