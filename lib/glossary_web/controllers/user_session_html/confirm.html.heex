@@ -20,7 +20,7 @@
       >
         Confirm and stay logged in
       </.button>
-      <.button phx-disable-with="Confirming..." class="btn btn-primary btn-soft w-full mt-2">
+      <.button phx-disable-with="Confirming..." class="btn btn-primary btn-soft mt-2 w-full">
         Confirm and log in only this time
       </.button>
     </.form>
@@ -35,7 +35,7 @@
       <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
       <%= if @current_scope do %>
         <.button variant="primary" phx-disable-with="Logging in..." class="btn btn-primary w-full">
-          Log in
+          Log In
         </.button>
       <% else %>
         <.button
@@ -46,7 +46,7 @@
         >
           Keep me logged in on this device
         </.button>
-        <.button phx-disable-with="Logging in..." class="btn btn-primary btn-soft w-full mt-2">
+        <.button phx-disable-with="Logging in..." class="btn btn-primary btn-soft mt-2 w-full">
           Log me in only this time
         </.button>
       <% end %>

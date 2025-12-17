@@ -19,18 +19,16 @@ defmodule GlossaryWeb.UserSettingsController do
 
     case Accounts.change_user_email(user, user_params) do
       %{valid?: true} = changeset ->
-        Accounts.deliver_user_update_email_instructions(
-          Ecto.Changeset.apply_action!(changeset, :insert),
-          user.email,
-          &url(~p"/users/settings/confirm-email/#{&1}")
-        )
+        # Email sending disabled - directly update email without confirmation
+        case Glossary.Repo.update(changeset) do
+          {:ok, _user} ->
+            conn
+            |> put_flash(:info, "Email updated successfully.")
+            |> redirect(to: ~p"/users/settings")
 
-        conn
-        |> put_flash(
-          :info,
-          "A link to confirm your email change has been sent to the new address."
-        )
-        |> redirect(to: ~p"/users/settings")
+          {:error, changeset} ->
+            render(conn, :edit, email_changeset: %{changeset | action: :insert})
+        end
 
       changeset ->
         render(conn, :edit, email_changeset: %{changeset | action: :insert})

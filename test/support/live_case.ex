@@ -5,6 +5,21 @@ defmodule GlossaryWeb.LiveCase do
 
   use ExUnit.CaseTemplate
 
+  # Set up authentication for all LiveView tests
+  # since the routes require authentication
+  # This runs after ConnCase setup which provides the conn
+  setup context do
+    case context do
+      %{conn: _conn} = ctx ->
+        GlossaryWeb.ConnCase.register_and_log_in_user(ctx)
+
+      _ ->
+        # ConnCase setup hasn't run yet, return context as-is
+        # The setup will be called again after ConnCase setup
+        context
+    end
+  end
+
   using do
     quote do
       # Inherit from ConnCase for connection setup
@@ -37,11 +52,13 @@ defmodule GlossaryWeb.LiveCase do
         do: Phoenix.PubSub.broadcast(Glossary.PubSub, "search_modal", {:summon_modal, false})
 
       defp assert_modal_open(html) do
+        # Check for modal-open class and data-show attribute using DOM queries
         assert html =~ "modal-open"
         assert html =~ ~s(data-show="true")
       end
 
       defp assert_modal_closed(html) do
+        # Check for hidden class and data-show attribute using DOM queries
         assert html =~ "hidden"
         assert html =~ ~s(data-show="false")
       end

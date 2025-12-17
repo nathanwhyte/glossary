@@ -4,7 +4,7 @@ defmodule GlossaryWeb.HomeLive do
   """
   use GlossaryWeb, :live_view
 
-  on_mount {GlossaryWeb.UserAuthHooks, :assign_current_scope}
+  on_mount {GlossaryWeb.UserAuthHooks, :ensure_authenticated}
 
   import GlossaryWeb.KeybindMacros
   import GlossaryWeb.Components.EntryComponents

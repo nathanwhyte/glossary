@@ -41,7 +41,7 @@ defmodule GlossaryWeb.ConnCase do
 
       setup :register_and_log_in_user
 
-  It stores an updated connection and a registered user in the
+  It stores an updated connection, a registered user, and a scope in the
   test context.
   """
   def register_and_log_in_user(%{conn: conn} = context) do
@@ -67,6 +67,7 @@ defmodule GlossaryWeb.ConnCase do
     maybe_set_token_authenticated_at(token, opts[:token_authenticated_at])
 
     conn
+    |> Map.replace!(:secret_key_base, GlossaryWeb.Endpoint.config(:secret_key_base))
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user_token, token)
   end

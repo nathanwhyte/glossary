@@ -31,7 +31,7 @@ defmodule GlossaryWeb.Layouts do
       <div class="flex-none">
         <ul class="flex-column flex items-center space-x-4 px-1">
           <li :if={@user}>
-            <span class="text-sm text-base-content/70">{@user.email}</span>
+            <span class="text-base-content/70 text-sm">{@user.email}</span>
           </li>
           <li :if={@user}>
             <.link
@@ -39,17 +39,12 @@ defmodule GlossaryWeb.Layouts do
               method="delete"
               class="btn btn-ghost btn-sm"
             >
-              Log out
+              Log Out
             </.link>
           </li>
           <li :if={!@user}>
             <.link href={~p"/users/log-in"} class="btn btn-ghost btn-sm">
-              Log in
-            </.link>
-          </li>
-          <li :if={!@user}>
-            <.link href={~p"/users/register"} class="btn btn-primary btn-sm">
-              Register
+              Log In
             </.link>
           </li>
           <li>
@@ -85,7 +80,11 @@ defmodule GlossaryWeb.Layouts do
 
   def app(assigns) do
     # Extract user from current_scope (following phx.gen.auth pattern)
-    user = if assigns.current_scope && assigns.current_scope.user, do: assigns.current_scope.user, else: nil
+    user =
+      if assigns.current_scope && assigns.current_scope.user,
+        do: assigns.current_scope.user,
+        else: nil
+
     assigns = assign(assigns, :user, user)
 
     ~H"""

@@ -18,7 +18,7 @@ defmodule GlossaryWeb.Router do
   end
 
   scope "/", GlossaryWeb do
-    pipe_through :browser
+    pipe_through [:browser, :require_authenticated_user]
 
     live "/", HomeLive
     live "/entries/new", NewEntryLive

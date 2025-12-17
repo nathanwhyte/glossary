@@ -1,6 +1,8 @@
 defmodule GlossaryWeb.SearchLiveTest do
   use GlossaryWeb.LiveCase
 
+  setup :register_and_log_in_user
+
   describe "mount/3" do
     test "mounts with show: false by default", %{conn: conn} do
       view = mount_home(conn)
@@ -20,7 +22,8 @@ defmodule GlossaryWeb.SearchLiveTest do
     test "hides modal when receiving summon_modal: false message", %{conn: conn} do
       view = mount_home(conn)
       open_search_modal()
-      assert render_search(view) =~ "modal-open"
+      html = render_search(view)
+      assert_modal_open(html)
       close_search_modal()
       html = render_search(view)
       assert_modal_closed(html)
@@ -31,6 +34,7 @@ defmodule GlossaryWeb.SearchLiveTest do
     test "renders search input for JS focus", %{conn: conn} do
       view = mount_home(conn)
       html = render_search(view)
+      # Check for search input ID needed for JavaScript hooks
       assert html =~ ~s(id="search-input")
     end
   end
@@ -56,19 +60,21 @@ defmodule GlossaryWeb.SearchLiveTest do
       view = mount_home(conn)
       simulate_keydown(view, "Meta")
       simulate_keydown(view, "k")
-      assert render_search(view) =~ "modal-open"
+      html = render_search(view)
+      assert_modal_open(html)
       simulate_keydown(view, "Escape")
       html = render_search(view)
-      assert html =~ "hidden"
+      assert_modal_closed(html)
     end
 
     test "Escape closes modal without leader", %{conn: conn} do
       view = mount_home(conn)
       open_search_modal()
-      assert render_search(view) =~ "modal-open"
+      html = render_search(view)
+      assert_modal_open(html)
       simulate_keydown(view, "Escape")
       html = render_search(view)
-      assert html =~ "hidden"
+      assert_modal_closed(html)
     end
   end
 
@@ -76,6 +82,7 @@ defmodule GlossaryWeb.SearchLiveTest do
     test "SearchModal hook is attached to modal container", %{conn: conn} do
       view = mount_home(conn)
       html = render_search(view)
+      # Check for phx-hook attribute needed for JavaScript hooks
       assert html =~ ~s(phx-hook="SearchModal")
     end
 
@@ -84,6 +91,7 @@ defmodule GlossaryWeb.SearchLiveTest do
       # Ensure modal is closed before testing
       close_search_modal()
       html = render_search(view)
+      # Check for IDs and data attributes needed for JavaScript
       assert html =~ ~s(id="search-modal-container")
       assert html =~ ~s(data-show="false")
     end
@@ -91,6 +99,7 @@ defmodule GlossaryWeb.SearchLiveTest do
     test "search input has correct ID for JS focus", %{conn: conn} do
       view = mount_home(conn)
       html = render_search(view)
+      # Check for search input ID needed for JavaScript focus
       assert html =~ ~s(id="search-input")
     end
   end

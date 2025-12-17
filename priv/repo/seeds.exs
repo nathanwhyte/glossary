@@ -10,12 +10,35 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
+alias Glossary.Accounts
 alias Glossary.Entries.{Entry, Project, Tag, Topic}
 alias Glossary.Repo
 
 if Mix.env() != :dev do
   IO.puts("Don't seed non-dev environments")
   System.halt(0)
+end
+
+# Create admin user with UUID password
+admin_password = Ecto.UUID.generate()
+admin_email = "admin@example.com"
+
+case Accounts.get_user_by_email(admin_email) do
+  nil ->
+    {:ok, admin_user} = Accounts.register_user(%{email: admin_email})
+    {:ok, _} = Accounts.update_user_password(admin_user, %{password: admin_password})
+
+    # Confirm the user so they can log in immediately
+    admin_user
+    |> Accounts.User.confirm_changeset()
+    |> Repo.update!()
+
+    IO.puts("Admin user created:")
+    IO.puts("  Email: #{admin_email}")
+    IO.puts("  Password: #{admin_password}")
+
+  _existing_user ->
+    IO.puts("Admin user already exists: #{admin_email}")
 end
 
 test_project =
