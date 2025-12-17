@@ -45,3 +45,7 @@ npm-debug.log
 
 # OS-specific
 .DS_Store
+
+# Seed scripts
+rel/overlays/bin/seed
+rel/overlays/bin/seed.bat

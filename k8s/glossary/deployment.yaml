@@ -22,7 +22,8 @@ spec:
         fsGroup: 65534
       containers:
         - name: glossary
-          image: nathanwhyte/glossary:latest
+          # image: nathanwhyte/glossary:latest
+          image: nathanwhyte/glossary:v1.1.0
           imagePullPolicy: Always
           ports:
             - name: http
