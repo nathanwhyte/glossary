@@ -4,6 +4,8 @@ defmodule GlossaryWeb.RouterTest do
 
   import Glossary.EntriesFixtures
 
+  setup :register_and_log_in_user
+
   describe "routes" do
     test "GET / mounts HomeLive", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/")

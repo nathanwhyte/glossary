@@ -4,6 +4,8 @@ defmodule GlossaryWeb.HomeLive do
   """
   use GlossaryWeb, :live_view
 
+  on_mount {GlossaryWeb.UserAuthHooks, :ensure_authenticated}
+
   import GlossaryWeb.KeybindMacros
   import GlossaryWeb.Components.EntryComponents
 
@@ -58,7 +60,7 @@ defmodule GlossaryWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div
         phx-window-keydown="key_down"
         phx-window-keyup="key_up"

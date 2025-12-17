@@ -17,6 +17,8 @@ defmodule GlossaryWeb.Layouts do
   Drawn at the top of pages using <Layouts.app flash={@flash}>.
   """
 
+  attr :user, :any, default: nil, doc: "the current user"
+
   def navbar(assigns) do
     ~H"""
     <nav class="navbar px-5">
@@ -28,6 +30,23 @@ defmodule GlossaryWeb.Layouts do
       </div>
       <div class="flex-none">
         <ul class="flex-column flex items-center space-x-4 px-1">
+          <li :if={@user}>
+            <span class="text-base-content/70 text-sm">{@user.email}</span>
+          </li>
+          <li :if={@user}>
+            <.link
+              href={~p"/users/log-out"}
+              method="delete"
+              class="btn btn-ghost btn-sm"
+            >
+              Log Out
+            </.link>
+          </li>
+          <li :if={!@user}>
+            <.link href={~p"/users/log-in"} class="btn btn-ghost btn-sm">
+              Log In
+            </.link>
+          </li>
           <li>
             <.theme_toggle />
           </li>
@@ -60,9 +79,17 @@ defmodule GlossaryWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    # Extract user from current_scope (following phx.gen.auth pattern)
+    user =
+      if assigns.current_scope && assigns.current_scope.user,
+        do: assigns.current_scope.user,
+        else: nil
+
+    assigns = assign(assigns, :user, user)
+
     ~H"""
     <div class="flex h-full flex-col">
-      <.navbar />
+      <.navbar user={@user} />
 
       <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8">
         <div class="mx-auto h-full max-w-5xl space-y-4">
