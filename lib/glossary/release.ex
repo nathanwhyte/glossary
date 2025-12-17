@@ -8,42 +8,37 @@ defmodule Glossary.Release do
   def migrate do
     load_app()
 
-    for repo <- repos() do
-      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
-    end
+    repos()
+    |> Enum.each(fn repo ->
+      case Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true)) do
+        {:ok, _, _} ->
+          require Logger
+          Logger.info("Successfully migrated #{inspect(repo)}")
+
+        {:error, error} ->
+          require Logger
+          Logger.error("Migration failed for #{inspect(repo)}: #{inspect(error)}")
+          raise "Migration failed for #{inspect(repo)}: #{inspect(error)}"
+      end
+    end)
   end
 
   def rollback(repo, version) do
     load_app()
-    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
-  end
 
-  @doc """
-  Seeds the database with initial data.
+    case Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version)) do
+      {:ok, _, _} ->
+        require Logger
+        Logger.info("Successfully rolled back #{inspect(repo)} to version #{version}")
 
-  This function can be called from production releases using the eval command:
+      {:error, error} ->
+        require Logger
 
-      bin/glossary eval "Glossary.Release.seed()"
+        Logger.error(
+          "Rollback failed for #{inspect(repo)} to version #{version}: #{inspect(error)}"
+        )
 
-  It runs the seed script located at priv/repo/seeds.exs
-  """
-  def seed do
-    load_app()
-
-    seed_file = Path.join([:code.priv_dir(@app), "repo", "seeds.exs"])
-
-    if File.exists?(seed_file) do
-      for repo <- repos() do
-        Ecto.Migrator.with_repo(repo, fn _repo ->
-          Code.eval_file(seed_file)
-        end)
-      end
-
-      IO.puts("✓ Database seeded successfully")
-      :ok
-    else
-      IO.puts("Seed file not found: #{seed_file}")
-      {:error, :seed_file_not_found}
+        raise "Rollback failed for #{inspect(repo)} to version #{version}: #{inspect(error)}"
     end
   end
 

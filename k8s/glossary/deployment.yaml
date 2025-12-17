@@ -8,6 +8,11 @@ metadata:
     app: web
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: web
@@ -22,9 +27,14 @@ spec:
         fsGroup: 65534
       containers:
         - name: glossary
-          # image: nathanwhyte/glossary:latest
-          image: nathanwhyte/glossary:v1.1.0
+          image: nathanwhyte/glossary:latest
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false  # App needs to write to /app/storage volume
           ports:
             - name: http
               containerPort: 4000
@@ -74,7 +84,7 @@ spec:
               memory: 1Gi
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: 4000
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -82,9 +92,9 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /
+              path: /health/ready
               port: 4000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3

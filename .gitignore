@@ -49,3 +49,6 @@ npm-debug.log
 # Seed scripts
 rel/overlays/bin/seed
 rel/overlays/bin/seed.bat
+
+# Kubernetes secrets (template is secrets.yaml.template)
+k8s/secrets.yaml

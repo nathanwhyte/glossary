@@ -17,6 +17,14 @@ defmodule GlossaryWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Health check endpoints (no authentication required)
+  scope "/", GlossaryWeb do
+    pipe_through :api
+
+    get "/health", HealthController, :liveness
+    get "/health/ready", HealthController, :readiness
+  end
+
   scope "/", GlossaryWeb do
     pipe_through [:browser, :require_authenticated_user]
 
