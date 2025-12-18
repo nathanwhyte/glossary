@@ -316,24 +316,26 @@ kubectl get pvc -l app=garage -n glossary
 
 # Test S3 API (from within cluster)
 kubectl run -it --rm --image=amazon/aws-cli:latest --restart=Never test-s3 -- \
-  aws --endpoint-url=http://garage-s3:3900 s3 ls
+  aws --endpoint-url=http://garage:3900 s3 ls
 ```
 
 ### Garage Services
 
 The Helm chart creates the following services:
 
-- **`garage`** (Headless): Peer discovery service
-  - Port `3901`: Admin API
+- **`garage`** (ClusterIP): Main service for S3 API and web
+  - Port `3900` (s3-api): S3 API
+  - Port `3902` (s3-web): Web endpoint
+  - Internal access: `http://garage:3900` (S3 API)
+
+- **`garage-headless`** (Headless): Peer discovery service
+  - Port `3900`: S3 API (for peer discovery)
+  - Port `3902`: Web endpoint
   - DNS names: `garage-0.garage`, `garage-1.garage`, `garage-2.garage`
 
-- **`garage-s3`** (ClusterIP): S3 API service
-  - Port `3900`: S3 API
-  - Internal access: `http://garage-s3:3900`
-
-- **`garage-metrics`** (ClusterIP): Metrics service
-  - Port `3902`: Prometheus metrics
-  - Internal access: `http://garage-metrics:3902`
+- **`garage-metrics`** (Headless): Metrics service
+  - Port `3903`: Prometheus metrics
+  - Internal access: `http://garage-metrics:3903`
 
 ### Configuration Details
 

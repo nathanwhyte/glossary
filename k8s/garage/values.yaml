@@ -2,86 +2,200 @@
 # Garage Helm Chart Values
 # Customized for Glossary deployment with Longhorn storage
 #
-# This values file is a starting point. The actual Garage Helm chart may have
-# different value names or structure. Check the chart's values schema:
-#   helm show values garage/garage
-# Or view the chart documentation:
-#   https://git.deuxfleurs.fr/Deuxfleurs/garage/src/branch/main-v1/script/helm
+# Based on official Garage Helm chart structure:
+# https://garagehq.deuxfleurs.fr/documentation/cookbook/kubernetes/
 #
 # Install with:
 # helm repo add garage https://garage.deuxfleurs.fr/helm
 # helm repo update
-# helm install garage garage/garage -f k8s/garage/values.yaml -n glossary
+# helm install garage garage/garage -f k8s/garage/values.yaml -n garage
+#
+# View default values:
+# helm show values garage/garage
 
-# Replica count (matches replication factor)
-replicaCount: 3
+# Garage configuration (maps to garage.toml)
+garage:
+  # Database engine (lmdb is default and recommended)
+  dbEngine: "lmdb"
 
-# Storage configuration
-storage:
-  # StorageClass for Garage volumes
-  # Uses garage-longhorn StorageClass (created separately)
-  storageClass: garage-longhorn
-  # Size per pod
-  size: 50Gi
-  # Access mode
-  accessMode: ReadWriteMany
+  # Block size (1MB default, can be increased for better performance)
+  blockSize: "1048576"
+
+  # Replication mode (3 replicas for quorum)
+  replicationMode: "3"
+
+  # Compression level (1 is default, higher = more CPU, less storage)
+  compressionLevel: "1"
+
+  # RPC bind address
+  rpcBindAddr: "[::]:3901"
+
+  # RPC secret - if empty, chart will auto-generate and store in Secret
+  # To use existing secret, reference it here (e.g., from garage-secrets)
+  # The secret should contain the RPC secret as a plain string value
+  rpcSecret: ""
+
+  # Bootstrap peers (not needed with Kubernetes discovery)
+  bootstrapPeers: []
+
+  # Use Kubernetes discovery (default, creates CRDs automatically)
+  kubernetesSkipCrd: false
+
+  # S3 API configuration
+  s3:
+    api:
+      region: "garage"
+      rootDomain: ".s3.garage.tld"
+    web:
+      rootDomain: ".web.garage.tld"
+      index: "index.html"
+
+  # Use existing ConfigMap for garage.toml (leave empty to use values above)
+  existingConfigMap: ""
+
+  # Custom garage.toml string template (overrides above if set)
+  garageTomlString: ""
+
+# Data persistence
+persistence:
+  enabled: true
+  meta:
+    # Use custom Longhorn StorageClass for metadata
+    storageClass: "longhorn-nvme"
+    size: 100Mi
+  data:
+    # Use custom Longhorn StorageClass for data
+    storageClass: "longhorn-garage"
+    size: 25Gi
+
+# Deployment configuration
+deployment:
+  # Use StatefulSet for stable pod identities
+  kind: StatefulSet
+  # Number of Garage nodes (matches replication mode)
+  replicaCount: 3
+  # OrderedReady ensures pods start/stop in order
+  podManagementPolicy: OrderedReady
+
+# Container image
+image:
+  repository: dxflrs/amd64_garage
+  # Leave empty to use chart's default tag (recommended)
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Init container image
+initImage:
+  repository: busybox
+  tag: stable
+  pullPolicy: IfNotPresent
+
+# Image pull secrets (if needed for private registry)
+imagePullSecrets: []
+
+# Name overrides (leave empty for defaults)
+nameOverride: ""
+fullnameOverride: ""
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Additional pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  runAsNonRoot: true
+
+# Container security context
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
 
 # Service configuration
 service:
-  # S3 API service
+  # Service type for S3 API
+  type: ClusterIP
   s3:
-    type: ClusterIP
-    port: 3900
+    api:
+      port: 3900
+    web:
+      port: 3902
+  # Admin API is handled via headless service automatically
 
-  # Admin API service (headless for peer discovery)
-  admin:
-    type: ClusterIP
-    clusterIP: None # Headless service
-    port: 3901
+# Ingress configuration (disabled by default)
+ingress:
+  s3:
+    api:
+      enabled: false
+      className: ""
+      annotations: {}
+      labels: {}
+      hosts: []
+      tls: []
+    web:
+      enabled: false
+      className: ""
+      annotations: {}
+      labels: {}
+      hosts: []
+      tls: []
 
-  # Metrics service
+# Resource limits and requests
+resources: {}
+  # Example resource configuration:
+  # limits:
+  #   cpu: 1000m
+  #   memory: 2Gi
+  # requests:
+  #   cpu: 100m
+  #   memory: 512Mi
+
+# Health probes
+livenessProbe: {}
+readinessProbe: {}
+
+# Node selector (for pod placement)
+nodeSelector: {}
+
+# Tolerations (for tainted nodes)
+tolerations: []
+
+# Affinity rules (for pod placement)
+affinity: {}
+
+# Additional environment variables
+environment: {}
+
+# Extra volumes
+extraVolumes: {}
+
+# Extra volume mounts
+extraVolumeMounts: {}
+
+# Monitoring configuration
+monitoring:
   metrics:
-    type: ClusterIP
-    port: 3902
-
-# Environment variables
-env:
-  - name: GARAGE_MODE
-    value: "server"
-  - name: GARAGE_RPC_BIND_ADDR
-    value: "0.0.0.0:3901"
-  - name: GARAGE_S3_API_BIND_ADDR
-    value: "0.0.0.0:3900"
-  - name: GARAGE_METRICS_BIND_ADDR
-    value: "0.0.0.0:3902"
-  - name: GARAGE_DATA_DIR
-    value: "/var/lib/garage/data"
-  - name: GARAGE_METADATA_DIR
-    value: "/var/lib/garage/meta"
-  - name: GARAGE_RPC_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: garage-secrets
-        key: GARAGE_RPC_SECRET
-  - name: GARAGE_ADMIN_KEY
-    valueFrom:
-      secretKeyRef:
-        name: garage-secrets
-        key: GARAGE_ADMIN_KEY
-
-# Resource limits
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 1000m
-    memory: 2Gi
-
-# Security context
-securityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-
-# Namespace
-namespace: glossary
+    # Enable metrics service with Prometheus annotations
+    enabled: true
+    serviceMonitor:
+      # Create ServiceMonitor CRD for Prometheus Operator
+      enabled: false
+      path: /metrics
+      labels: {}
+      interval: 15s
+      scheme: http
+      tlsConfig: {}
+      scrapeTimeout: 10s
+      relabelings: []
+  tracing:
+    # OpenTelemetry trace sink endpoint
+    sink: ""
