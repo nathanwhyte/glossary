@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
 # instead of Alpine to avoid DNS resolution issues in production.
 #
@@ -11,14 +12,18 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.18.4-erlang-27.3.4.3-debian-trixie-20250908-slim
 #
-ARG ELIXIR_VERSION=1.18.4
+ARG ELIXIR_VERSION=1.19.3
 ARG OTP_VERSION=27.3.4.3
 ARG DEBIAN_VERSION=trixie-20251208-slim
+
+# Always build Linux/amd64 images (helps avoid ARM64 build/runtime issues on macOS hosts).
+# We use our own arg name so build tooling doesn't override it.
+ARG DOCKER_PLATFORM=linux/amd64
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
-FROM ${BUILDER_IMAGE} AS builder
+FROM --platform=${DOCKER_PLATFORM} ${BUILDER_IMAGE} AS builder
 
 # install build dependencies
 RUN apt-get update \
@@ -76,7 +81,7 @@ RUN mix release
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
-FROM ${RUNNER_IMAGE} AS final
+FROM --platform=${DOCKER_PLATFORM} ${RUNNER_IMAGE} AS final
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 locales ca-certificates \
