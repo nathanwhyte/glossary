@@ -1,0 +1,87 @@
+---
+# Garage Helm Chart Values
+# Customized for Glossary deployment with Longhorn storage
+#
+# This values file is a starting point. The actual Garage Helm chart may have
+# different value names or structure. Check the chart's values schema:
+#   helm show values garage/garage
+# Or view the chart documentation:
+#   https://git.deuxfleurs.fr/Deuxfleurs/garage/src/branch/main-v1/script/helm
+#
+# Install with:
+# helm repo add garage https://garage.deuxfleurs.fr/helm
+# helm repo update
+# helm install garage garage/garage -f k8s/garage/values.yaml -n glossary
+
+# Replica count (matches replication factor)
+replicaCount: 3
+
+# Storage configuration
+storage:
+  # StorageClass for Garage volumes
+  # Uses garage-longhorn StorageClass (created separately)
+  storageClass: garage-longhorn
+  # Size per pod
+  size: 50Gi
+  # Access mode
+  accessMode: ReadWriteMany
+
+# Service configuration
+service:
+  # S3 API service
+  s3:
+    type: ClusterIP
+    port: 3900
+
+  # Admin API service (headless for peer discovery)
+  admin:
+    type: ClusterIP
+    clusterIP: None # Headless service
+    port: 3901
+
+  # Metrics service
+  metrics:
+    type: ClusterIP
+    port: 3902
+
+# Environment variables
+env:
+  - name: GARAGE_MODE
+    value: "server"
+  - name: GARAGE_RPC_BIND_ADDR
+    value: "0.0.0.0:3901"
+  - name: GARAGE_S3_API_BIND_ADDR
+    value: "0.0.0.0:3900"
+  - name: GARAGE_METRICS_BIND_ADDR
+    value: "0.0.0.0:3902"
+  - name: GARAGE_DATA_DIR
+    value: "/var/lib/garage/data"
+  - name: GARAGE_METADATA_DIR
+    value: "/var/lib/garage/meta"
+  - name: GARAGE_RPC_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: garage-secrets
+        key: GARAGE_RPC_SECRET
+  - name: GARAGE_ADMIN_KEY
+    valueFrom:
+      secretKeyRef:
+        name: garage-secrets
+        key: GARAGE_ADMIN_KEY
+
+# Resource limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Namespace
+namespace: glossary
