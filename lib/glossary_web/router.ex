@@ -80,4 +80,13 @@ defmodule GlossaryWeb.Router do
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
   end
+
+  # File serving from Garage (no authentication required)
+  # This catch-all route must be last to avoid conflicts with other routes
+  # Route: /:bucket_name/*path (e.g., /scripts/test.sh, /context/file.txt)
+  scope "/", GlossaryWeb do
+    pipe_through :api
+
+    get "/:bucket_name/*path", FilesController, :show
+  end
 end
