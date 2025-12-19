@@ -78,7 +78,7 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Garage S3-compatible storage configuration
+# S3-compatible storage configuration
 # Defaults for development/testing. Override via environment variables in runtime.exs
 config :glossary, :garage,
   endpoint: System.get_env("GARAGE_ENDPOINT"),
@@ -86,7 +86,7 @@ config :glossary, :garage,
   secret_access_key: System.get_env("GARAGE_SECRET_KEY"),
   region: System.get_env("GARAGE_REGION")
 
-# Configure ExAws for Garage
+# Configure ExAws for S3-compatible storage
 config :ex_aws,
   json_codec: Jason,
   http_client: ExAws.Request.Hackney

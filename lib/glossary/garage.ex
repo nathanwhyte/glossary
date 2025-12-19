@@ -1,9 +1,9 @@
 defmodule Glossary.Garage do
   @moduledoc """
-  Service module for interacting with Garage S3-compatible storage.
+  Service module for interacting with S3-compatible storage.
 
   Provides functions to upload, download, and check existence of objects
-  in Garage buckets.
+  in S3-compatible storage buckets.
   """
 
   # Builds ExAws configuration from application config for Garage.
@@ -12,8 +12,15 @@ defmodule Glossary.Garage do
 
     endpoint =
       Keyword.get(garage_config, :endpoint) ||
-        System.get_env("GARAGE_ENDPOINT") ||
-        "http://garage.garage.svc.cluster.local:3900"
+        System.get_env("S3_PROVIDER_ENDPOINT") ||
+        nil
+
+    if is_nil(endpoint) do
+      raise """
+      S3 storage endpoint not configured. Please set S3_PROVIDER_ENDPOINT environment variable
+      or configure it in config/runtime.exs.
+      """
+    end
 
     access_key =
       Keyword.get(garage_config, :access_key_id) ||
@@ -53,7 +60,7 @@ defmodule Glossary.Garage do
   end
 
   @doc """
-  Fetches an object from a Garage bucket.
+  Fetches an object from an S3-compatible storage bucket.
 
   Returns `{:ok, content}` on success or `{:error, reason}` on failure.
   """
@@ -69,7 +76,7 @@ defmodule Glossary.Garage do
   end
 
   @doc """
-  Checks if an object exists in a Garage bucket.
+  Checks if an object exists in an S3-compatible storage bucket.
 
   Returns `true` if the object exists, `false` otherwise.
   """

@@ -2,7 +2,7 @@ defmodule GlossaryWeb.FilesController do
   use GlossaryWeb, :controller
 
   @doc """
-  Serves files from Garage buckets.
+  Serves files from S3-compatible storage buckets.
 
   Route: `/:bucket_name/*path`
   - `bucket_name` is the first URL segment (e.g., "scripts", "context")
@@ -28,7 +28,7 @@ defmodule GlossaryWeb.FilesController do
 
       {:error, reason} ->
         require Logger
-        Logger.error("Error fetching file from Garage: #{inspect(reason)}")
+        Logger.error("Error fetching file from S3 storage: #{inspect(reason)}")
 
         conn
         |> put_status(:internal_server_error)

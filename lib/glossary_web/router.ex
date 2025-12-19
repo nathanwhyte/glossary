@@ -81,7 +81,7 @@ defmodule GlossaryWeb.Router do
     delete "/users/log-out", UserSessionController, :delete
   end
 
-  # File serving from Garage (no authentication required)
+  # File serving from S3-compatible storage (no authentication required)
   # This catch-all route must be last to avoid conflicts with other routes
   # Route: /:bucket_name/*path (e.g., /scripts/test.sh, /context/file.txt)
   scope "/", GlossaryWeb do
