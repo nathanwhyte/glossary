@@ -70,7 +70,11 @@ defmodule Glossary.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:cachex, "~> 4.0"}
+      {:cachex, "~> 4.0"},
+      {:ex_aws, "~> 2.0"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:hackney, "~> 1.16"},
+      {:dotenv, "~> 3.0.0", only: [:dev, :test]}
     ]
   end
 
