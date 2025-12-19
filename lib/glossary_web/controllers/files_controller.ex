@@ -6,7 +6,7 @@ defmodule GlossaryWeb.FilesController do
 
   Route: `/:bucket_name/*path`
   - `bucket_name` is the first URL segment (e.g., "scripts", "context")
-  - `path` is the remaining path segments joined (e.g., "test.sh", "subdir/file.txt")
+  - `path` is the remaining path segments joined (e.g., "script.sh", "subdir/file.txt")
   """
   def show(conn, %{"bucket_name" => bucket_name, "path" => path_segments}) do
     # Join path segments back into a single key

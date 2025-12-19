@@ -83,7 +83,7 @@ defmodule GlossaryWeb.Router do
 
   # File serving from S3-compatible storage (no authentication required)
   # This catch-all route must be last to avoid conflicts with other routes
-  # Route: /:bucket_name/*path (e.g., /scripts/test.sh, /context/file.txt)
+  # Route: /:bucket_name/*path (e.g., /scripts/script.sh, /context/file.txt)
   scope "/", GlossaryWeb do
     pipe_through :api
 
