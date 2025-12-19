@@ -27,7 +27,7 @@ spec:
         fsGroup: 65534
       containers:
         - name: glossary
-          image: nathanwhyte/glossary:latest
+          image: nathanwhyte/glossary:v1.2.0
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -72,6 +72,26 @@ spec:
                 secretKeyRef:
                   name: glossary-secrets
                   key: SECRET_KEY_BASE
+            - name: S3_PROVIDER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: S3_PROVIDER_ENDPOINT
+            - name: S3_PROVIDER_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-provider-credentials
+                  key: S3_PROVIDER_ACCESS_KEY
+            - name: S3_PROVIDER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-provider-credentials
+                  key: S3_PROVIDER_SECRET_KEY
+            - name: S3_PROVIDER_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: S3_PROVIDER_REGION
           volumeMounts:
             - name: storage
               mountPath: /app/storage

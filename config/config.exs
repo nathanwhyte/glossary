@@ -81,10 +81,10 @@ config :phoenix, :json_library, Jason
 # S3-compatible storage configuration
 # Defaults for development/testing. Override via environment variables in runtime.exs
 config :glossary, :garage,
-  endpoint: System.get_env("GARAGE_ENDPOINT"),
-  access_key_id: System.get_env("GARAGE_ACCESS_KEY"),
-  secret_access_key: System.get_env("GARAGE_SECRET_KEY"),
-  region: System.get_env("GARAGE_REGION")
+  endpoint: System.get_env("S3_PROVIDER_ENDPOINT"),
+  access_key_id: System.get_env("S3_PROVIDER_ACCESS_KEY"),
+  secret_access_key: System.get_env("S3_PROVIDER_SECRET_KEY"),
+  region: System.get_env("S3_PROVIDER_REGION")
 
 # Configure ExAws for S3-compatible storage
 config :ex_aws,

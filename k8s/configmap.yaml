@@ -14,3 +14,7 @@ data:
   # Postgres
   POSTGRES_USER: "postgres"
   POSTGRES_DB: "glossary"
+
+  # Garage
+  S3_PROVIDER_ENDPOINT: "http://garage.garage.svc.cluster.local:3900"
+  S3_PROVIDER_REGION: "garage"

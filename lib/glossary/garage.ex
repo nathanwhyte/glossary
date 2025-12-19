@@ -24,17 +24,17 @@ defmodule Glossary.Garage do
 
     access_key =
       Keyword.get(garage_config, :access_key_id) ||
-        System.get_env("GARAGE_ACCESS_KEY") ||
+        System.get_env("S3_PROVIDER_ACCESS_KEY") ||
         ""
 
     secret_key =
       Keyword.get(garage_config, :secret_access_key) ||
-        System.get_env("GARAGE_SECRET_KEY") ||
+        System.get_env("S3_PROVIDER_SECRET_KEY") ||
         ""
 
     region =
       Keyword.get(garage_config, :region) ||
-        System.get_env("GARAGE_REGION") ||
+        System.get_env("S3_PROVIDER_REGION") ||
         "garage"
 
     uri = URI.parse(endpoint)
