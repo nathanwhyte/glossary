@@ -7,9 +7,11 @@ This repository is the **Glossary** Phoenix (Elixir) web application. Follow the
 - **App Name**: Glossary
 - **Framework**: Phoenix 1.8+ with LiveView
 - **Database**: PostgreSQL via Ecto
-- **Frontend**: Phoenix LiveView, TailwindCSS, DaisyUI, Heroicons
+- **Frontend**: Phoenix LiveView, TailwindCSS, DaisyUI, Heroicons, Tiptap editors
 - **Build Tools**: esbuild (JS), Tailwind (CSS)
 - **Server**: Bandit (HTTP/2 capable)
+- **Auth**: `phx.gen.auth` with scoped users (`@current_scope`)
+- **Storage**: S3-compatible object storage via `Glossary.Garage` (ExAws + Hackney)
 - **Local URL**: http://localhost:4000
 
 ## Project Structure & Module Organization
@@ -19,22 +21,29 @@ This repository is the **Glossary** Phoenix (Elixir) web application. Follow the
     - `application.ex` – OTP application supervisor
     - `repo.ex` – Ecto repository
     - `mailer.ex` – email delivery via Swoosh
+    - `accounts.ex` – authentication context
+    - `entries.ex` – glossary entry context
+    - `projects.ex` – project listing context
+    - `garage.ex` – S3-compatible object storage service
+    - `entries/` – schemas for entries, tags, topics, projects
   - `lib/glossary_web/` – web layer (LiveView, components, controllers, HTML)
     - `endpoint.ex` – HTTP endpoint configuration
     - `router.ex` – route definitions
     - `components/` – reusable LiveView components
     - `live/macros/` – custom macros for LiveView patterns
-    - `controllers/` – traditional Phoenix controllers (if any)
+    - `controllers/` – health checks, auth controllers, file proxying
     - `gettext.ex` – internationalization
     - `telemetry.ex` – metrics and monitoring
 - **Frontend assets** (`assets/`):
   - `assets/css/app.css` – main stylesheet (imports Tailwind)
   - `assets/js/app.js` – JS entry point, LiveView hooks
+  - `assets/js/hooks/` – LiveView hooks (search modal + Tiptap editors)
   - `assets/vendor/` – third-party JS (DaisyUI, heroicons, topbar)
   - `assets/tsconfig.json` – TypeScript configuration
 - **Tests** (`test/`):
   - Mirror `lib/` structure
   - Use `DataCase` for business logic, `ConnCase`/`LiveCase` for web tests
+  - Shared fixtures live in `test/support/fixtures/`
 - **Database** (`priv/repo/`):
   - `migrations/` – schema migrations
   - `seeds.exs` – seed data
@@ -120,7 +129,7 @@ iex -S mix phx.server
 | `mix format`                          | Format all Elixir code                          |
 | `mix compile --warnings-as-errors`    | Strict compilation check                        |
 | `mix deps.unlock --unused`            | Remove unused dependencies                      |
-| `mix precommit`                       | Run pre-commit checks (compile, format, test)   |
+| `mix precommit`                       | Run pre-commit checks (compile, deps.unlock, format, test) |
 
 ### Asset Pipeline
 
@@ -147,7 +156,7 @@ Configured hooks:
 
 - YAML validation, trailing whitespace, EOF fixes
 - Merge conflict detection
-- `mix precommit` (compile, format, test)
+- `mix precommit` (compile, deps.unlock, format, test)
 
 ## Coding Style & Naming Conventions
 
@@ -313,13 +322,12 @@ view |> element("div[phx-window-keydown=\"key_down\"]") |> render_keydown(%{"key
 ## Testing Guidelines
 
 - **Focus**: Prioritise coverage for core glossary flows—context APIs, the search modal LiveView, and PubSub wiring—rather than chasing every UI permutation. Keep low-impact polish under manual QA.
-- **Layout**: Mirror `lib/` contexts inside `test/`. Stand up files like `test/glossary/entries_test.exs` to exercise `Glossary.*` DataCase code before relocating LiveView specs out of `test/glossary_web/live/`.
-- **Fixtures**: Centralise reusable data builders in `test/support/fixtures/` and expose them via modules such as `Glossary.EntriesFixtures`. Replace duplicated `create_entry/1` helpers (see `test/glossary_web/live/edit_entry_live_test.exs` and `test/glossary_web/live/search_live_test.exs`) with calls into that fixture module.
-- **Case templates**: Introduce `GlossaryWeb.LiveCase` wrapping `Phoenix.LiveViewTest`. Move helpers like `mount_home/1`, `render_search/1`, and the search modal PubSub open/close shorthands there, alongside broadcast assertion helpers.
-- **Setup**: Use `setup` callbacks to prepare shared state (e.g., build entries once in `test/glossary_web/router_test.exs` and `test/glossary_web/live/edit_entry_live_test.exs`) and pass assigns such as `%{entry: entry}` to reduce inline Repo calls.
-- **Assertions**: Prefer `assert_redirect/2` for navigation checks and rely on the LiveCase broadcast helpers for PubSub expectations. Add `@moduletag :capture_log` to PubSub-heavy suites to keep CI output quiet.
+- **Layout**: Mirror `lib/` contexts inside `test/` (e.g., `test/glossary/entries_test.exs` plus `test/glossary/entries/*.exs`).
+- **Fixtures**: Centralise reusable data builders in `test/support/fixtures/` (use `Glossary.EntriesFixtures` helpers).
+- **Case templates**: Use `GlossaryWeb.LiveCase` for LiveView tests; it wraps `ConnCase`, handles auth setup, and provides helpers like `mount_home/1`, `render_search/1`, and search modal PubSub shorthands.
+- **Setup**: Use `setup` callbacks to prepare shared state (see `test/glossary_web/router_test.exs` and `test/glossary_web/live/search_live_test.exs`) and pass assigns such as `%{entry: entry}` to reduce inline Repo calls.
+- **Assertions**: Prefer `assert_redirect/2` for navigation checks and rely on LiveCase helpers for PubSub expectations. Use `@tag :capture_log` to keep noisy suites quiet.
 - **Organisation**: Split live specs into focused `describe` blocks per behaviour—rendering vs. hooks vs. keyboard shortcuts—and tag slow, end-to-end flows with `@tag :slow` so contributors can filter them.
-- **Macros**: Add regression coverage for LiveView macros under `test/glossary_web/live/macros/keybind_macros_test.exs` by defining throwaway modules that `use` the macro and asserting the generated callbacks.
 - **Async**: Keep database-backed LiveView tests synchronous unless the shared sandbox is configured. Reserve `async: true` for controller/view tests such as `test/glossary_web/controllers/error_html_test.exs`.
 - **Execution**: Run `mix test` before merge and consider wiring a targeted command (e.g., `mix test --only live`) so the LiveView surface can be validated independently once tagging lands.
 
@@ -445,6 +453,9 @@ For detailed deployment instructions, see `k8s/README.md`.
 - **Configuration pattern**:
   - Compile-time config: `config/*.exs`
   - Runtime config: `config/runtime.exs` (reads `System.get_env/1`)
+- **Object storage**:
+  - Configure S3-compatible credentials via `S3_PROVIDER_ENDPOINT`, `S3_PROVIDER_ACCESS_KEY`, `S3_PROVIDER_SECRET_KEY`, `S3_PROVIDER_REGION`
+  - `Glossary.Garage` reads defaults from `config/config.exs` and validates at runtime
 - **Dependencies**:
   - **HTTP client**: Use `Req` (already included)
   - **Avoid**: HTTPoison, HTTPotion, or other HTTP clients
