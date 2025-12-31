@@ -52,3 +52,6 @@ rel/overlays/bin/seed.bat
 
 # Kubernetes secrets (template is secrets.yaml.template)
 k8s/secrets.yaml
+
+**/.elixir-tools/*
+**/.expert/*
