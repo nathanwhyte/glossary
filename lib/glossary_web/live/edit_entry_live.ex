@@ -67,16 +67,11 @@ defmodule GlossaryWeb.EditEntryLive do
   end
 
   def handle_event("body_update", %{"body" => body}, socket) do
-    Entry.changeset(socket.assigns.entry, %{body: body})
-    |> Repo.update()
-    |> case do
-      {:ok, updated_entry} ->
-        {:noreply, assign(socket, :entry, updated_entry)}
+    {:ok, _} =
+      Entry.changeset(socket.assigns.entry, %{body: body})
+      |> Repo.update()
 
-      {:error, changeset} ->
-        Logger.error("Failed to update entry body: #{inspect(changeset.errors)}")
-        {:noreply, socket}
-    end
+    {:noreply, socket}
   end
 
   @impl true
@@ -103,22 +98,7 @@ defmodule GlossaryWeb.EditEntryLive do
         class="flex h-full flex-col py-8"
       >
         <.title_section entry={@entry} recent_projects={@recent_projects} />
-
-        <div class="divider px-3"></div>
-
-        <section class="h-full">
-          <div
-            id="body-editor"
-            phx-hook="BodyEditor"
-          >
-            <input
-              id="entry_body"
-              type="hidden"
-              name="entry[body]"
-              value={@entry.body}
-            />
-          </div>
-        </section>
+        <.body_section entry={@entry} />
       </div>
     </Layouts.app>
 
@@ -173,6 +153,28 @@ defmodule GlossaryWeb.EditEntryLive do
         <.topic_badges topics={assigns.entry.topics} />
       </div>
     </header>
+    """
+  end
+
+  attr :entry, Entry, required: true, doc: "the entry being edited"
+
+  defp body_section(assigns) do
+    ~H"""
+    <div class="divider px-3"></div>
+
+    <section class="h-full">
+      <div
+        id="body-editor"
+        phx-hook="BodyEditor"
+      >
+        <input
+          id="entry_body"
+          type="hidden"
+          name="entry[body]"
+          value={@entry.body}
+        />
+      </div>
+    </section>
     """
   end
 end
