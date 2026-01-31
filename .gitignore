@@ -37,3 +37,13 @@ npm-debug.log
 
 # environment files
 .env
+
+# IDE files
+.vscode/
+.idea/
+.cursor/
+
+# Elixir tools
+.elixir-tools
+.elixir_ls
+.formatter.exs

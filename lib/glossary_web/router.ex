@@ -17,7 +17,12 @@ defmodule GlossaryWeb.Router do
   scope "/", GlossaryWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", DashboardLive, :index
+
+    live "/entries", EntryLive.Index, :index
+    live "/entries/new", EntryLive.Form, :new
+    live "/entries/:id", EntryLive.Show, :show
+    live "/entries/:id/edit", EntryLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.
