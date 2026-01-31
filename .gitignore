@@ -46,4 +46,3 @@ npm-debug.log
 # Elixir tools
 .elixir-tools
 .elixir_ls
-.formatter.exs
