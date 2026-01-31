@@ -2,43 +2,16 @@ defmodule GlossaryWeb.EntryLive.Index do
   use GlossaryWeb, :live_view
 
   alias Glossary.Entries
+  alias GlossaryWeb.EntryLayouts
 
   @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <.header>
-        Listing Entries
-        <:actions>
-          <.button variant="primary" navigate={~p"/entries/new"}>
-            <.icon name="hero-plus" /> New Entry
-          </.button>
-        </:actions>
-      </.header>
-
-      <.table
-        id="entries"
-        rows={@streams.entries}
-        row_click={fn {_id, entry} -> JS.navigate(~p"/entries/#{entry}") end}
-      >
-        <:col :let={{_id, entry}} label="Title">{entry.title}</:col>
-        <:col :let={{_id, entry}} label="Subtitle">{entry.subtitle}</:col>
-        <:col :let={{_id, entry}} label="Body">{entry.body}</:col>
-        <:action :let={{_id, entry}}>
-          <div class="sr-only">
-            <.link navigate={~p"/entries/#{entry}"}>Show</.link>
-          </div>
-          <.link navigate={~p"/entries/#{entry}/edit"}>Edit</.link>
-        </:action>
-        <:action :let={{id, entry}}>
-          <.link
-            phx-click={JS.push("delete", value: %{id: entry.id}) |> hide("##{id}")}
-            data-confirm="Are you sure?"
-          >
-            Delete
-          </.link>
-        </:action>
-      </.table>
+      <EntryLayouts.entry_table
+        table_title="All Entries"
+        table_rows={@streams.entries}
+      />
     </Layouts.app>
     """
   end
@@ -47,7 +20,7 @@ defmodule GlossaryWeb.EntryLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Listing Entries")
+     |> assign(:page_title, "All Entries")
      |> stream(:entries, list_entries())}
   end
 

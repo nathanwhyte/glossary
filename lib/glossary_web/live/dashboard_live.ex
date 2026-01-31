@@ -1,7 +1,9 @@
 defmodule GlossaryWeb.DashboardLive do
   use GlossaryWeb, :live_view
 
-  # Initialize counter state for the LiveView session.
+  alias Glossary.Entries
+  alias GlossaryWeb.EntryLayouts
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
@@ -9,17 +11,15 @@ defmodule GlossaryWeb.DashboardLive do
        current_scope: nil,
        platform: nil,
        query: ""
-     )}
+     )
+     |> stream(:recent_entries, Entries.recent_entries())}
   end
 
-  # Handle button clicks and update the counter based on action.
   @impl true
   def handle_event("platform_detected", %{"platform" => platform}, socket) do
-    IO.inspect(platform, label: "User Platform")
     {:noreply, assign(socket, :platform, platform)}
   end
 
-  # Render the counter UI with stable DOM IDs for tests.
   @impl true
   def render(assigns) do
     ~H"""
@@ -27,7 +27,7 @@ defmodule GlossaryWeb.DashboardLive do
       <span id="platform-detector" phx-hook="DetectPlatform" class="hidden"></span>
 
       <section>
-        <label class="input input-lg flex w-full items-center space-x-1 text-sm">
+        <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
           <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
 
           <input
@@ -48,6 +48,40 @@ defmodule GlossaryWeb.DashboardLive do
             </span>
           <% end %>
         </label>
+      </section>
+
+      <section>
+        <div class="grid auto-rows-fr grid-cols-1 gap-8 lg:grid-cols-2">
+          <a
+            href={~p"/entries/new"}
+            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75"
+          >
+            <div class="card-body">
+              <h2 class="card-title">New Entry</h2>
+              <div class="h-6" />
+              <div class="card-actions justify-end">
+                <.icon name="hero-arrow-long-right-micro" class="size-6" />
+              </div>
+            </div>
+          </a>
+
+          <a
+            href={~p"/entries"}
+            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75"
+          >
+            <div class="card-body">
+              <h2 class="card-title">See All Entries</h2>
+              <div class="h-6" />
+              <div class="card-actions justify-end">
+                <.icon name="hero-arrow-long-right-micro" class="size-6" />
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section>
+        <EntryLayouts.entry_table table_title="Recent Entries" table_rows={@streams.recent_entries} />
       </section>
     </Layouts.app>
     """

@@ -23,7 +23,7 @@ defmodule GlossaryWeb.EntryLiveTest do
     test "lists all entries", %{conn: conn, entry: entry} do
       {:ok, _index_live, html} = live(conn, ~p"/entries")
 
-      assert html =~ "Listing Entries"
+      assert html =~ "All Entries"
       assert html =~ entry.title
     end
 

@@ -22,6 +22,19 @@ defmodule Glossary.Entries do
   end
 
   @doc """
+  Returns the list of the X most recent entries.
+
+  ## Examples
+
+      iex> list_entries(3)
+      [%Entry{}, %Entry{}, %Entry{},]
+
+  """
+  def recent_entries(count \\ 3) do
+    Repo.all(Entry |> order_by(desc: :inserted_at) |> limit(^count))
+  end
+
+  @doc """
   Gets a single entry.
 
   Raises `Ecto.NoResultsError` if the Entry does not exist.
