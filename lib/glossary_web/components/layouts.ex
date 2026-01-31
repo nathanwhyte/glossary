@@ -35,28 +35,16 @@ defmodule GlossaryWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
+    <header class="navbar px-4 py-6 lg:px-8">
       <div class="flex-1">
-        <a href="/" class="flex w-fit flex-1 items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
+        <a href="/" class="flex-1 items-center gap-2 text-2xl">
+          🧠 <span class="ml-4 font-bold">Glossary</span>
         </a>
       </div>
       <div class="flex-none">
         <ul class="flex-column flex items-center space-x-4 px-1">
           <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
             <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
           </li>
         </ul>
       </div>
