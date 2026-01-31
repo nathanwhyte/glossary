@@ -2,6 +2,8 @@ services:
   adminer:
     image: adminer
     restart: always
+    environment:
+      ADMINER_DESIGN: lavender-light
     ports:
       - 8008:8080
 
