@@ -25,13 +25,28 @@ import { LiveSocket } from "phoenix_live_view";
 import { hooks as colocatedHooks } from "phoenix-colocated/glossary";
 import topbar from "../vendor/topbar";
 
+/**
+ * @type {import("phoenix_live_view").HooksOptions}
+ */
+let Hooks = { ...colocatedHooks };
+
+// get the user's system platform
+Hooks.DetectPlatform = {
+  mounted() {
+    const platform =
+      navigator.userAgentData.platform || navigator.userAgent || "";
+    const detected = platform.toLowerCase().includes("mac") ? "mac" : "other";
+    this.pushEvent("platform_detected", { platform: detected });
+  },
+};
+
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks },
+  hooks: Hooks,
 });
 
 // Show progress bar on live navigation and form submits
