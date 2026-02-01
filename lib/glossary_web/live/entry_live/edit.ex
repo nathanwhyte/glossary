@@ -1,4 +1,4 @@
-defmodule GlossaryWeb.EntryLive.Form do
+defmodule GlossaryWeb.EntryLive.Edit do
   use GlossaryWeb, :live_view
 
   alias Glossary.Entries
@@ -17,8 +17,8 @@ defmodule GlossaryWeb.EntryLive.Form do
         <.input field={@form[:title]} type="text" label="Title" />
         <.input field={@form[:subtitle]} type="text" label="Subtitle" />
 
-        <div class="mt-2">
-          <label class="block text-sm font-semibold">Body</label>
+        <div class="mt-4">
+          <label class="block text-sm font-semibold sr-only">Body</label>
           <div
             id="tiptap-editor"
             phx-hook="TiptapEditor"
@@ -41,7 +41,7 @@ defmodule GlossaryWeb.EntryLive.Form do
           </div>
         </div>
 
-        <footer>
+        <footer class="mt-4">
           <.button phx-disable-with="Saving..." variant="primary">Save Entry</.button>
           <.button navigate={return_path(@return_to, @entry)}>Cancel</.button>
         </footer>

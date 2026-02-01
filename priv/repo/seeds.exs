@@ -18,30 +18,30 @@ alias Glossary.Entries.Entry
 # Entry body is stored as HTML (from Tiptap editor) with a plain text copy in body_text
 entries = [
   %{
-    title: "Lorem Ipsum One",
-    subtitle: "Single paragraph",
+    title: "What Are Corvids?",
+    subtitle: "The smartest birds in the family",
     body: """
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <p>Corvids are a family of birds that includes crows, ravens, jays, magpies, and rooks. They are found on every continent except Antarctica and South America. Scientists consider corvids among the most intelligent of all birds. They can use tools, solve puzzles, and remember human faces for years. Ravens are the largest of the passerine birds, while some jays are small and brightly coloured. Many corvids live in social groups and communicate with a wide range of calls.</p>
     """,
     body_text:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+      "Corvids are a family of birds that includes crows, ravens, jays, magpies, and rooks. They are found on every continent except Antarctica and South America. Scientists consider corvids among the most intelligent of all birds. They can use tools, solve puzzles, and remember human faces for years. Ravens are the largest of the passerine birds, while some jays are small and brightly coloured. Many corvids live in social groups and communicate with a wide range of calls."
   },
   %{
-    title: "Lorem Ipsum Two",
-    subtitle: "Two paragraphs with formatting",
+    title: "Corvid Intelligence and Behaviour",
+    subtitle: "Tool use, memory, and social learning",
     body: """
-    <p>Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. <em>Excepteur sint occaecat cupidatat non proident</em>, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <h2>Second Section</h2>
-    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+    <p>New Caledonian crows make and use tools in the wild, such as hooked sticks to pull insects from bark. <strong>Researchers have watched them bend wire into hooks</strong> when no ready-made tool was available. Scrub jays and other corvids cache thousands of food items and remember where they hid them months later.</p>
+    <p>Magpies have been shown to pass the mirror test, meaning they can recognise themselves in a reflection. <em>American crows can recognise and remember human faces</em> that have threatened them and will scold those people years later. Corvids also learn from each other, so clever solutions spread through groups.</p>
+    <h2>Why It Matters</h2>
+    <p>Studying corvids helps us understand how intelligence evolves in animals that are not primates. Their ability to plan, use tools, and cooperate suggests that complex cognition can arise in very different branches of the tree of life.</p>
     <ul>
-      <li>Nemo enim ipsam voluptatem quia voluptas sit aspernatur</li>
-      <li>Aut odit aut fugit, sed quia consequuntur magni dolores</li>
-      <li>Neque porro quisquam est, qui dolorem ipsum</li>
+      <li>Corvids use tools in the wild and in experiments</li>
+      <li>They cache food and remember thousands of locations</li>
+      <li>Some species pass the mirror test for self-recognition</li>
     </ul>
     """,
     body_text:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Second Section Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur Aut odit aut fugit, sed quia consequuntur magni dolores Neque porro quisquam est, qui dolorem ipsum"
+      "New Caledonian crows make and use tools in the wild, such as hooked sticks to pull insects from bark. Researchers have watched them bend wire into hooks when no ready-made tool was available. Scrub jays and other corvids cache thousands of food items and remember where they hid them months later. Magpies have been shown to pass the mirror test, meaning they can recognise themselves in a reflection. American crows can recognise and remember human faces that have threatened them and will scold those people years later. Corvids also learn from each other, so clever solutions spread through groups. Why It Matters Studying corvids helps us understand how intelligence evolves in animals that are not primates. Their ability to plan, use tools, and cooperate suggests that complex cognition can arise in very different branches of the tree of life. Corvids use tools in the wild and in experiments They cache food and remember thousands of locations Some species pass the mirror test for self-recognition"
   }
 ]
 

@@ -26,35 +26,35 @@ defmodule GlossaryWeb.DashboardLive do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <span id="platform-detector" phx-hook="DetectPlatform" class="hidden"></span>
 
-      <section>
-        <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
-          <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
+      <div class="space-y-12">
+        <section>
+          <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
+            <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
 
-          <input
-            type="text"
-            placeholder="Search"
-            class=""
-            value={@query}
-            name="query"
-            autocomplete="off"
-          />
+            <input
+              type="text"
+              placeholder="Search"
+              class=""
+              value={@query}
+              name="query"
+              autocomplete="off"
+            />
 
-          <%= if @platform do %>
-            <span class="hidden space-x-1 sm:inline-flex">
-              <kbd id="leader-key" class="kbd kbd-sm">
-                {if @platform == "mac", do: "⌘", else: "Ctrl"}
-              </kbd>
-              <kbd class="kbd kbd-sm">k</kbd>
-            </span>
-          <% end %>
-        </label>
-      </section>
+            <%= if @platform do %>
+              <span class="hidden space-x-1 sm:inline-flex">
+                <kbd id="leader-key" class="kbd kbd-sm">
+                  {if @platform == "mac", do: "⌘", else: "Ctrl"}
+                </kbd>
+                <kbd class="kbd kbd-sm">k</kbd>
+              </span>
+            <% end %>
+          </label>
+        </section>
 
-      <section>
-        <div class="grid auto-rows-fr grid-cols-1 gap-8 lg:grid-cols-2">
+        <section class="grid auto-rows-fr grid-cols-2 gap-4">
           <a
             href={~p"/entries/new"}
-            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75"
+            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
           >
             <div class="card-body">
               <h2 class="card-title">New Entry</h2>
@@ -67,7 +67,7 @@ defmodule GlossaryWeb.DashboardLive do
 
           <a
             href={~p"/entries"}
-            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75"
+            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
           >
             <div class="card-body">
               <h2 class="card-title">See All Entries</h2>
@@ -77,12 +77,12 @@ defmodule GlossaryWeb.DashboardLive do
               </div>
             </div>
           </a>
-        </div>
-      </section>
+        </section>
 
-      <section>
-        <EntryLayouts.entry_table table_title="Recent Entries" table_rows={@streams.recent_entries} />
-      </section>
+        <section>
+          <EntryLayouts.entry_table table_title="Recent Entries" table_rows={@streams.recent_entries} />
+        </section>
+      </div>
     </Layouts.app>
     """
   end
