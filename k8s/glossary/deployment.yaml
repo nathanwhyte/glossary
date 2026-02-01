@@ -32,15 +32,17 @@ spec:
           command: ["/app/bin/migrate"]
           env:
             - name: MIX_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: MIX_ENV
+              value: prod
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: glossary-secrets
                   key: DATABASE_URL
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: glossary-secrets
+                  key: SECRET_KEY_BASE
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -63,31 +65,19 @@ spec:
           env:
             - name: PHX_SERVER
               value: "true"
-            - name: PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: PORT
-            - name: PHX_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: PHX_HOST
-            - name: POOL_SIZE
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: POOL_SIZE
-            - name: MIX_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: MIX_ENV
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: glossary-secrets
                   key: DATABASE_URL
+            - name: PORT
+              value: "4000"
+            - name: PHX_HOST
+              value: glossary.nathanwhyte.dev
+            - name: POOL_SIZE
+              value: "10"
+            - name: MIX_ENV
+              value: prod
             - name: SECRET_KEY_BASE
               valueFrom:
                 secretKeyRef:

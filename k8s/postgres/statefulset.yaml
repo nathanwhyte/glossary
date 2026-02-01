@@ -45,15 +45,9 @@ spec:
               protocol: TCP
           env:
             - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: POSTGRES_DB
+              value: glossary
             - name: POSTGRES_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: glossary-config
-                  key: POSTGRES_USER
+              value: postgres
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
