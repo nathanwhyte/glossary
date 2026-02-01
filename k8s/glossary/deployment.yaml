@@ -25,6 +25,27 @@ spec:
         runAsNonRoot: true
         runAsUser: 65534  # nobody user
         fsGroup: 65534
+      initContainers:
+        - name: migrate
+          image: registry.nathanwhyte.dev/glossary/glossary:latest
+          imagePullPolicy: Always
+          command: ["/app/bin/migrate"]
+          env:
+            - name: MIX_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: glossary-config
+                  key: MIX_ENV
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: glossary-secrets
+                  key: DATABASE_URL
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
       containers:
         - name: glossary
           image: registry.nathanwhyte.dev/glossary/glossary:latest

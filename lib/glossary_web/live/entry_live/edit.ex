@@ -18,7 +18,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
         <.input field={@form[:subtitle]} type="text" label="Subtitle" />
 
         <div class="mt-4">
-          <label class="block text-sm font-semibold sr-only">Body</label>
+          <label class="sr-only block text-sm font-semibold">Body</label>
           <div
             id="tiptap-editor"
             phx-hook="TiptapEditor"

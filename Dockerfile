@@ -22,7 +22,7 @@ FROM ${BUILDER_IMAGE} AS builder
 
 # install build dependencies (nodejs/npm for assets with npm deps e.g. Tiptap)
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends build-essential git nodejs npm \
+  && apt-get install -y --no-install-recommends build-essential git npm \
   && rm -rf /var/lib/apt/lists/*
 
 # prepare build dir
