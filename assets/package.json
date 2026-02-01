@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "@tiptap/core": "^3.18.0",
+    "@tiptap/extension-typography": "^3.18.0",
     "@tiptap/extensions": "^3.18.0",
     "@tiptap/pm": "^3.18.0",
     "@tiptap/starter-kit": "^3.18.0"

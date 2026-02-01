@@ -104,4 +104,5 @@
 
 /* This file is for your main application CSS */
 
-@import "./tiptap.css";
+@import "./tiptap/body.css";
+@import "./tiptap/title.css";

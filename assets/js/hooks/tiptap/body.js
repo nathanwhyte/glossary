@@ -27,7 +27,10 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 
-const TiptapEditor = {
+/**
+ * @type {import("phoenix_live_view").Hook}
+ */
+const BodyEditor = {
   mounted() {
     const editorElement = this.el.querySelector("[data-editor]");
     this.bodyInput = this.el.querySelector("[data-editor-hidden='body']");
@@ -41,7 +44,7 @@ const TiptapEditor = {
       content: this.el.dataset.value || "",
       editorProps: {
         attributes: {
-          class: "tiptap-content",
+          class: "body-content",
         },
       },
       onUpdate: ({ editor }) => {
@@ -60,4 +63,4 @@ const TiptapEditor = {
   },
 };
 
-export default TiptapEditor;
+export default BodyEditor;

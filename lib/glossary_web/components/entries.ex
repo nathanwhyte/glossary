@@ -27,7 +27,7 @@ defmodule GlossaryWeb.EntryLayouts do
       rows={@table_rows}
       row_click={fn {_id, entry} -> JS.navigate(~p"/entries/#{entry}") end}
     >
-      <:col :let={{_id, entry}} label="Title">{entry.title}</:col>
+      <:col :let={{_id, entry}} label="Title">{entry.title_text}</:col>
       <:col :let={{_id, entry}} label="Subtitle">{entry.subtitle}</:col>
       <:action :let={{_id, entry}}>
         <.link navigate={~p"/entries/#{entry}"}>View</.link>

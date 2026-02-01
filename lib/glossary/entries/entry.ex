@@ -23,6 +23,7 @@ defmodule Glossary.Entries.Entry do
 
   schema "entries" do
     field :title, :string
+    field :title_text, :string
     field :subtitle, :string
     field :body, :string
     field :body_text, :string
@@ -42,7 +43,7 @@ defmodule Glossary.Entries.Entry do
   """
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:title, :subtitle, :body, :body_text])
+    |> cast(attrs, [:title, :subtitle, :body, :body_text, :title_text])
     |> validate_required([:title, :subtitle, :body])
   end
 end

@@ -9,18 +9,43 @@ defmodule GlossaryWeb.EntryLive.Edit do
     ~H"""
     <Layouts.app flash={@flash}>
       <.form for={@form} id="entry-form" phx-change="validate" phx-submit="save">
-        <.input field={@form[:title]} type="text" label="Title" />
-        <.input field={@form[:subtitle]} type="text" label="Subtitle" />
+        <%!-- <.input field={@form[:title]} type="text" label="Title" /> --%>
 
-        <div class="mt-4">
+        <%!-- <.input field={@form[:subtitle]} type="text" label="Subtitle" /> --%>
+
+        <div>
           <label class="sr-only block text-sm font-semibold">Body</label>
           <div
-            id="tiptap-editor"
-            phx-hook="TiptapEditor"
+            id="title-editor"
+            phx-hook="TitleEditor"
+            data-value={@form[:title].value}
+            class="mt-2"
+          >
+            <div data-editor="title" id="entry-title" phx-update="ignore" class="title-editor" />
+            <input
+              type="hidden"
+              name="entry[title]"
+              data-editor-hidden="title"
+              value={@form[:title].value}
+            />
+            <input
+              type="hidden"
+              name="entry[title_text]"
+              data-editor-hidden="title_text"
+              value={@form[:title_text].value}
+            />
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="sr-only block text-sm font-semibold">Title</label>
+          <div
+            id="body-editor"
+            phx-hook="BodyEditor"
             data-value={@form[:body].value}
             class="mt-2"
           >
-            <div data-editor="body" id="tiptap-content" phx-update="ignore" class="tiptap-editor" />
+            <div data-editor="body" id="entry-body" phx-update="ignore" class="body-editor" />
             <input
               type="hidden"
               name="entry[body]"
