@@ -20,9 +20,9 @@ ARG RUNNER_IMAGE="docker.io/debian:${DEBIAN_VERSION}"
 
 FROM ${BUILDER_IMAGE} AS builder
 
-# install build dependencies
+# install build dependencies (nodejs/npm for assets with npm deps e.g. Tiptap)
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends build-essential git \
+  && apt-get install -y --no-install-recommends build-essential git nodejs npm \
   && rm -rf /var/lib/apt/lists/*
 
 # prepare build dir
@@ -56,6 +56,9 @@ COPY lib lib
 RUN mix compile
 
 COPY assets assets
+
+# install npm deps (e.g. @tiptap/*) so esbuild can resolve them
+RUN cd assets && npm ci --omit=dev
 
 # compile assets
 RUN mix assets.deploy
