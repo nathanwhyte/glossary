@@ -2,8 +2,9 @@
   "name": "glossary-assets",
   "private": true,
   "dependencies": {
-    "@tiptap/core": "^2.11.5",
-    "@tiptap/pm": "^2.11.5",
-    "@tiptap/starter-kit": "^2.11.5"
+    "@tiptap/core": "^3.18.0",
+    "@tiptap/extensions": "^3.18.0",
+    "@tiptap/pm": "^3.18.0",
+    "@tiptap/starter-kit": "^3.18.0"
   }
 }
