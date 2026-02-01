@@ -31,16 +31,6 @@ import TiptapEditor from "./hooks/tiptap_editor";
  */
 let Hooks = { ...colocatedHooks, TiptapEditor };
 
-// get the user's system platform
-Hooks.DetectPlatform = {
-  mounted() {
-    const platform =
-      navigator.userAgentData.platform || navigator.userAgent || "";
-    const detected = platform.toLowerCase().includes("mac") ? "mac" : "other";
-    this.pushEvent("platform_detected", { platform: detected });
-  },
-};
-
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");

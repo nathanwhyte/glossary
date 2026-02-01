@@ -9,23 +9,15 @@ defmodule GlossaryWeb.DashboardLive do
     {:ok,
      assign(socket,
        current_scope: nil,
-       platform: nil,
        query: ""
      )
      |> stream(:recent_entries, Entries.recent_entries())}
   end
 
   @impl true
-  def handle_event("platform_detected", %{"platform" => platform}, socket) do
-    {:noreply, assign(socket, :platform, platform)}
-  end
-
-  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <span id="platform-detector" phx-hook="DetectPlatform" class="hidden"></span>
-
       <div class="space-y-12">
         <section>
           <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
@@ -40,14 +32,12 @@ defmodule GlossaryWeb.DashboardLive do
               autocomplete="off"
             />
 
-            <%= if @platform do %>
-              <span class="hidden space-x-1 sm:inline-flex">
-                <kbd id="leader-key" class="kbd kbd-sm">
-                  {if @platform == "mac", do: "⌘", else: "Ctrl"}
-                </kbd>
-                <kbd class="kbd kbd-sm">k</kbd>
-              </span>
-            <% end %>
+            <span class="hidden space-x-1 sm:inline-flex">
+              <kbd class="kbd kbd-sm">
+                ⌘
+              </kbd>
+              <kbd class="kbd kbd-sm">k</kbd>
+            </span>
           </label>
         </section>
 
