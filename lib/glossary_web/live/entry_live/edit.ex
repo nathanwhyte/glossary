@@ -8,11 +8,6 @@ defmodule GlossaryWeb.EntryLive.Edit do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <.header>
-        {@page_title}
-        <:subtitle>Use this form to manage entry records in your database.</:subtitle>
-      </.header>
-
       <.form for={@form} id="entry-form" phx-change="validate" phx-submit="save">
         <.input field={@form[:title]} type="text" label="Title" />
         <.input field={@form[:subtitle]} type="text" label="Subtitle" />

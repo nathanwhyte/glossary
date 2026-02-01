@@ -18,7 +18,7 @@ defmodule GlossaryWeb.DashboardLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="space-y-12">
+      <div class="space-y-12 pt-8">
         <section>
           <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
             <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />

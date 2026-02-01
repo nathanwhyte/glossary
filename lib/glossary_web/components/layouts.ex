@@ -50,7 +50,7 @@ defmodule GlossaryWeb.Layouts do
       </div>
     </header>
 
-    <main class="px-4 py-12 sm:px-6 lg:px-8">
+    <main class="px-4 py-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-5xl space-y-6">
         {render_slot(@inner_block)}
       </div>
