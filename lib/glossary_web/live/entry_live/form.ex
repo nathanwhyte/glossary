@@ -16,7 +16,31 @@ defmodule GlossaryWeb.EntryLive.Form do
       <.form for={@form} id="entry-form" phx-change="validate" phx-submit="save">
         <.input field={@form[:title]} type="text" label="Title" />
         <.input field={@form[:subtitle]} type="text" label="Subtitle" />
-        <.input field={@form[:body]} type="textarea" label="Body" />
+
+        <div class="mt-2">
+          <label class="block text-sm font-semibold">Body</label>
+          <div
+            id="tiptap-editor"
+            phx-hook="TiptapEditor"
+            data-value={@form[:body].value}
+            class="mt-2"
+          >
+            <div data-editor="body" id="tiptap-content" phx-update="ignore" class="tiptap-editor" />
+            <input
+              type="hidden"
+              name="entry[body]"
+              data-editor-hidden="body"
+              value={@form[:body].value}
+            />
+            <input
+              type="hidden"
+              name="entry[body_text]"
+              data-editor-hidden="body_text"
+              value={@form[:body_text].value}
+            />
+          </div>
+        </div>
+
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Entry</.button>
           <.button navigate={return_path(@return_to, @entry)}>Cancel</.button>

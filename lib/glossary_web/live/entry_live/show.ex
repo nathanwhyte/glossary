@@ -23,7 +23,11 @@ defmodule GlossaryWeb.EntryLive.Show do
       <.list>
         <:item title="Title">{@entry.title}</:item>
         <:item title="Subtitle">{@entry.subtitle}</:item>
-        <:item title="Body">{@entry.body}</:item>
+        <:item title="Body">
+          <div class="prose prose-sm max-w-none">
+            {raw(@entry.body)}
+          </div>
+        </:item>
       </.list>
     </Layouts.app>
     """

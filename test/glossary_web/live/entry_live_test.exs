@@ -4,13 +4,10 @@ defmodule GlossaryWeb.EntryLiveTest do
   import Phoenix.LiveViewTest
   import Glossary.EntriesFixtures
 
-  @create_attrs %{title: "some title", body: "some body", subtitle: "some subtitle"}
-  @update_attrs %{
-    title: "some updated title",
-    body: "some updated body",
-    subtitle: "some updated subtitle"
-  }
-  @invalid_attrs %{title: nil, body: nil, subtitle: nil}
+  # Note: body and body_text are managed by the Tiptap JS hook via hidden inputs,
+  # so we only include title/subtitle in form test attrs
+  @update_attrs %{title: "some updated title", subtitle: "some updated subtitle"}
+  @invalid_attrs %{title: nil, subtitle: nil}
   defp create_entry(_) do
     entry = entry_fixture()
 
@@ -42,10 +39,17 @@ defmodule GlossaryWeb.EntryLiveTest do
              |> form("#entry-form", entry: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
+      # Use render_submit/2 with explicit params to include body (managed by Tiptap hook in browser)
       assert {:ok, index_live, _html} =
                form_live
-               |> form("#entry-form", entry: @create_attrs)
-               |> render_submit()
+               |> render_submit("save", %{
+                 "entry" => %{
+                   "title" => "some title",
+                   "subtitle" => "some subtitle",
+                   "body" => "<p>some body</p>",
+                   "body_text" => "some body"
+                 }
+               })
                |> follow_redirect(conn, ~p"/entries")
 
       html = render(index_live)

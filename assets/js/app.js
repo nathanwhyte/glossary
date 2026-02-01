@@ -24,11 +24,12 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks as colocatedHooks } from "phoenix-colocated/glossary";
 import topbar from "../vendor/topbar";
+import TiptapEditor from "./hooks/tiptap_editor";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
-let Hooks = { ...colocatedHooks };
+let Hooks = { ...colocatedHooks, TiptapEditor };
 
 // get the user's system platform
 Hooks.DetectPlatform = {

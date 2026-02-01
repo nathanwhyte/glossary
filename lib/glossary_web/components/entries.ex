@@ -29,9 +29,6 @@ defmodule GlossaryWeb.EntryLayouts do
     >
       <:col :let={{_id, entry}} label="Title">{entry.title}</:col>
       <:col :let={{_id, entry}} label="Subtitle">{entry.subtitle}</:col>
-      <:col :let={{_id, entry}} label="Body">
-        <p class="whitespace-pre-wrap">{entry.body}</p>
-      </:col>
       <:action :let={{_id, entry}}>
         <div class="sr-only">
           <.link navigate={~p"/entries/#{entry}"}>Show</.link>

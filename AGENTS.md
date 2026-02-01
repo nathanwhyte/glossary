@@ -17,6 +17,26 @@ This is a web application written using the Phoenix web framework.
 - If you override the default input classes (`<.input class="myclass px-2 py-1 rounded-lg">)`) class with your own values, no default classes are inherited, so your
 custom classes must fully style the input
 
+### Tiptap rich text editor
+
+The Entry form uses [Tiptap](https://tiptap.dev/) for rich text editing of the `body` field.
+
+**Architecture:**
+- **Hook**: `assets/js/hooks/tiptap_editor.js` — mounts Tiptap editor and syncs content to hidden inputs
+- **Storage**: Entry stores two fields:
+  - `body` (HTML) — for rich rendering on the show page
+  - `body_text` (plain text) — for AI analysis, embeddings, and full-text search
+- **Styles**: Tiptap/ProseMirror styles are in `assets/css/app.css`
+
+**Key patterns:**
+- The `phx-update="ignore"` attribute is only on the editor div, NOT on hidden inputs (so form submission works)
+- The hook syncs both `getHTML()` and `getText()` to hidden inputs on every editor update
+- The show page renders body HTML using `raw(@entry.body)` — add sanitization for production
+
+**Testing:**
+- Since body is managed by JavaScript, LiveView tests use `render_submit/2` with explicit params to include body content
+- Validation tests only check title/subtitle (body validation happens client-side via Tiptap)
+
 <!-- usage-rules-start -->
 <!-- phoenix:elixir-start -->
 ## Elixir guidelines
