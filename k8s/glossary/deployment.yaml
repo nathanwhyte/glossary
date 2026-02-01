@@ -27,7 +27,7 @@ spec:
         fsGroup: 65534
       containers:
         - name: glossary
-          image: nathanwhyte/glossary:v1.2.0
+          image: registry.nathanwhyte.dev/glossary/glossary:latest
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
