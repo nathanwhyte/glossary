@@ -46,3 +46,7 @@ npm-debug.log
 # Elixir tools
 .elixir-tools
 .elixir_ls
+
+# Kubernetes secret files
+**/*.secrets.yaml
+
