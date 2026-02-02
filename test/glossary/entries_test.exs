@@ -8,7 +8,7 @@ defmodule Glossary.EntriesTest do
 
     import Glossary.EntriesFixtures
 
-    @invalid_attrs %{title: nil, body: nil, subtitle: nil}
+    @invalid_attrs %{title: nil, body: nil, subtitle: nil, body_text: nil, title_text: nil}
 
     test "list_entries/0 returns all entries" do
       entry = entry_fixture()
@@ -21,12 +21,20 @@ defmodule Glossary.EntriesTest do
     end
 
     test "create_entry/1 with valid data creates a entry" do
-      valid_attrs = %{title: "some title", body: "some body", subtitle: "some subtitle"}
+      valid_attrs = %{
+        title: "some title",
+        title_text: "some title",
+        body: "some body",
+        body_text: "some body",
+        subtitle: "some subtitle"
+      }
 
       assert {:ok, %Entry{} = entry} = Entries.create_entry(valid_attrs)
       assert entry.title == "some title"
       assert entry.body == "some body"
+      assert entry.body_text == "some body"
       assert entry.subtitle == "some subtitle"
+      assert entry.title_text == "some title"
     end
 
     test "create_entry/1 with invalid data returns error changeset" do
@@ -38,14 +46,18 @@ defmodule Glossary.EntriesTest do
 
       update_attrs = %{
         title: "some updated title",
+        title_text: "some updated title",
         body: "some updated body",
+        body_text: "some updated body",
         subtitle: "some updated subtitle"
       }
 
       assert {:ok, %Entry{} = entry} = Entries.update_entry(entry, update_attrs)
       assert entry.title == "some updated title"
       assert entry.body == "some updated body"
+      assert entry.body_text == "some updated body"
       assert entry.subtitle == "some updated subtitle"
+      assert entry.title_text == "some updated title"
     end
 
     test "update_entry/2 with invalid data returns error changeset" do

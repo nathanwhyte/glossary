@@ -12,8 +12,10 @@ defmodule Glossary.EntriesFixtures do
       attrs
       |> Enum.into(%{
         body: "some body",
+        body_text: "some body",
         subtitle: "some subtitle",
-        title: "some title"
+        title: "some title",
+        title_text: "some title"
       })
       |> Glossary.Entries.create_entry()
 

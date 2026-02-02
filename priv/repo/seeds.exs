@@ -58,5 +58,3 @@ entries = [
         {inserted_count, skipped_count + 1}
     end
   end)
-
-IO.puts("Seeded entries: inserted=#{inserted} skipped=#{skipped}")

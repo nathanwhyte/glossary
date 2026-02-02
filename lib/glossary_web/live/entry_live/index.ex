@@ -18,8 +18,6 @@ defmodule GlossaryWeb.EntryLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    IO.inspect(list_entries(), label: "Mounting EntryLive.Index with entries")
-
     {:ok,
      socket
      |> assign(:page_title, "All Entries")
