@@ -23,13 +23,14 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534  # nobody user
+        runAsUser: 65534 # nobody user
         fsGroup: 65534
       initContainers:
         - name: migrate
           image: registry.nathanwhyte.dev/glossary/glossary:latest
           imagePullPolicy: Always
-          command: ["/app/bin/migrate"]
+          command:
+            - /app/bin/migrate
           env:
             - name: MIX_ENV
               value: prod
@@ -57,7 +58,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-            readOnlyRootFilesystem: false  # App needs to write to /app/storage volume
+            readOnlyRootFilesystem: false # App needs to write to /app/storage volume
           ports:
             - name: http
               containerPort: 4000
@@ -83,9 +84,6 @@ spec:
                 secretKeyRef:
                   name: glossary-secrets
                   key: SECRET_KEY_BASE
-          volumeMounts:
-            - name: storage
-              mountPath: /app/storage
           resources:
             requests:
               cpu: 500m
@@ -113,4 +111,3 @@ spec:
         - name: storage
           persistentVolumeClaim:
             claimName: glossary-storage
-
