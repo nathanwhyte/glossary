@@ -6,6 +6,7 @@
     "@tiptap/extension-typography": "^3.18.0",
     "@tiptap/extensions": "^3.18.0",
     "@tiptap/pm": "^3.18.0",
-    "@tiptap/starter-kit": "^3.18.0"
+    "@tiptap/starter-kit": "^3.18.0",
+    "debounce": "^3.0.0"
   }
 }
