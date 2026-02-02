@@ -14,6 +14,8 @@ defmodule GlossaryWeb.Router do
     plug :accepts, ["json"]
   end
 
+  get "/health", GlossaryWeb.HealthController, :index
+
   scope "/", GlossaryWeb do
     pipe_through :browser
 
