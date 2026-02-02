@@ -86,6 +86,14 @@ defmodule Glossary.Entries do
     |> Repo.update()
   end
 
+  def upsert_entry(%Entry{id: nil}, attrs) do
+    create_entry(attrs)
+  end
+
+  def upsert_entry(%Entry{} = entry, attrs) do
+    update_entry(entry, attrs)
+  end
+
   @doc """
   Deletes a entry.
 

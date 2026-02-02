@@ -24,20 +24,22 @@
  *   - Cmd/Ctrl+Z: Undo
  *   - Cmd/Ctrl+Shift+Z: Redo
  */
+
 import { Editor } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
+import StarterKit from "@tiptap/starter-kit";
+import debounce from "debounce";
 
 /**
  * @type {import("phoenix_live_view").Hook}
  */
 const BodyEditor = {
   mounted() {
+    const debouncedPush = debounce((body, body_text) => {
+      this.pushEvent("body_update", { body, body_text });
+    }, 1000);
+
     const editorElement = this.el.querySelector("[data-editor]");
-    this.bodyInput = this.el.querySelector("[data-editor-hidden='body']");
-    this.bodyTextInput = this.el.querySelector(
-      "[data-editor-hidden='body_text']",
-    );
 
     this.editor = new Editor({
       element: editorElement,
@@ -54,10 +56,7 @@ const BodyEditor = {
         },
       },
       onUpdate: ({ editor }) => {
-        this.bodyInput.value = editor.getHTML();
-        this.bodyTextInput.value = editor.getText();
-        // Trigger input event so LiveView picks up changes for phx-change
-        this.bodyInput.dispatchEvent(new Event("input", { bubbles: true }));
+        debouncedPush(editor.getHTML(), editor.getText());
       },
     });
   },

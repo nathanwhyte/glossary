@@ -1,7 +1,8 @@
 import { Editor } from "@tiptap/core";
+import { Typography } from "@tiptap/extension-typography";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
-import { Typography } from "@tiptap/extension-typography";
+import debounce from "debounce";
 
 /**
  * @type {import("phoenix_live_view").Hook}
@@ -9,14 +10,10 @@ import { Typography } from "@tiptap/extension-typography";
 const TitleEditor = {
   mounted() {
     const editorElement = this.el.querySelector("[data-editor]");
-    this.titleInput = this.el.querySelector("[data-editor-hidden='title']");
-    this.titleTextInput = this.el.querySelector(
-      "[data-editor-hidden='title_text']",
-    );
 
-    // const debouncedPush = debounce((title) => {
-    //   this.pushEvent("title_update", { title });
-    // }, 500);
+    const debouncedPush = debounce((title, title_text) => {
+      this.pushEvent("title_update", { title, title_text });
+    }, 1000);
 
     this.editor = new Editor({
       element: editorElement,
@@ -54,10 +51,7 @@ const TitleEditor = {
         },
       },
       onUpdate: ({ editor }) => {
-        this.titleTextInput.value = editor.getText();
-        this.titleInput.value = editor.getHTML();
-        // Trigger input event so LiveView picks up changes for phx-change
-        this.titleInput.dispatchEvent(new Event("input", { bubbles: true }));
+        debouncedPush(editor.getHTML(), editor.getText());
       },
     });
   },

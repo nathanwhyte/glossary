@@ -30,7 +30,7 @@ import TitleEditor from "./hooks/tiptap/title";
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
-let Hooks = { ...colocatedHooks, BodyEditor, TitleEditor };
+const Hooks = { ...colocatedHooks, BodyEditor, TitleEditor };
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -74,7 +74,9 @@ if (process.env.NODE_ENV === "development") {
       //   * click with "c" key pressed to open at caller location
       //   * click with "d" key pressed to open at function component definition location
       let keyDown;
+      // biome-ignore lint/suspicious/noAssignInExpressions: pre-packaged from `mix phx.new`
       window.addEventListener("keydown", (e) => (keyDown = e.key));
+      // biome-ignore lint/suspicious/noAssignInExpressions: pre-packaged from `mix phx.new`
       window.addEventListener("keyup", (_) => (keyDown = null));
       window.addEventListener(
         "click",

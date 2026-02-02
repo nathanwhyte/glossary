@@ -1,9 +1,0 @@
-/* Tiptap editor styles */
-.tiptap-title {
-    min-height: 200px;
-}
-
-p.is-editor-empty:first-child::before {
-    @apply text-base-content/15 float-left h-0 pointer-events-none;
-    content: attr(data-placeholder);
-}

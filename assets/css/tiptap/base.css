@@ -1,0 +1,57 @@
+.tiptap {
+    p.is-editor-empty:first-child::before {
+        @apply text-base-content/15 float-left h-0 pointer-events-none;
+        content: attr(data-placeholder);
+    }
+
+    ul {
+      @apply list-disc list-outside;
+      padding: 0 1rem;
+      margin: 0rem 1rem 0rem 0.4rem;
+
+      ul {
+        @apply list-[circle] list-outside;
+
+        ul {
+          @apply list-[square] list-outside;
+        }
+      }
+
+      li p {
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+      }
+    }
+
+    ol {
+      @apply list-decimal list-outside;
+      padding: 0 1rem;
+      margin: 0rem 1rem 0rem 0.4rem;
+
+      ol {
+        @apply list-[lower-alpha] list-outside;
+
+        ol {
+          @apply list-[lower-roman] list-outside;
+        }
+      }
+
+      li p {
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+      }
+    }
+
+    code {
+        @apply bg-primary/50 text-inherit px-1 py-0.5;
+        padding-inline: 0.25em !important;
+    }
+
+    pre {
+      @apply bg-neutral rounded-md text-neutral-content font-mono my-2 px-3 py-2;
+
+      code {
+        @apply bg-transparent text-sm p-0;
+      }
+    }
+}

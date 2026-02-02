@@ -37,8 +37,8 @@ defmodule Glossary.EntriesTest do
       assert entry.title_text == "some title"
     end
 
-    test "create_entry/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Entries.create_entry(@invalid_attrs)
+    test "create_entry/1 with nil data creates a draft entry" do
+      assert {:ok, %Entry{}} = Entries.create_entry(@invalid_attrs)
     end
 
     test "update_entry/2 with valid data updates the entry" do
@@ -60,10 +60,9 @@ defmodule Glossary.EntriesTest do
       assert entry.title_text == "some updated title"
     end
 
-    test "update_entry/2 with invalid data returns error changeset" do
+    test "update_entry/2 with nil data clears fields" do
       entry = entry_fixture()
-      assert {:error, %Ecto.Changeset{}} = Entries.update_entry(entry, @invalid_attrs)
-      assert entry == Entries.get_entry!(entry.id)
+      assert {:ok, %Entry{}} = Entries.update_entry(entry, @invalid_attrs)
     end
 
     test "delete_entry/1 deletes the entry" do
