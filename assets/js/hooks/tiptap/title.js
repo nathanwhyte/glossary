@@ -6,7 +6,7 @@ import { Typography } from "@tiptap/extension-typography";
 /**
  * @type {import("phoenix_live_view").Hook}
  */
-let TitleEditor = {
+const TitleEditor = {
   mounted() {
     const editorElement = this.el.querySelector("[data-editor]");
     this.titleInput = this.el.querySelector("[data-editor-hidden='title']");

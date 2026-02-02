@@ -26,6 +26,7 @@
  */
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import { Placeholder } from "@tiptap/extensions";
 
 /**
  * @type {import("phoenix_live_view").Hook}
@@ -40,7 +41,12 @@ const BodyEditor = {
 
     this.editor = new Editor({
       element: editorElement,
-      extensions: [StarterKit],
+      extensions: [
+        StarterKit,
+        Placeholder.configure({
+          placeholder: "Write something ...",
+        }),
+      ],
       content: this.el.dataset.value || "",
       editorProps: {
         attributes: {

@@ -44,6 +44,6 @@ defmodule Glossary.Entries.Entry do
   def changeset(entry, attrs) do
     entry
     |> cast(attrs, [:title, :subtitle, :body, :body_text, :title_text])
-    |> validate_required([:title, :title_text, :subtitle, :body, :body_text])
+    |> validate_required([:title, :title_text])
   end
 end

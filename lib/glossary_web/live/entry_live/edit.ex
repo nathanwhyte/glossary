@@ -115,7 +115,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
         {:noreply,
          socket
          |> put_flash(:info, "Entry updated successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, entry))}
+         |> redirect(to: return_path(socket.assigns.return_to, entry))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -128,7 +128,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
         {:noreply,
          socket
          |> put_flash(:info, "Entry created successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, entry))}
+         |> redirect(to: return_path(socket.assigns.return_to, entry))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
