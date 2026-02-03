@@ -76,4 +76,12 @@ defmodule GlossaryWeb.DashboardLive do
     </Layouts.app>
     """
   end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    entry = Entries.get_entry!(id)
+    {:ok, _} = Entries.delete_entry(entry)
+
+    {:noreply, stream_delete(socket, :entries, entry)}
+  end
 end
