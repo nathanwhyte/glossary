@@ -8,7 +8,8 @@ defmodule GlossaryWeb.DashboardLive do
     {:ok,
      socket
      |> assign(query: "")
-     |> stream(:search_results, [])}
+     |> stream(:search_results, [])
+     |> stream(:recent_entries, Entries.recent_entries())}
   end
 
   @impl true

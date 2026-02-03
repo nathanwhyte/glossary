@@ -39,6 +39,8 @@ defmodule GlossaryWeb.Endpoint do
     param_key: "request_logger",
     cookie_key: "request_logger"
 
+  plug GlossaryWeb.Plugs.HealthCheck
+
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
