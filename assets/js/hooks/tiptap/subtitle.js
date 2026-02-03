@@ -11,8 +11,8 @@ const SubtitleEditor = {
   mounted() {
     const editorElement = this.el.querySelector("[data-editor]");
 
-    const debouncedPush = debounce((subtitle) => {
-      this.pushEvent("subtitle_update", { subtitle });
+    const debouncedPush = debounce((subtitle, subtitle_text) => {
+      this.pushEvent("subtitle_update", { subtitle, subtitle_text });
     }, 1000);
 
     this.editor = new Editor({
@@ -48,7 +48,7 @@ const SubtitleEditor = {
         },
       },
       onUpdate: ({ editor }) => {
-        debouncedPush(editor.getText());
+        debouncedPush(editor.getHTML(), editor.getText());
       },
     });
   },

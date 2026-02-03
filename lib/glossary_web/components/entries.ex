@@ -32,14 +32,18 @@ defmodule GlossaryWeb.EntryLayouts do
           <%= if !entry.title_text || String.length(entry.title_text) <= 0 do %>
             <em class="text-base-content/25 italic">No Title</em>
           <% else %>
-            {entry.title_text}
+            <span class="font-semibold">
+              {entry.title_text}
+            </span>
           <% end %>
         </:col>
         <:col :let={{_id, entry}} label="Subtitle">
           <%= if !entry.subtitle_text || String.length(entry.subtitle_text) <= 0 do %>
             <em class="text-base-content/25 italic">No Subtitle</em>
           <% else %>
-            {entry.subtitle_text}
+            <span class="text-base-content/50 text-sm">
+              {entry.subtitle_text}
+            </span>
           <% end %>
         </:col>
         <:action :let={{_id, entry}}>

@@ -30,7 +30,7 @@ defmodule Glossary.Entries do
       [%Entry{}, %Entry{}, %Entry{},]
 
   """
-  def recent_entries(count \\ 5) do
+  def recent_entries(count \\ 7) do
     Repo.all(Entry |> order_by(desc: :inserted_at) |> limit(^count))
   end
 

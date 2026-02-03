@@ -15,8 +15,12 @@ defmodule GlossaryWeb.EntryLive.Edit do
   end
 
   @impl true
-  def handle_event("subtitle_update", %{"subtitle" => subtitle}, socket) do
-    {:noreply, save_field(socket, %{subtitle: subtitle})}
+  def handle_event(
+        "subtitle_update",
+        %{"subtitle" => subtitle, "subtitle_text" => subtitle_text},
+        socket
+      ) do
+    {:noreply, save_field(socket, %{subtitle: subtitle, subtitle_text: subtitle_text})}
   end
 
   @impl true

@@ -18,27 +18,40 @@ This is a web application written using the Phoenix web framework.
 - If you override the default input classes (`<.input class="myclass px-2 py-1 rounded-lg">)`) class with your own values, no default classes are inherited, so your
   custom classes must fully style the input
 
+### Data model
+
+The `entries` table stores each field as both HTML (from Tiptap) and plain text:
+
+| Column | Type | Purpose |
+|---|---|---|
+| `title` / `title_text` | string | Entry title (HTML / plain text) |
+| `subtitle` / `subtitle_text` | string | Subtitle (HTML / plain text) |
+| `body` / `body_text` | string | Body content (HTML / plain text) |
+
+**Search:** The `pg_trgm` extension is enabled with a GIN trigram index on `title_text` (`entries_title_text_trgm_gin`). Use `similarity()` for fuzzy matching. The search function is `Glossary.Entries.search_entries/1`.
+
+**Health check:** Handled by `GlossaryWeb.Plugs.HealthCheck` in the endpoint (before telemetry), not via the router.
+
 ### Tiptap rich text editor
 
-The Entry form uses [Tiptap](https://tiptap.dev/) for rich text editing of the `body` field.
+The Entry form uses [Tiptap](https://tiptap.dev/) for rich text editing of title, subtitle, and body.
 
 **Architecture:**
 
-- **Hook**: `assets/js/hooks/tiptap_editor.js` — mounts Tiptap editor and syncs content to hidden inputs
-- **Storage**: Entry stores two fields:
-  - `body` (HTML) — for rich rendering on the show page
-  - `body_text` (plain text) — for AI analysis, embeddings, and full-text search
+- **Hooks**: `assets/js/hooks/tiptap/` — separate hooks for title, subtitle, and body editors
+- **Storage**: Each field stores two versions (HTML + plain text) as described above
 - **Styles**: Tiptap/ProseMirror styles are in `assets/css/app.css`
+- **Events**: Each editor pushes its own debounced event (`title_update`, `subtitle_update`, `body_update`)
 
 **Key patterns:**
 
 - The `phx-update="ignore"` attribute is only on the editor div, NOT on hidden inputs (so form submission works)
-- The hook syncs both `getHTML()` and `getText()` to hidden inputs on every editor update
+- Each hook syncs both `getHTML()` and `getText()` to the LiveView on every editor update
 - The show page renders body HTML using `raw(@entry.body)` — add sanitization for production
 
 **Testing:**
 
-- Since body is managed by JavaScript, LiveView tests use `render_submit/2` with explicit params to include body content
+- Since content is managed by JavaScript, LiveView tests use `render_hook/3` with explicit params to include content
 - Validation tests only check title/subtitle (body validation happens client-side via Tiptap)
 
 <!-- usage-rules-start -->
