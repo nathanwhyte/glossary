@@ -30,6 +30,17 @@ defmodule GlossaryWeb.EntryLayouts do
       <:col :let={{_id, entry}} label="Title">{entry.title_text}</:col>
       <:col :let={{_id, entry}} label="Subtitle">{entry.subtitle}</:col>
       <:action :let={{_id, entry}}>
+        <.link
+          href="#"
+          phx-click="delete"
+          phx-value-id={entry.id}
+          data-confirm="Are you sure you want to delete this entry?"
+          data-disable-with="Deleting..."
+        >
+          Delete
+        </.link>
+      </:action>
+      <:action :let={{_id, entry}}>
         <.link navigate={~p"/entries/#{entry}"}>View</.link>
       </:action>
     </.table>

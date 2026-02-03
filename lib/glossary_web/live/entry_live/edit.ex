@@ -15,6 +15,11 @@ defmodule GlossaryWeb.EntryLive.Edit do
   end
 
   @impl true
+  def handle_event("subtitle_update", %{"subtitle" => subtitle}, socket) do
+    {:noreply, save_field(socket, %{subtitle: subtitle})}
+  end
+
+  @impl true
   def handle_event("body_update", %{"body" => body, "body_text" => body_text}, socket) do
     {:noreply, save_field(socket, %{body: body, body_text: body_text})}
   end
@@ -41,7 +46,18 @@ defmodule GlossaryWeb.EntryLive.Edit do
         >
           <div data-editor="title" id="entry-title" phx-update="ignore" class="title-editor" />
         </div>
+
+        <div
+          id="subtitle-editor"
+          phx-hook="SubtitleEditor"
+          data-value={@entry.subtitle}
+          class="mt-1"
+        >
+          <div data-editor="subtitle" id="entry-subtitle" phx-update="ignore" class="subtitle-editor" />
+        </div>
       </div>
+
+      <div class="divider" />
 
       <div class="mt-4">
         <div

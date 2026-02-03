@@ -42,6 +42,7 @@ npm-debug.log
 .vscode/
 .idea/
 .cursor/
+.claude/
 
 # Elixir tools
 .elixir-tools

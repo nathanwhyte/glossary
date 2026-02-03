@@ -25,12 +25,13 @@ import { LiveSocket } from "phoenix_live_view";
 import { hooks as colocatedHooks } from "phoenix-colocated/glossary";
 import topbar from "../vendor/topbar";
 import BodyEditor from "./hooks/tiptap/body";
+import SubtitleEditor from "./hooks/tiptap/subtitle";
 import TitleEditor from "./hooks/tiptap/title";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
-const Hooks = { ...colocatedHooks, BodyEditor, TitleEditor };
+const Hooks = { ...colocatedHooks, BodyEditor, SubtitleEditor, TitleEditor };
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")

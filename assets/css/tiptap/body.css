@@ -31,10 +31,10 @@
 }
 
 .body-editor .ProseMirror blockquote {
-    border-left: 3px solid var(--color-base-300);
-    padding-left: 1em;
+    @apply px-4 py-2 rounded-sm;
     margin: 0.5em 0;
-    color: var(--color-neutral);
+    border-left: 3px solid var(--color-base-300);
+    background-color: var(--color-neutral);
 }
 
 .body-editor .ProseMirror pre {
