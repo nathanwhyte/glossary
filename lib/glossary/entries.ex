@@ -119,6 +119,21 @@ defmodule Glossary.Entries do
       %Ecto.Changeset{data: %Entry{}}
 
   """
+  def search_entries(query) do
+    query = String.trim(query)
+
+    if query == "" do
+      []
+    else
+      from(e in Entry,
+        where: fragment("similarity(title_text, ?) > 0.1", ^query),
+        order_by: [desc: fragment("similarity(title_text, ?)", ^query)],
+        limit: 10
+      )
+      |> Repo.all()
+    end
+  end
+
   def change_entry(%Entry{} = entry, attrs \\ %{}) do
     Entry.changeset(entry, attrs)
   end

@@ -76,4 +76,39 @@ defmodule Glossary.EntriesTest do
       assert %Ecto.Changeset{} = Entries.change_entry(entry)
     end
   end
+
+  describe "search_entries/1" do
+    import Glossary.EntriesFixtures
+
+    test "returns entries matching the title" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+      entry_fixture(%{title_text: "Tidal Locking"})
+
+      results = Entries.search_entries("sourdough")
+      assert length(results) == 1
+      assert hd(results).title_text == "Sourdough Fermentation"
+    end
+
+    test "returns empty list for blank query" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+
+      assert Entries.search_entries("") == []
+      assert Entries.search_entries("   ") == []
+    end
+
+    test "returns empty list when nothing matches" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+
+      assert Entries.search_entries("astrophysics") == []
+    end
+
+    test "ranks closer matches higher" do
+      entry_fixture(%{title_text: "Tidal Locking"})
+      entry_fixture(%{title_text: "Tidal Waves and Erosion"})
+
+      results = Entries.search_entries("tidal locking")
+      assert length(results) == 2
+      assert hd(results).title_text == "Tidal Locking"
+    end
+  end
 end

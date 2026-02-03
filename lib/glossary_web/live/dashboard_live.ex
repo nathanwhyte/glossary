@@ -1,14 +1,24 @@
 defmodule GlossaryWeb.DashboardLive do
   use GlossaryWeb, :live_view
 
+  alias Glossary.Entries
+
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, query: "")}
+    {:ok,
+     socket
+     |> assign(query: "")
+     |> stream(:search_results, [])}
   end
 
   @impl true
   def handle_event("search", %{"query" => query}, socket) do
-    {:noreply, assign(socket, query: query)}
+    results = Entries.search_entries(query)
+
+    {:noreply,
+     socket
+     |> assign(query: query)
+     |> stream(:search_results, results, reset: true)}
   end
 
   @impl true
@@ -41,6 +51,20 @@ defmodule GlossaryWeb.DashboardLive do
           </label>
         </section>
 
+        <section :if={@query != ""} id="search-results" phx-update="stream" class="space-y-1">
+          <.link
+            :for={{id, entry} <- @streams.search_results}
+            id={id}
+            navigate={~p"/entries/#{entry.id}"}
+            class="block rounded-lg p-3 hover:bg-base-200"
+          >
+            <div class="font-semibold">{entry.title_text}</div>
+            <div :if={entry.subtitle_text != ""} class="text-base-content/60 text-sm">
+              {entry.subtitle_text}
+            </div>
+          </.link>
+        </section>
+
         <section class="grid auto-rows-fr grid-cols-2 gap-4">
           <a
             href={~p"/entries/new"}
@@ -68,6 +92,9 @@ defmodule GlossaryWeb.DashboardLive do
             </div>
           </a>
         </section>
+
+        <%!-- IDEA: project list w/ dropdown to show entries --%>
+        <%!--       simiar to Google Drive layout but w/o folders --%>
       </div>
     </Layouts.app>
     """
