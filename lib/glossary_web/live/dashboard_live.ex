@@ -68,20 +68,8 @@ defmodule GlossaryWeb.DashboardLive do
             </div>
           </a>
         </section>
-
-        <section>
-          <EntryLayouts.entry_table table_title="Recent Entries" table_rows={@streams.recent_entries} />
-        </section>
       </div>
     </Layouts.app>
     """
-  end
-
-  @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    entry = Entries.get_entry!(id)
-    {:ok, _} = Entries.delete_entry(entry)
-
-    {:noreply, stream_delete(socket, :entries, entry)}
   end
 end
