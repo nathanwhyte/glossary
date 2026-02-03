@@ -2,6 +2,7 @@ defmodule GlossaryWeb.DashboardLive do
   use GlossaryWeb, :live_view
 
   alias Glossary.Entries
+  alias GlossaryWeb.EntryLayouts
 
   @impl true
   def mount(_params, _session, socket) do
@@ -94,8 +95,13 @@ defmodule GlossaryWeb.DashboardLive do
           </a>
         </section>
 
+        <EntryLayouts.entry_table
+          table_title="Recent Entries"
+          table_rows={@streams.recent_entries}
+        />
+
         <%!-- IDEA: project list w/ dropdown to show entries --%>
-        <%!--       simiar to Google Drive layout but w/o folders --%>
+        <%!--       similar to Google Drive layout but w/o folders --%>
       </div>
     </Layouts.app>
     """
