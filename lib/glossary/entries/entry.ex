@@ -25,6 +25,7 @@ defmodule Glossary.Entries.Entry do
     field :title, :string
     field :title_text, :string
     field :subtitle, :string
+    field :subtitle_text, :string
     field :body, :string
     field :body_text, :string
 
@@ -43,6 +44,6 @@ defmodule Glossary.Entries.Entry do
   """
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:title, :subtitle, :body, :body_text, :title_text])
+    |> cast(attrs, [:title, :subtitle, :body, :body_text, :title_text, :subtitle_text])
   end
 end

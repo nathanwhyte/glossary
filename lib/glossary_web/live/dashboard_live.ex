@@ -2,7 +2,6 @@ defmodule GlossaryWeb.DashboardLive do
   use GlossaryWeb, :live_view
 
   alias Glossary.Entries
-  alias GlossaryWeb.EntryLayouts
 
   @impl true
   def mount(_params, _session, socket) do
