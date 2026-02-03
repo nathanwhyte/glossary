@@ -1,35 +1,36 @@
 defmodule GlossaryWeb.DashboardLive do
   use GlossaryWeb, :live_view
 
-  alias Glossary.Entries
-
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     assign(socket,
-       current_scope: nil,
-       query: ""
-     )
-     |> stream(:recent_entries, Entries.recent_entries())}
+    {:ok, assign(socket, query: "")}
+  end
+
+  @impl true
+  def handle_event("search", %{"query" => query}, socket) do
+    {:noreply, assign(socket, query: query)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app flash={@flash}>
       <div class="space-y-12 pt-8">
         <section>
           <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
             <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
 
-            <input
-              type="text"
-              placeholder="Search"
-              class=""
-              value={@query}
-              name="query"
-              autocomplete="off"
-            />
+            <.form for={%{}} phx-change="search" class="grow">
+              <.input
+                type="text"
+                name="query"
+                placeholder="Search"
+                autocomplete="off"
+                value={@query}
+                phx-debounce="150"
+                class="input-ghost input-md size-full border-0 focus:ring-0"
+              />
+            </.form>
 
             <span class="hidden space-x-1 sm:inline-flex">
               <kbd class="kbd kbd-sm">
