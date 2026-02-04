@@ -121,17 +121,40 @@ defmodule Glossary.Entries do
   """
   def search_entries(query) do
     query = String.trim(query)
+    if query == "", do: [], else: do_search(query)
+  end
 
-    if query == "" do
-      []
+  defp do_search(query) do
+    fts_results = fts_search(query)
+
+    if length(fts_results) < 3 do
+      fts_ids = MapSet.new(fts_results, & &1.id)
+      trigram_results = trigram_search(query)
+      fts_results ++ Enum.reject(trigram_results, &MapSet.member?(fts_ids, &1.id))
     else
-      from(e in Entry,
-        where: fragment("similarity(title_text, ?) > 0.1", ^query),
-        order_by: [desc: fragment("similarity(title_text, ?)", ^query)],
-        limit: 10
-      )
-      |> Repo.all()
+      fts_results
     end
+  end
+
+  defp fts_search(query) do
+    from(e in Entry,
+      where: fragment("search_tsv @@ websearch_to_tsquery('english', ?)", ^query),
+      order_by: [
+        desc: fragment("ts_rank_cd(search_tsv, websearch_to_tsquery('english', ?))", ^query),
+        desc: e.updated_at
+      ],
+      limit: 20
+    )
+    |> Repo.all()
+  end
+
+  defp trigram_search(query) do
+    from(e in Entry,
+      where: fragment("similarity(title_text, ?) > 0.1", ^query),
+      order_by: [desc: fragment("similarity(title_text, ?)", ^query)],
+      limit: 10
+    )
+    |> Repo.all()
   end
 
   def change_entry(%Entry{} = entry, attrs \\ %{}) do
