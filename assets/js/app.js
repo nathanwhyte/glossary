@@ -27,11 +27,12 @@ import topbar from "../vendor/topbar";
 import BodyEditor from "./hooks/tiptap/body";
 import SubtitleEditor from "./hooks/tiptap/subtitle";
 import TitleEditor from "./hooks/tiptap/title";
+import SearchShortcut from "./hooks/search_shortcut";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
-const Hooks = { ...colocatedHooks, BodyEditor, SubtitleEditor, TitleEditor };
+const Hooks = { ...colocatedHooks, BodyEditor, SubtitleEditor, TitleEditor, SearchShortcut };
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")

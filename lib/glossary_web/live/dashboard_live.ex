@@ -8,7 +8,7 @@ defmodule GlossaryWeb.DashboardLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(query: "")
+     |> assign(query: "", search_modal_open?: false, search_results_empty?: true)
      |> stream(:search_results, [])
      |> stream(:recent_entries, Entries.recent_entries())}
   end
@@ -19,8 +19,18 @@ defmodule GlossaryWeb.DashboardLive do
 
     {:noreply,
      socket
-     |> assign(query: query)
+     |> assign(query: query, search_modal_open?: true, search_results_empty?: results == [])
      |> stream(:search_results, results, reset: true)}
+  end
+
+  @impl true
+  def handle_event("summon_search_modal", _params, socket) do
+    {:noreply, assign(socket, :search_modal_open?, true)}
+  end
+
+  @impl true
+  def handle_event("banish_search_modal", _params, socket) do
+    {:noreply, assign(socket, :search_modal_open?, false)}
   end
 
   @impl true
@@ -32,8 +42,12 @@ defmodule GlossaryWeb.DashboardLive do
           <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
             <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
 
-            <.form for={%{}} phx-change="search" class="grow">
+            <.form for={%{}} id="dashboard-search-form" phx-change="search" class="grow">
               <.input
+                id="dashboard-search"
+                phx-hook="SearchShortcut"
+                phx-focus="summon_search_modal"
+                phx-click="summon_search_modal"
                 type="text"
                 name="query"
                 placeholder="Search"
@@ -53,18 +67,43 @@ defmodule GlossaryWeb.DashboardLive do
           </label>
         </section>
 
-        <section :if={@query != ""} id="search-results" phx-update="stream" class="space-y-1">
-          <.link
-            :for={{id, entry} <- @streams.search_results}
-            id={id}
-            navigate={~p"/entries/#{entry.id}"}
-            class="block rounded-lg p-3 hover:bg-base-200"
+        <section
+          :if={@search_modal_open?}
+          id="search-modal"
+          class="modal modal-open"
+          phx-window-keydown="banish_search_modal"
+          phx-key="escape"
+        >
+          <div
+            id="search-modal-content"
+            class="modal-box max-w-3xl p-3"
+            phx-click-away="banish_search_modal"
           >
-            <div class="font-semibold">{entry.title_text}</div>
-            <div :if={entry.subtitle_text != ""} class="text-base-content/60 text-sm">
-              {entry.subtitle_text}
+            <div :if={@query == ""} class="text-base-content/60 px-3 py-10 text-center text-sm">
+              Start typing to search entries.
             </div>
-          </.link>
+
+            <div
+              :if={@query != "" && @search_results_empty?}
+              class="text-base-content/60 px-3 py-10 text-center text-sm"
+            >
+              No matching entries.
+            </div>
+
+            <section id="search-results" phx-update="stream" class="space-y-1">
+              <.link
+                :for={{id, entry} <- @streams.search_results}
+                id={id}
+                navigate={~p"/entries/#{entry.id}"}
+                class="block rounded-lg p-3 hover:bg-base-200"
+              >
+                <div class="font-semibold">{entry.title_text}</div>
+                <div :if={entry.subtitle_text != ""} class="text-base-content/60 text-sm">
+                  {entry.subtitle_text}
+                </div>
+              </.link>
+            </section>
+          </div>
         </section>
 
         <section class="grid auto-rows-fr grid-cols-2 gap-4">
