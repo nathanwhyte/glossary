@@ -41,6 +41,11 @@ defmodule GlossaryWeb.EntryLive.Edit do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
+      <.live_component
+        module={GlossaryWeb.SearchModal}
+        id="global-search-modal"
+      />
+
       <div>
         <div
           id="title-editor"

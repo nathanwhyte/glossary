@@ -8,6 +8,11 @@ defmodule GlossaryWeb.EntryLive.Index do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
+      <.live_component
+        module={GlossaryWeb.SearchModal}
+        id="global-search-modal"
+      />
+
       <EntryLayouts.entry_table
         table_title="All Entries"
         table_rows={@streams.entries}

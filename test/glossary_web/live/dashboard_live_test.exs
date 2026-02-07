@@ -1,4 +1,4 @@
-defmodule GlossaryWeb.DashboardLiveTest do
+defmodule GlossaryWeb.DashboardTest do
   use GlossaryWeb.ConnCase
 
   import Glossary.EntriesFixtures
@@ -28,7 +28,9 @@ defmodule GlossaryWeb.DashboardLiveTest do
 
     assert has_element?(view, "#search-modal")
 
-    render_keydown(view, "banish_search_modal", %{"key" => "escape"})
+    view
+    |> element("#search-modal")
+    |> render_keydown(%{"key" => "escape"})
 
     refute has_element?(view, "#search-modal")
   end

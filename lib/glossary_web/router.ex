@@ -17,7 +17,7 @@ defmodule GlossaryWeb.Router do
   scope "/", GlossaryWeb do
     pipe_through :browser
 
-    live "/", DashboardLive, :index
+    live "/", Dashboard, :index
 
     live "/entries", EntryLive.Index, :index
     live "/entries/new", EntryLive.New, :new
