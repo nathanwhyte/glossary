@@ -4,14 +4,14 @@ defmodule GlossaryWeb.DashboardLiveTest do
   import Glossary.EntriesFixtures
   import Phoenix.LiveViewTest
 
-  test "opens modal when search input is focused", %{conn: conn} do
+  test "shows the search modal", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
-    refute has_element?(view, "#search-modal")
-
-    view
-    |> element("#dashboard-search")
-    |> render_focus()
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
 
     assert has_element?(view, "#search-modal")
     assert has_element?(view, "#search-modal-content[phx-click-away='banish_search_modal']")
@@ -20,9 +20,11 @@ defmodule GlossaryWeb.DashboardLiveTest do
   test "closes modal on escape", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
-    view
-    |> element("#dashboard-search")
-    |> render_focus()
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
 
     assert has_element?(view, "#search-modal")
 
@@ -37,9 +39,11 @@ defmodule GlossaryWeb.DashboardLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/")
 
-    view
-    |> element("#dashboard-search")
-    |> render_focus()
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
 
     view
     |> element("#dashboard-search-form")

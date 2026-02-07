@@ -39,24 +39,24 @@ defmodule GlossaryWeb.DashboardLive do
     <Layouts.app flash={@flash}>
       <div class="space-y-12 pt-8">
         <section>
-          <label class="input input-lg mx-auto flex w-full max-w-3xl items-center space-x-1 text-sm">
+          <button
+            id="dashboard-search-button"
+            phx-hook="SearchShortcut"
+            phx-focus="summon_search_modal"
+            phx-click="summon_search_modal"
+            phx-debounce="100"
+            type="button"
+            class="border-base-content/50 mx-auto flex w-full max-w-3xl cursor-pointer items-center space-x-2 rounded-md border p-3 text-sm"
+          >
             <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
 
-            <.form for={%{}} id="dashboard-search-form" phx-change="search" class="grow">
-              <.input
-                id="dashboard-search"
-                phx-hook="SearchShortcut"
-                phx-focus="summon_search_modal"
-                phx-click="summon_search_modal"
-                type="text"
-                name="query"
-                placeholder="Search"
-                autocomplete="off"
-                value={@query}
-                phx-debounce="150"
-                class="input-ghost input-md size-full border-0 focus:ring-0"
-              />
-            </.form>
+            <div
+              placeholder="Search"
+              autocomplete="off"
+              class="text-base-content/50 grow cursor-text text-left focus:outline-none"
+            >
+              Search
+            </div>
 
             <span class="hidden space-x-1 sm:inline-flex">
               <kbd class="kbd kbd-sm">
@@ -64,7 +64,7 @@ defmodule GlossaryWeb.DashboardLive do
               </kbd>
               <kbd class="kbd kbd-sm">k</kbd>
             </span>
-          </label>
+          </button>
         </section>
 
         <section
@@ -76,10 +76,34 @@ defmodule GlossaryWeb.DashboardLive do
         >
           <div
             id="search-modal-content"
-            class="modal-box max-w-3xl p-3"
+            class="modal-box min-h-72 max-w-3xl"
             phx-click-away="banish_search_modal"
           >
-            <div :if={@query == ""} class="text-base-content/60 px-3 py-10 text-center text-sm">
+            <label class="mx-auto flex w-full max-w-3xl items-center gap-4 text-sm">
+              <.icon name="hero-magnifying-glass-micro" class="size-5 shrink-0" />
+
+              <.form for={%{}} id="dashboard-search-form" phx-change="search" class="grow">
+                <.input
+                  id="dashboard-search-input"
+                  phx-mounted={JS.focus()}
+                  type="text"
+                  name="query"
+                  placeholder="Search"
+                  autocomplete="off"
+                  value={@query}
+                  phx-debounce="150"
+                  class="size-full py-3 text-sm focus:outline-none"
+                />
+              </.form>
+
+              <div class="hidden pl-1 sm:inline-flex">
+                <kbd class="kbd kbd-sm">
+                  Esc
+                </kbd>
+              </div>
+            </label>
+
+            <div :if={@query == ""} class="text-base-content/25 px-3 py-10 text-center text-sm italic">
               Start typing to search entries.
             </div>
 

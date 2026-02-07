@@ -1,20 +1,25 @@
 const SearchShortcut = {
   mounted() {
     this.handleKeydown = (event) => {
-      if (event.defaultPrevented || !event.metaKey || event.key.toLowerCase() !== "k") {
+      if (
+        event.defaultPrevented ||
+        !event.metaKey ||
+        event.key.toLowerCase() !== "k"
+      ) {
         return;
       }
 
       event.preventDefault();
-      this.el.focus();
-      this.el.select();
+      this.el.click();
     };
 
     window.addEventListener("keydown", this.handleKeydown);
   },
 
   destroyed() {
-    window.removeEventListener("keydown", this.handleKeydown);
+    if (this.handleKeydown) {
+      window.removeEventListener("keydown", this.handleKeydown);
+    }
   },
 };
 

@@ -32,7 +32,13 @@ import SearchShortcut from "./hooks/search_shortcut";
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
-const Hooks = { ...colocatedHooks, BodyEditor, SubtitleEditor, TitleEditor, SearchShortcut };
+const Hooks = {
+  ...colocatedHooks,
+  BodyEditor,
+  SubtitleEditor,
+  TitleEditor,
+  SearchShortcut,
+};
 
 const csrfToken = document
   .querySelector("meta[name='csrf-token']")
