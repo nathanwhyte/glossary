@@ -120,3 +120,49 @@ entries = [
         {inserted_count, skipped_count + 1}
     end
   end)
+
+# Seed projects and associate entries
+alias Glossary.Projects
+alias Glossary.Projects.Project
+
+projects = [
+  %{
+    # Intentionally overlaps existing entry title/body text for cross-type search checks
+    name: "Corvid Intelligence",
+    entry_titles: ["Corvid Intelligence", "What Are Corvids?"]
+  },
+  %{
+    name: "Ornithology",
+    entry_titles: ["What Are Corvids?", "Corvid Intelligence"]
+  },
+  %{
+    name: "Natural Sciences",
+    entry_titles: [
+      "Mycelial Networks",
+      "Tidal Locking",
+      "Circadian Rhythms"
+    ]
+  }
+]
+
+for project_attrs <- projects do
+  project =
+    case Repo.get_by(Project, name: project_attrs.name) do
+      nil ->
+        {:ok, p} = Projects.create_project(%{name: project_attrs.name})
+        p
+
+      %Project{} = p ->
+        p
+    end
+
+  for title <- project_attrs.entry_titles do
+    case Repo.get_by(Entry, title_text: title) do
+      nil ->
+        :skip
+
+      %Entry{} = entry ->
+        Projects.add_entry(project, entry)
+    end
+  end
+end

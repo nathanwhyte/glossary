@@ -111,14 +111,32 @@ defmodule Glossary.Entries do
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking entry changes.
+  Searches entries and projects, returning a unified list of results.
 
-  ## Examples
-
-      iex> change_entry(entry)
-      %Ecto.Changeset{data: %Entry{}}
-
+  Each result is a map with `:type` (`:entry` or `:project`), `:id`, `:title`,
+  and `:subtitle` keys for display in the search modal.
   """
+  def search(query) do
+    query = String.trim(query)
+    if query == "", do: [], else: do_unified_search(query)
+  end
+
+  defp do_unified_search(query) do
+    entry_results =
+      do_search(query)
+      |> Enum.map(fn entry ->
+        %{type: :entry, id: entry.id, title: entry.title_text, subtitle: entry.subtitle_text}
+      end)
+
+    project_results =
+      Glossary.Projects.search_projects(query)
+      |> Enum.map(fn project ->
+        %{type: :project, id: project.id, title: project.name, subtitle: nil}
+      end)
+
+    project_results ++ entry_results
+  end
+
   def search_entries(query) do
     query = String.trim(query)
     if query == "", do: [], else: do_search(query)
@@ -157,6 +175,15 @@ defmodule Glossary.Entries do
     |> Repo.all()
   end
 
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking entry changes.
+
+  ## Examples
+
+      iex> change_entry(entry)
+      %Ecto.Changeset{data: %Entry{}}
+
+  """
   def change_entry(%Entry{} = entry, attrs \\ %{}) do
     Entry.changeset(entry, attrs)
   end

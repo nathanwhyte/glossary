@@ -11,7 +11,7 @@ defmodule GlossaryWeb.SearchModal do
        query: "",
        show_trigger: false,
        search_modal_open?: false,
-       search_results: [],
+       search_result_groups: result_groups(),
        search_results_empty?: true
      )}
   end
@@ -23,14 +23,14 @@ defmodule GlossaryWeb.SearchModal do
 
   @impl true
   def handle_event("search", %{"query" => query}, socket) do
-    results = Entries.search_entries(query)
+    results = Entries.search(query)
 
     {:noreply,
      socket
      |> assign(
        query: query,
        search_modal_open?: true,
-       search_results: results,
+       search_result_groups: group_results(results, socket.assigns.search_result_groups),
        search_results_empty?: results == []
      )}
   end
@@ -43,6 +43,76 @@ defmodule GlossaryWeb.SearchModal do
   @impl true
   def handle_event("banish_search_modal", _params, socket) do
     {:noreply, assign(socket, :search_modal_open?, false)}
+  end
+
+  defp result_path(%{type: :entry, id: id}), do: ~p"/entries/#{id}"
+  defp result_path(%{type: :project, id: id}), do: ~p"/projects/#{id}"
+  defp result_path(%{type: :tag, id: id}), do: "/tags/#{id}"
+
+  defp result_groups do
+    %{
+      entry: %{label: "Entries", dom_id: "entry-results-section", results: []},
+      project: %{label: "Projects", dom_id: "project-results-section", results: []},
+      tag: %{label: "Tags", dom_id: "tag-results-section", results: []}
+    }
+  end
+
+  defp group_results(results, groups) do
+    groups = reset_group_results(groups)
+
+    grouped =
+      Enum.reduce(results, groups, fn result, acc ->
+        case result.type do
+          :entry -> update_in(acc.entry.results, &[result | &1])
+          :project -> update_in(acc.project.results, &[result | &1])
+          :tag -> update_in(acc.tag.results, &[result | &1])
+          _ -> acc
+        end
+      end)
+
+    reverse_group_results(grouped)
+  end
+
+  defp reset_group_results(groups) do
+    for {key, group} <- groups, into: %{} do
+      {key, %{group | results: []}}
+    end
+  end
+
+  defp reverse_group_results(groups) do
+    for {key, group} <- groups, into: %{} do
+      {key, %{group | results: Enum.reverse(group.results)}}
+    end
+  end
+
+  attr :group, :map, required: true
+
+  defp result_section(assigns) do
+    ~H"""
+    <div :if={@group.results != []} id={@group.dom_id} class="space-y-1">
+      <div class="text-base-content/60 px-3 pt-1 text-xs font-semibold uppercase tracking-wide">
+        {@group.label}
+      </div>
+
+      <.link
+        :for={result <- @group.results}
+        id={"search-result-#{result.type}-#{result.id}"}
+        navigate={result_path(result)}
+        class="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-base-200 focus:bg-base-200 focus:outline-none"
+      >
+        <div>
+          <div class="font-semibold">{result.title}</div>
+          <div
+            :if={result.subtitle && result.subtitle != ""}
+            class="text-base-content/60 text-sm"
+          >
+            {result.subtitle}
+          </div>
+        </div>
+        <.icon name="hero-chevron-right-micro" class="size-5 text-base-content/25 shrink-0" />
+      </.link>
+    </div>
+    """
   end
 
   @impl true
@@ -125,7 +195,7 @@ defmodule GlossaryWeb.SearchModal do
                 autocomplete="off"
                 value={@query}
                 phx-debounce="150"
-                class="size-full py-3 text-sm focus:outline-none"
+                class="size-full text-base-content/75 py-1 text-sm focus:outline-none"
               />
             </.form>
 
@@ -137,7 +207,7 @@ defmodule GlossaryWeb.SearchModal do
           </label>
 
           <div :if={@query == ""} class="text-base-content/25 px-3 py-10 text-center text-sm italic">
-            Start typing to search entries.
+            Start typing to search entries, projects, or tags.
           </div>
 
           <div
@@ -147,18 +217,10 @@ defmodule GlossaryWeb.SearchModal do
             No matching entries.
           </div>
 
-          <section id="search-results" class="space-y-1">
-            <.link
-              :for={entry <- @search_results}
-              id={"search-result-#{entry.id}"}
-              navigate={~p"/entries/#{entry.id}"}
-              class="block rounded-lg p-3 hover:bg-base-200"
-            >
-              <div class="font-semibold">{entry.title_text}</div>
-              <div :if={entry.subtitle_text != ""} class="text-base-content/60 text-sm">
-                {entry.subtitle_text}
-              </div>
-            </.link>
+          <section id="search-results" class="space-y-4 pt-4">
+            <.result_section group={@search_result_groups.entry} />
+            <.result_section group={@search_result_groups.project} />
+            <.result_section group={@search_result_groups.tag} />
           </section>
         </div>
       </section>
