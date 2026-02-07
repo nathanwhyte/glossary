@@ -77,6 +77,7 @@ defmodule GlossaryWeb.DashboardLive do
           <div
             id="search-modal-content"
             class="modal-box min-h-72 max-w-3xl"
+            phx-hook="SearchResultNavigator"
             phx-click-away="banish_search_modal"
           >
             <label class="mx-auto flex w-full max-w-3xl items-center gap-4 text-sm">
