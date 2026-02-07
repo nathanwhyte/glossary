@@ -11,6 +11,7 @@ defmodule GlossaryWeb.EntryLive.Index do
       <EntryLayouts.entry_table
         table_title="All Entries"
         table_rows={@streams.entries}
+        allow_delete
       />
     </Layouts.app>
     """

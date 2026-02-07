@@ -11,6 +11,10 @@ defmodule GlossaryWeb.EntryLayouts do
   attr :table_title, :string, required: true, doc: "the title of the table"
   attr :table_rows, :list, required: true, doc: "list of entries to display"
 
+  attr :allow_delete, :boolean,
+    default: false,
+    doc: "whether to show delete buttons for each entry"
+
   def entry_table(assigns) do
     ~H"""
     <div class="space-y-2">
@@ -48,6 +52,7 @@ defmodule GlossaryWeb.EntryLayouts do
         </:col>
         <:action :let={{_id, entry}}>
           <.link
+            :if={@allow_delete}
             href="#"
             phx-click="delete"
             phx-value-id={entry.id}
