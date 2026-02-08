@@ -111,30 +111,58 @@ defmodule Glossary.Entries do
   end
 
   @doc """
-  Searches entries and projects, returning a unified list of results.
+  Searches entries, projects, and topics, returning a unified list of results.
 
-  Each result is a map with `:type` (`:entry` or `:project`), `:id`, `:title`,
-  and `:subtitle` keys for display in the search modal.
+  Each result is a map with `:type` (`:entry`, `:project`, or `:topic`), `:id`,
+  `:title`, and `:subtitle` keys for display in the search modal.
+
+  Accepts an optional `mode` to restrict which types are searched:
+
+    * `:all` (default) - searches entries, projects, and topics
+    * `:entries` - searches entries only
+    * `:projects` - searches projects only
+    * `:topics` - searches topics only
   """
-  def search(query) do
+  def search(query, mode \\ :all)
+
+  def search(query, mode) do
     query = String.trim(query)
-    if query == "", do: [], else: do_unified_search(query)
+    if query == "", do: [], else: do_filtered_search(query, mode)
   end
 
-  defp do_unified_search(query) do
-    entry_results =
-      do_search(query)
-      |> Enum.map(fn entry ->
-        %{type: :entry, id: entry.id, title: entry.title_text, subtitle: entry.subtitle_text}
-      end)
+  defp do_filtered_search(query, :entries) do
+    do_search(query)
+    |> Enum.map(&entry_to_result/1)
+  end
 
-    project_results =
-      Glossary.Projects.search_projects(query)
-      |> Enum.map(fn project ->
-        %{type: :project, id: project.id, title: project.name, subtitle: nil}
-      end)
+  defp do_filtered_search(query, :projects) do
+    Glossary.Projects.search_projects(query)
+    |> Enum.map(&project_to_result/1)
+  end
 
-    project_results ++ entry_results
+  defp do_filtered_search(query, :topics) do
+    Glossary.Topics.search_topics(query)
+    |> Enum.map(&topic_to_result/1)
+  end
+
+  defp do_filtered_search(query, :all) do
+    entries = do_search(query) |> Enum.map(&entry_to_result/1)
+    projects = Glossary.Projects.search_projects(query) |> Enum.map(&project_to_result/1)
+    topics = Glossary.Topics.search_topics(query) |> Enum.map(&topic_to_result/1)
+
+    projects ++ topics ++ entries
+  end
+
+  defp entry_to_result(entry) do
+    %{type: :entry, id: entry.id, title: entry.title_text, subtitle: entry.subtitle_text}
+  end
+
+  defp project_to_result(project) do
+    %{type: :project, id: project.id, title: project.name, subtitle: nil}
+  end
+
+  defp topic_to_result(topic) do
+    %{type: :topic, id: topic.id, title: topic.name, subtitle: nil}
   end
 
   def search_entries(query) do

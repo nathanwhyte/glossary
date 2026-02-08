@@ -22,6 +22,7 @@ defmodule Glossary.Entries.Entry do
   import Ecto.Changeset
 
   alias Glossary.Projects.Project
+  alias Glossary.Topics.Topic
 
   schema "entries" do
     field :title, :string
@@ -32,6 +33,7 @@ defmodule Glossary.Entries.Entry do
     field :body_text, :string
 
     many_to_many :projects, Project, join_through: "project_entries"
+    many_to_many :topics, Topic, join_through: "entry_topics"
 
     timestamps(type: :utc_datetime)
   end

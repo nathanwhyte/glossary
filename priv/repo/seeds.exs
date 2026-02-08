@@ -166,3 +166,44 @@ for project_attrs <- projects do
     end
   end
 end
+
+# Seed topics and associate entries
+alias Glossary.Topics
+alias Glossary.Topics.Topic
+
+topics = [
+  %{
+    name: "Biology",
+    entry_titles: ["What Are Corvids?", "Corvid Intelligence", "Mycelial Networks"]
+  },
+  %{
+    name: "Astronomy",
+    entry_titles: ["Tidal Locking"]
+  },
+  %{
+    name: "Food Science",
+    entry_titles: ["Sourdough Fermentation"]
+  }
+]
+
+for topic_attrs <- topics do
+  topic =
+    case Repo.get_by(Topic, name: topic_attrs.name) do
+      nil ->
+        {:ok, t} = Topics.create_topic(%{name: topic_attrs.name})
+        t
+
+      %Topic{} = t ->
+        t
+    end
+
+  for title <- topic_attrs.entry_titles do
+    case Repo.get_by(Entry, title_text: title) do
+      nil ->
+        :skip
+
+      %Entry{} = entry ->
+        Topics.add_entry(topic, entry)
+    end
+  end
+end

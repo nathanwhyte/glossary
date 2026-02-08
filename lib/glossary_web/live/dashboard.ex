@@ -22,26 +22,13 @@ defmodule GlossaryWeb.Dashboard do
           show_trigger={true}
         />
 
-        <section class="grid auto-rows-fr grid-cols-3 gap-4">
-          <a
-            href={~p"/entries/new"}
-            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
-          >
-            <div class="card-body">
-              <h2 class="card-title">Create a New Entry</h2>
-              <div class="h-6" />
-              <div class="card-actions justify-end">
-                <.icon name="hero-arrow-long-right-micro" class="size-6" />
-              </div>
-            </div>
-          </a>
-
+        <section class="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-3">
           <a
             href={~p"/entries"}
             class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
           >
             <div class="card-body">
-              <h2 class="card-title">See All Entries</h2>
+              <h2 class="card-title">Entries</h2>
               <div class="h-6" />
               <div class="card-actions justify-end">
                 <.icon name="hero-arrow-long-right-micro" class="size-6" />
@@ -54,7 +41,20 @@ defmodule GlossaryWeb.Dashboard do
             class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
           >
             <div class="card-body">
-              <h2 class="card-title">See All Projects</h2>
+              <h2 class="card-title">Projects</h2>
+              <div class="h-6" />
+              <div class="card-actions justify-end">
+                <.icon name="hero-arrow-long-right-micro" class="size-6" />
+              </div>
+            </div>
+          </a>
+
+          <a
+            href={~p"/topics"}
+            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
+          >
+            <div class="card-body">
+              <h2 class="card-title">Topics</h2>
               <div class="h-6" />
               <div class="card-actions justify-end">
                 <.icon name="hero-arrow-long-right-micro" class="size-6" />

@@ -27,6 +27,7 @@ import topbar from "../vendor/topbar";
 import BodyEditor from "./hooks/tiptap/body";
 import SubtitleEditor from "./hooks/tiptap/subtitle";
 import TitleEditor from "./hooks/tiptap/title";
+import SearchInput from "./hooks/search_input";
 import SearchShortcut from "./hooks/search_shortcut";
 import SearchResultNavigator from "./hooks/search_result_navigator";
 
@@ -38,6 +39,7 @@ const Hooks = {
   BodyEditor,
   SubtitleEditor,
   TitleEditor,
+  SearchInput,
   SearchShortcut,
   SearchResultNavigator,
 };

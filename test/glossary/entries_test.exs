@@ -111,4 +111,58 @@ defmodule Glossary.EntriesTest do
       assert hd(results).title_text == "Tidal Locking"
     end
   end
+
+  describe "search/2 with mode" do
+    import Glossary.EntriesFixtures
+    import Glossary.ProjectsFixtures
+    import Glossary.TopicsFixtures
+
+    test "mode :all returns entries, projects, and topics" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+      project_fixture(%{name: "Sourdough Project"})
+      topic_fixture(%{name: "Sourdough Topic"})
+
+      results = Entries.search("sourdough", :all)
+      types = Enum.map(results, & &1.type) |> Enum.uniq() |> Enum.sort()
+
+      assert :entry in types
+      assert :project in types
+      assert :topic in types
+    end
+
+    test "mode :entries returns only entries" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+      project_fixture(%{name: "Sourdough Project"})
+      topic_fixture(%{name: "Sourdough Topic"})
+
+      results = Entries.search("sourdough", :entries)
+      assert Enum.all?(results, &(&1.type == :entry))
+      assert length(results) >= 1
+    end
+
+    test "mode :projects returns only projects" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+      project_fixture(%{name: "Sourdough Project"})
+
+      results = Entries.search("sourdough", :projects)
+      assert Enum.all?(results, &(&1.type == :project))
+      assert length(results) == 1
+    end
+
+    test "mode :topics returns only topics" do
+      entry_fixture(%{title_text: "Sourdough Fermentation"})
+      topic_fixture(%{name: "Sourdough Topic"})
+
+      results = Entries.search("sourdough", :topics)
+      assert Enum.all?(results, &(&1.type == :topic))
+      assert length(results) == 1
+    end
+
+    test "returns empty list for blank query in any mode" do
+      assert Entries.search("", :entries) == []
+      assert Entries.search("  ", :projects) == []
+      assert Entries.search("", :topics) == []
+      assert Entries.search("", :all) == []
+    end
+  end
 end

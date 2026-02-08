@@ -27,6 +27,11 @@ defmodule GlossaryWeb.Router do
     live "/projects/new", ProjectLive.New, :new
     live "/projects/:id", ProjectLive.Show, :show
     live "/projects/:id/edit", ProjectLive.Edit, :edit
+
+    live "/topics", TopicLive.Index, :index
+    live "/topics/new", TopicLive.New, :new
+    live "/topics/:id", TopicLive.Show, :show
+    live "/topics/:id/edit", TopicLive.Edit, :edit
   end
 
   # Other scopes may use custom stacks.

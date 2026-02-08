@@ -54,4 +54,21 @@ defmodule GlossaryWeb.DashboardTest do
     assert has_element?(view, "#search-modal #search-results")
     assert has_element?(view, "#search-results a", matching.title_text)
   end
+
+  test "hides detected prefix from query input and shows mode badge", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
+
+    view
+    |> element("#dashboard-search-form")
+    |> render_change(%{"query" => "@Alpha"})
+
+    assert has_element?(view, "#search-filter-badge", "Projects")
+    assert has_element?(view, "#dashboard-search-input[value='Alpha']")
+  end
 end
