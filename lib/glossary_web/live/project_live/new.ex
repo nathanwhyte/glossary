@@ -47,6 +47,8 @@ defmodule GlossaryWeb.ProjectLive.New do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/projects"} text="Back to Projects" />
+
       <.header>
         New Project
         <:subtitle>Create a new project to group entries.</:subtitle>

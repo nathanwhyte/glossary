@@ -47,6 +47,8 @@ defmodule GlossaryWeb.TopicLive.New do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/topics"} text="Back to Topics" />
+
       <.header>
         New Topic
         <:subtitle>Create a new topic to tag entries.</:subtitle>

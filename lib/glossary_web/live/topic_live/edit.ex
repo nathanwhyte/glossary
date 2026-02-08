@@ -48,6 +48,8 @@ defmodule GlossaryWeb.TopicLive.Edit do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/topics"} text="Back to Topics" />
+
       <.header>
         Edit Topic
         <:subtitle>Update the topic name.</:subtitle>

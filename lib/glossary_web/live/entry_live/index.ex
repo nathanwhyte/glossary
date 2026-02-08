@@ -13,6 +13,8 @@ defmodule GlossaryWeb.EntryLive.Index do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/"} text="Back to Dashboard" />
+
       <EntryLayouts.entry_table
         table_title="All Entries"
         table_rows={@streams.entries}

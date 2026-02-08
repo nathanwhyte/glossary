@@ -22,7 +22,7 @@ defmodule GlossaryWeb.Dashboard do
           show_trigger={true}
         />
 
-        <section class="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-3">
+        <section class="grid auto-rows-fr grid-cols-1 gap-4 lg:grid-cols-3">
           <a
             href={~p"/entries"}
             class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"

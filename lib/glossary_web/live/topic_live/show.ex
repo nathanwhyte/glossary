@@ -90,6 +90,8 @@ defmodule GlossaryWeb.TopicLive.Show do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/topics"} text="Back to Topics" />
+
       <div class="space-y-6">
         <.header>
           {@topic.name}

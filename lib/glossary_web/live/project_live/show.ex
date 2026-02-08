@@ -90,6 +90,8 @@ defmodule GlossaryWeb.ProjectLive.Show do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/projects"} text="Back to Projects" />
+
       <div class="space-y-6">
         <.header>
           {@project.name}

@@ -47,13 +47,21 @@ defmodule GlossaryWeb.EntryLive.Edit do
       />
 
       <div>
-        <div
-          id="title-editor"
-          phx-hook="TitleEditor"
-          data-value={@entry.title}
-          class="mt-2"
-        >
-          <div data-editor="title" id="entry-title" phx-update="ignore" class="title-editor" />
+        <LiveLayouts.back_link navigate={~p"/entries"} text="Back to Entries" />
+
+        <div class="mt-4 flex items-center justify-between">
+          <div
+            id="title-editor"
+            phx-hook="TitleEditor"
+            data-value={@entry.title}
+          >
+            <div data-editor="title" id="entry-title" phx-update="ignore" class="title-editor" />
+          </div>
+
+          <%!-- IDEA: entry actions menu --%>
+          <div>
+            <.icon name="hero-ellipsis-vertical-micro" class="size-6 text-base-content/50" />
+          </div>
         </div>
 
         <div

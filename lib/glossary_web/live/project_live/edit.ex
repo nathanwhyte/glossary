@@ -48,6 +48,8 @@ defmodule GlossaryWeb.ProjectLive.Edit do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/projects"} text="Back to Projects" />
+
       <.header>
         Edit Project
         <:subtitle>Update the project name.</:subtitle>

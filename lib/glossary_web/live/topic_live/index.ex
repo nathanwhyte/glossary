@@ -28,6 +28,8 @@ defmodule GlossaryWeb.TopicLive.Index do
         id="global-search-modal"
       />
 
+      <LiveLayouts.back_link navigate={~p"/"} text="Back to Dashboard" />
+
       <div class="space-y-2">
         <.header>
           All Topics
