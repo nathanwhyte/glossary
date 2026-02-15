@@ -17,7 +17,7 @@ defmodule GlossaryWeb.EntryLayouts do
 
   def entry_table(assigns) do
     ~H"""
-    <div class="space-y-2">
+    <div class="max-w-7xl space-y-2">
       <.header>
         {@table_title}
         <:actions>
@@ -50,6 +50,32 @@ defmodule GlossaryWeb.EntryLayouts do
             </span>
           <% end %>
         </:col>
+        <:col :let={{_id, entry}} label="Projects">
+          <%= if !entry.projects || length(entry.projects) <= 0 do %>
+            <em class="text-base-content/25 italic">None</em>
+          <% else %>
+            <div class="flex flex-wrap gap-1">
+              <%= for project <- entry.projects do %>
+                <div class="badge badge-sm badge-accent text-nowrap">
+                  {project.name}
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </:col>
+        <:col :let={{_id, entry}} label="Topics">
+          <%= if !entry.topics || length(entry.topics) <= 0 do %>
+            <em class="text-base-content/25 italic">None</em>
+          <% else %>
+            <div class="flex flex-wrap">
+              <%= for topic <- entry.topics do %>
+                <div class="badge badge-sm badge-primary text-nowrap">
+                  {topic.name}
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </:col>
         <:action :let={{_id, entry}}>
           <.link
             :if={@allow_delete}
@@ -59,11 +85,16 @@ defmodule GlossaryWeb.EntryLayouts do
             data-confirm="Are you sure you want to delete this entry?"
             data-disable-with="Deleting..."
           >
-            Delete
+            <.icon
+              name="hero-trash-micro"
+              class="size-4 text-base-content/25 transition-colors hover:bg-error/75 focus:bg-error/75"
+            />
           </.link>
         </:action>
         <:action :let={{_id, entry}}>
-          <.link navigate={~p"/entries/#{entry}"}>View</.link>
+          <.link navigate={~p"/entries/#{entry}"}>
+            <.icon name="hero-chevron-right-micro" class="size-4 text-base-content/25" />
+          </.link>
         </:action>
       </.table>
     </div>

@@ -24,24 +24,16 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks as colocatedHooks } from "phoenix-colocated/glossary";
 import topbar from "../vendor/topbar";
-import BodyEditor from "./hooks/tiptap/body";
-import SubtitleEditor from "./hooks/tiptap/subtitle";
-import TitleEditor from "./hooks/tiptap/title";
-import SearchInput from "./hooks/search_input";
-import SearchShortcut from "./hooks/search_shortcut";
-import SearchResultNavigator from "./hooks/search_result_navigator";
+import { tiptapHooks } from "./hooks/tiptap";
+import { searchHooks } from "./hooks/search";
 
 /**
  * @type {import("phoenix_live_view").HooksOptions}
  */
 const Hooks = {
   ...colocatedHooks,
-  BodyEditor,
-  SubtitleEditor,
-  TitleEditor,
-  SearchInput,
-  SearchShortcut,
-  SearchResultNavigator,
+  ...tiptapHooks,
+  ...searchHooks,
 };
 
 const csrfToken = document

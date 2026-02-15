@@ -18,7 +18,7 @@ defmodule Glossary.Entries do
 
   """
   def list_entries do
-    Repo.all(Entry)
+    Repo.all(Entry |> order_by(desc: :inserted_at) |> preload([:projects, :topics]))
   end
 
   @doc """
@@ -31,7 +31,12 @@ defmodule Glossary.Entries do
 
   """
   def recent_entries(count \\ 7) do
-    Repo.all(Entry |> order_by(desc: :inserted_at) |> limit(^count))
+    Repo.all(
+      Entry
+      |> order_by(desc: :inserted_at)
+      |> limit(^count)
+      |> preload([:projects, :topics])
+    )
   end
 
   @doc """

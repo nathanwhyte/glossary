@@ -12,7 +12,8 @@ defmodule Glossary.EntriesTest do
 
     test "list_entries/0 returns all entries" do
       entry = entry_fixture()
-      assert Entries.list_entries() == [entry]
+      assert [%Entry{id: id}] = Entries.list_entries()
+      assert id == entry.id
     end
 
     test "get_entry!/1 returns the entry with given id" do
