@@ -4,6 +4,8 @@ defmodule GlossaryWeb.DashboardTest do
   import Glossary.EntriesFixtures
   import Phoenix.LiveViewTest
 
+  setup :register_and_log_in_user
+
   test "shows the search modal", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 

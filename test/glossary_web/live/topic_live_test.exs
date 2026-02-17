@@ -5,6 +5,8 @@ defmodule GlossaryWeb.TopicLiveTest do
   import Glossary.TopicsFixtures
   import Glossary.EntriesFixtures
 
+  setup :register_and_log_in_user
+
   defp create_topic(_) do
     topic = topic_fixture(%{name: "Test Topic"})
     %{topic: topic}

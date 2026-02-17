@@ -18,7 +18,7 @@ defmodule GlossaryWeb.Dashboard do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="space-y-12 pt-8">
         <.live_component
           module={GlossaryWeb.SearchModal}

@@ -5,6 +5,8 @@ defmodule GlossaryWeb.ProjectLiveTest do
   import Glossary.ProjectsFixtures
   import Glossary.EntriesFixtures
 
+  setup :register_and_log_in_user
+
   defp create_project(_) do
     project = project_fixture(%{name: "Test Project"})
     %{project: project}

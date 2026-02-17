@@ -1,6 +1,8 @@
 defmodule GlossaryWeb.Router do
   use GlossaryWeb, :router
 
+  import GlossaryWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,30 +10,55 @@ defmodule GlossaryWeb.Router do
     plug :put_root_layout, html: {GlossaryWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  ## Authentication routes (no login required)
+
   scope "/", GlossaryWeb do
-    pipe_through :browser
+    pipe_through [:browser]
 
-    live "/", Dashboard, :index
+    live_session :current_user,
+      on_mount: [{GlossaryWeb.UserAuth, :mount_current_scope}] do
+      live "/users/register", UserLive.Registration, :new
+      live "/users/log-in", UserLive.Login, :new
+    end
 
-    live "/entries", EntryLive.Index, :index
-    live "/entries/new", EntryLive.New, :new
-    live "/entries/:id", EntryLive.Edit, :edit
+    post "/users/log-in", UserSessionController, :create
+    delete "/users/log-out", UserSessionController, :delete
+  end
 
-    live "/projects", ProjectLive.Index, :index
-    live "/projects/new", ProjectLive.New, :new
-    live "/projects/:id", ProjectLive.Show, :show
-    live "/projects/:id/edit", ProjectLive.Edit, :edit
+  ## Protected app routes (login required)
 
-    live "/topics", TopicLive.Index, :index
-    live "/topics/new", TopicLive.New, :new
-    live "/topics/:id", TopicLive.Show, :show
-    live "/topics/:id/edit", TopicLive.Edit, :edit
+  scope "/", GlossaryWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{GlossaryWeb.UserAuth, :require_authenticated}] do
+      live "/", Dashboard, :index
+
+      live "/entries", EntryLive.Index, :index
+      live "/entries/new", EntryLive.New, :new
+      live "/entries/:id", EntryLive.Edit, :edit
+
+      live "/projects", ProjectLive.Index, :index
+      live "/projects/new", ProjectLive.New, :new
+      live "/projects/:id", ProjectLive.Show, :show
+      live "/projects/:id/edit", ProjectLive.Edit, :edit
+
+      live "/topics", TopicLive.Index, :index
+      live "/topics/new", TopicLive.New, :new
+      live "/topics/:id", TopicLive.Show, :show
+      live "/topics/:id/edit", TopicLive.Edit, :edit
+
+      live "/users/settings", UserLive.Settings, :edit
+    end
+
+    post "/users/update-password", UserSessionController, :update_password
   end
 
   # Other scopes may use custom stacks.

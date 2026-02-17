@@ -40,7 +40,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"

@@ -4,6 +4,8 @@ defmodule GlossaryWeb.EntryLiveTest do
   import Phoenix.LiveViewTest
   import Glossary.EntriesFixtures
 
+  setup :register_and_log_in_user
+
   defp create_entry(_) do
     entry = entry_fixture()
 
