@@ -82,12 +82,23 @@ defmodule GlossaryWeb.TopicLive.Show do
   end
 
   @impl true
+  def handle_info(:refresh_entries, socket) do
+    topic = Topics.get_topic!(socket.assigns.topic.id)
+
+    {:noreply,
+     socket
+     |> assign(:topic, topic)
+     |> stream(:topic_entries, topic.entries, reset: true)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        context={%{page: :topic_show, topic: @topic}}
       />
 
       <LiveLayouts.back_link navigate={~p"/topics"} text="Back to Topics" />

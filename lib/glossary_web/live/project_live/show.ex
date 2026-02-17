@@ -82,12 +82,23 @@ defmodule GlossaryWeb.ProjectLive.Show do
   end
 
   @impl true
+  def handle_info(:refresh_entries, socket) do
+    project = Projects.get_project!(socket.assigns.project.id)
+
+    {:noreply,
+     socket
+     |> assign(:project, project)
+     |> stream(:project_entries, project.entries, reset: true)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        context={%{page: :project_show, project: @project}}
       />
 
       <LiveLayouts.back_link navigate={~p"/projects"} text="Back to Projects" />

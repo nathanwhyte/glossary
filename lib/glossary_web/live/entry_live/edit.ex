@@ -44,6 +44,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        context={%{page: :entry_edit, entry: @entry}}
       />
 
       <div>
