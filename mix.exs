@@ -50,6 +50,7 @@ defmodule Glossary.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:tailwind_formatter, "~> 0.4.2", only: [:dev, :test], runtime: false},
       {:heroicons,
