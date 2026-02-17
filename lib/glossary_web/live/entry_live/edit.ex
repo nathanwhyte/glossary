@@ -91,6 +91,11 @@ defmodule GlossaryWeb.EntryLive.Edit do
     """
   end
 
+  @impl true
+  def handle_info({:search_modal_action, level, message}, socket) do
+    {:noreply, put_flash(socket, level, message)}
+  end
+
   defp apply_action(socket, :edit, %{"id" => id}) do
     entry = Entries.get_entry!(id)
 

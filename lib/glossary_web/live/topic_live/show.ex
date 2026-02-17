@@ -82,11 +82,12 @@ defmodule GlossaryWeb.TopicLive.Show do
   end
 
   @impl true
-  def handle_info(:refresh_entries, socket) do
+  def handle_info({:search_modal_action, level, message}, socket) do
     topic = Topics.get_topic!(socket.assigns.topic.id)
 
     {:noreply,
      socket
+     |> put_flash(level, message)
      |> assign(:topic, topic)
      |> stream(:topic_entries, topic.entries, reset: true)}
   end

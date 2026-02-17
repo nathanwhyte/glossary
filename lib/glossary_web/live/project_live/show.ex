@@ -82,11 +82,12 @@ defmodule GlossaryWeb.ProjectLive.Show do
   end
 
   @impl true
-  def handle_info(:refresh_entries, socket) do
+  def handle_info({:search_modal_action, level, message}, socket) do
     project = Projects.get_project!(socket.assigns.project.id)
 
     {:noreply,
      socket
+     |> put_flash(level, message)
      |> assign(:project, project)
      |> stream(:project_entries, project.entries, reset: true)}
   end
