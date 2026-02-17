@@ -24,6 +24,7 @@ defmodule GlossaryWeb.UserLive.Settings do
         phx-change="validate_password"
         phx-submit="update_password"
         phx-trigger-action={@trigger_submit}
+        class="mx-auto mt-6 max-w-sm space-y-4"
       >
         <input
           name={@password_form[:username].name}
@@ -32,19 +33,23 @@ defmodule GlossaryWeb.UserLive.Settings do
           autocomplete="username"
           value={@current_username}
         />
-        <.input
-          field={@password_form[:password]}
-          type="password"
-          label="New password"
-          autocomplete="new-password"
-          required
-        />
-        <.input
-          field={@password_form[:password_confirmation]}
-          type="password"
-          label="Confirm new password"
-          autocomplete="new-password"
-        />
+
+        <div>
+          <.input
+            field={@password_form[:password]}
+            type="password"
+            label="New password"
+            autocomplete="new-password"
+            required
+          />
+          <.input
+            field={@password_form[:password_confirmation]}
+            type="password"
+            label="Confirm new password"
+            autocomplete="new-password"
+          />
+        </div>
+
         <.button variant="primary" phx-disable-with="Saving...">
           Save Password
         </.button>

@@ -1,10 +1,10 @@
 defmodule GlossaryWeb.UserAuthTest do
   use GlossaryWeb.ConnCase, async: true
 
-  alias Phoenix.LiveView
   alias Glossary.Accounts
   alias Glossary.Accounts.Scope
   alias GlossaryWeb.UserAuth
+  alias Phoenix.LiveView
 
   import Glossary.AccountsFixtures
 

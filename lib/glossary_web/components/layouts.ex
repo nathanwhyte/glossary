@@ -42,10 +42,26 @@ defmodule GlossaryWeb.Layouts do
         </a>
       </div>
       <div class="flex-none">
-        <ul class="flex-column flex items-center space-x-4 px-1">
-          <li>
-            <.theme_toggle />
-          </li>
+        <ul class="menu menu-horizontal flex items-center gap-4 px-1">
+          <%= if @current_scope do %>
+            <li class="text-accent text-base font-semibold">
+              <.link href={~p"/users/settings"}>
+                <.icon name="hero-user-circle-mini" class="size-5" />
+                {@current_scope.user.username}
+              </.link>
+            </li>
+            <li class="text-base-content/50 text-xs font-semibold">
+              <.link href={~p"/users/log-out"} method="delete">Log Out</.link>
+            </li>
+          <% else %>
+            <li>
+              <.link href={~p"/users/register"}>Register</.link>
+            </li>
+            <li>
+              <.link href={~p"/users/log-in"}>Log In</.link>
+            </li>
+          <% end %>
+          <.theme_toggle />
         </ul>
       </div>
     </header>

@@ -9,7 +9,7 @@ defmodule GlossaryWeb.UserLive.LoginTest do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
       assert html =~ "Log in"
-      assert html =~ "Sign up"
+      assert html =~ "Register"
     end
   end
 
@@ -46,16 +46,16 @@ defmodule GlossaryWeb.UserLive.LoginTest do
   end
 
   describe "login navigation" do
-    test "redirects to registration page when the Sign up button is clicked", %{conn: conn} do
+    test "redirects to registration page when the Register button is clicked", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
-      {:ok, _login_live, login_html} =
+      {:ok, conn} =
         lv
-        |> element("main a", "Sign up")
+        |> element("#register-button")
         |> render_click()
         |> follow_redirect(conn, ~p"/users/register")
 
-      assert login_html =~ "Register"
+      assert conn.resp_body =~ "Register"
     end
   end
 
@@ -69,7 +69,7 @@ defmodule GlossaryWeb.UserLive.LoginTest do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
       assert html =~ "You need to reauthenticate"
-      refute html =~ "Sign up"
+      refute html =~ "Register"
 
       assert html =~
                ~s(value="#{user.username}")

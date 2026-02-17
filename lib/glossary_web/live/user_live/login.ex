@@ -12,12 +12,6 @@ defmodule GlossaryWeb.UserLive.Login do
             <:subtitle>
               <%= if @current_scope do %>
                 You need to reauthenticate to perform sensitive actions on your account.
-              <% else %>
-                Don't have an account? <.link
-                  navigate={~p"/users/register"}
-                  class="text-brand font-semibold hover:underline"
-                  phx-no-format
-                >Sign up</.link> for an account now.
               <% end %>
             </:subtitle>
           </.header>
@@ -30,29 +24,54 @@ defmodule GlossaryWeb.UserLive.Login do
           action={~p"/users/log-in"}
           phx-submit="submit"
           phx-trigger-action={@trigger_submit}
+          class="mx-auto max-w-sm space-y-4"
         >
-          <.input
-            readonly={!!@current_scope}
-            field={f[:username]}
-            type="text"
-            label="Username"
-            autocomplete="username"
-            required
-            phx-mounted={JS.focus()}
-          />
-          <.input
-            field={@form[:password]}
-            type="password"
-            label="Password"
-            autocomplete="current-password"
-          />
-          <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-            Log in and stay logged in <span aria-hidden="true">→</span>
-          </.button>
-          <.button class="btn btn-primary btn-soft mt-2 w-full">
-            Log in only this time
+          <div>
+            <.input
+              readonly={!!@current_scope}
+              field={f[:username]}
+              type="text"
+              label="Username"
+              autocomplete="username"
+              required
+              phx-mounted={JS.focus()}
+            />
+            <.input
+              field={@form[:password]}
+              type="password"
+              label="Password"
+              autocomplete="current-password"
+            />
+          </div>
+
+          <label class="label cursor-pointer justify-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name={@form[:remember_me].name}
+              class="checkbox"
+              value="true"
+              checked={@form[:remember_me].value == "true"}
+            />
+            <span class="label-text">Stay logged in</span>
+          </label>
+
+          <.button class="btn btn-primary w-full" type="submit">
+            Log in <span aria-hidden="true">→</span>
           </.button>
         </.form>
+
+        <%= unless @current_scope do %>
+          <div class="text-base-content/50 mt-8 flex flex-col items-center gap-2 text-sm">
+            Don't have an account?
+            <.button
+              id="register-button"
+              class="btn btn-primary btn-soft w-fit"
+              href={~p"/users/register"}
+            >
+              Create an Account
+            </.button>
+          </div>
+        <% end %>
       </div>
     </Layouts.app>
     """
@@ -64,7 +83,7 @@ defmodule GlossaryWeb.UserLive.Login do
       Phoenix.Flash.get(socket.assigns.flash, :username) ||
         get_in(socket.assigns, [:current_scope, Access.key(:user), Access.key(:username)])
 
-    form = to_form(%{"username" => username}, as: "user")
+    form = to_form(%{"username" => username, "remember_me" => "false"}, as: "user")
 
     {:ok, assign(socket, form: form, trigger_submit: false)}
   end
