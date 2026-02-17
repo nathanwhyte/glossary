@@ -10,6 +10,13 @@ const SearchShortcut = {
       }
 
       event.preventDefault();
+
+      const input = document.getElementById("dashboard-search-input");
+      if (input) {
+        input.select();
+        return;
+      }
+
       this.el.click();
     };
 
