@@ -211,6 +211,27 @@ defmodule GlossaryWeb.SearchModal do
   end
 
   @impl true
+  def handle_event("search:clear_prefix", _params, socket) do
+    if socket.assigns.search_mode == :all do
+      {:noreply, socket}
+    else
+      {:noreply,
+       socket
+       |> assign(
+         query: "",
+         search_mode: :all,
+         search_result_groups: result_groups(),
+         search_results_empty?: true,
+         command_results: [],
+         command_result_groups: command_groups(),
+         command_step: nil,
+         picker_query: "",
+         picker_results: []
+       )}
+    end
+  end
+
+  @impl true
   def handle_event("banish_search_modal", _params, socket) do
     {:noreply,
      assign(socket,

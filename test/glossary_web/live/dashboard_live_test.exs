@@ -108,4 +108,27 @@ defmodule GlossaryWeb.DashboardTest do
     assert has_element?(view, "#command-results #global-command-results-section", "Global")
     assert has_element?(view, "#command-results #command-new_entry", "New Entry")
   end
+
+  test "clears active prefix when query becomes empty", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
+
+    view
+    |> element("#dashboard-search-form")
+    |> render_change(%{"query" => "@"})
+
+    assert has_element?(view, "#search-filter-badge", "Projects")
+
+    view
+    |> element("#dashboard-search-form")
+    |> render_change(%{"query" => ""})
+
+    refute has_element?(view, "#search-filter-badge")
+    assert has_element?(view, "#starter-command-results")
+  end
 end
