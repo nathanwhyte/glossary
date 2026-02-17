@@ -71,6 +71,28 @@ defmodule GlossaryWeb.SearchModal do
             command_step: nil
           )
 
+        :all ->
+          results = Entries.search(socket.assigns.current_scope, search_query, :all)
+
+          commands =
+            if search_query == "" do
+              []
+            else
+              Commands.list_commands(socket.assigns.context, search_query)
+            end
+
+          socket
+          |> assign(
+            query: search_query,
+            search_modal_open?: true,
+            search_mode: :all,
+            search_result_groups: group_results(results, socket.assigns.search_result_groups),
+            search_results_empty?: results == [] and commands == [],
+            command_results: commands,
+            command_result_groups: group_commands(commands, socket.assigns.command_result_groups),
+            command_step: nil
+          )
+
         _ ->
           results = Entries.search(socket.assigns.current_scope, search_query, mode)
 
@@ -82,6 +104,7 @@ defmodule GlossaryWeb.SearchModal do
             search_result_groups: group_results(results, socket.assigns.search_result_groups),
             search_results_empty?: results == [],
             command_results: [],
+            command_result_groups: command_groups(),
             command_step: nil
           )
       end
@@ -694,6 +717,17 @@ defmodule GlossaryWeb.SearchModal do
             id="search-results"
             class="space-y-4 pt-4"
           >
+            <section
+              :if={@search_mode == :all && @query != "" && @command_results != []}
+              id="inline-command-results"
+              class="space-y-4"
+            >
+              <.command_group_section group={@command_result_groups.global} myself={@myself} />
+              <.command_group_section group={@command_result_groups.project} myself={@myself} />
+              <.command_group_section group={@command_result_groups.topic} myself={@myself} />
+              <.command_group_section group={@command_result_groups.entry} myself={@myself} />
+            </section>
+
             <.result_section group={@search_result_groups.entry} />
             <.result_section group={@search_result_groups.project} />
             <.result_section group={@search_result_groups.topic} />

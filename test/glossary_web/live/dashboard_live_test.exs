@@ -109,6 +109,23 @@ defmodule GlossaryWeb.DashboardTest do
     assert has_element?(view, "#command-results #command-new_entry", "New Entry")
   end
 
+  test "shows command matches in non-prefix search mode", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
+
+    view
+    |> element("#dashboard-search-form")
+    |> render_change(%{"query" => "new"})
+
+    assert has_element?(view, "#search-results #inline-command-results")
+    assert has_element?(view, "#search-results #command-new_entry", "New Entry")
+  end
+
   test "clears active prefix when query becomes empty", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
