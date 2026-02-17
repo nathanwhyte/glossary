@@ -4,9 +4,11 @@ defmodule Glossary.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias Glossary.Repo
 
+  alias Glossary.Accounts.Scope
   alias Glossary.Accounts.{User, UserToken}
+  alias Glossary.Entries
+  alias Glossary.Repo
 
   ## Database getters
 
@@ -74,10 +76,29 @@ defmodule Glossary.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+  def register_user(attrs, opts \\ []) do
+    create_welcome? = Keyword.get(opts, :create_welcome, true)
+
+    transact_user_registration(attrs, create_welcome?)
+  end
+
+  defp transact_user_registration(attrs, create_welcome?) do
+    case Repo.transact(fn -> do_register_user(attrs, create_welcome?) end) do
+      {:ok, user} -> {:ok, user}
+      {:error, %Ecto.Changeset{} = changeset} -> {:error, changeset}
+    end
+  end
+
+  defp do_register_user(attrs, create_welcome?) do
+    with {:ok, user} <-
+           %User{}
+           |> User.registration_changeset(attrs)
+           |> Repo.insert(),
+         {:ok, _entry} <- maybe_create_welcome_entry(user, create_welcome?) do
+      {:ok, user}
+    else
+      {:error, %Ecto.Changeset{} = changeset} -> Repo.rollback(changeset)
+    end
   end
 
   @doc """
@@ -179,5 +200,78 @@ defmodule Glossary.Accounts do
         {:ok, {user, tokens_to_expire}}
       end
     end)
+  end
+
+  defp maybe_create_welcome_entry(_user, false), do: {:ok, nil}
+
+  defp maybe_create_welcome_entry(user, true) do
+    user
+    |> Scope.for_user()
+    |> Entries.create_entry(welcome_entry_attrs())
+  end
+
+  defp welcome_entry_attrs do
+    %{
+      title: "<h1>Welcome to Glossary</h1>",
+      title_text: "Welcome to Glossary",
+      subtitle:
+        "<p>Start organizing notes with entries, projects, topics, and powerful search.</p>",
+      subtitle_text:
+        "Start organizing notes with entries, projects, topics, and powerful search.",
+      body: """
+      <h2>How your glossary is organized</h2>
+      <p><strong>Entries</strong> are your core notes. Keep ideas, definitions, snippets, and references here.</p>
+      <p><strong>Projects</strong> group entries by initiative, deliverable, or workflow.</p>
+      <p><strong>Topics</strong> group entries by subject area so you can connect related concepts across projects.</p>
+      <p><strong>Tags</strong> are planned next, and will add lightweight labels for cross-cutting filters.</p>
+
+      <h2>Search and commands</h2>
+      <p>Open search with <code>Cmd+K</code> (or the search button).</p>
+      <ul>
+        <li><code>@</code> projects</li>
+        <li><code>%</code> entries</li>
+        <li><code>#</code> topics</li>
+        <li><code>!</code> commands</li>
+      </ul>
+      <p>You can also type naturally without a prefix to see mixed results and suggested commands.</p>
+
+      <h2>Editor built-ins to try</h2>
+      <ul>
+        <li>Headings for structure</li>
+        <li><strong>Bold</strong> and <em>italic</em> for emphasis</li>
+        <li>Bullet lists and checklists for task-oriented notes</li>
+        <li>Code blocks for snippets and terminal commands</li>
+        <li>Blockquotes for key takeaways</li>
+        <li>Links to references and docs</li>
+      </ul>
+      """,
+      body_text: """
+      How your glossary is organized
+
+      Entries are your core notes. Keep ideas, definitions, snippets, and references here.
+      Projects group entries by initiative, deliverable, or workflow.
+      Topics group entries by subject area so you can connect related concepts across projects.
+      Tags are planned next, and will add lightweight labels for cross-cutting filters.
+
+      Search and commands
+
+      Open search with Cmd+K (or the search button).
+      @ projects
+      % entries
+      # topics
+      ! commands
+
+      You can also type naturally without a prefix to see mixed results and suggested commands.
+
+      Editor built-ins to try
+
+      Headings for structure
+      Bold and italic for emphasis
+      Bullet lists and checklists for task-oriented notes
+      Code blocks for snippets and terminal commands
+      Blockquotes for key takeaways
+      Links to references and docs
+      """
+    }
   end
 end

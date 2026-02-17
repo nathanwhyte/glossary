@@ -17,11 +17,11 @@ defmodule Glossary.AccountsFixtures do
     })
   end
 
-  def user_fixture(attrs \\ %{}) do
+  def user_fixture(attrs \\ %{}, opts \\ []) do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> Accounts.register_user()
+      |> Accounts.register_user(Keyword.put_new(opts, :create_welcome, false))
 
     user
   end

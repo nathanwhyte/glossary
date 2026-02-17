@@ -22,31 +22,39 @@ defmodule GlossaryWeb.UserLive.Registration do
           </.header>
         </div>
 
-        <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
-          <.input
-            field={@form[:username]}
-            type="text"
-            label="Username"
-            autocomplete="username"
-            required
-            phx-mounted={JS.focus()}
-          />
-          <.input
-            field={@form[:password]}
-            type="password"
-            label="Password"
-            autocomplete="new-password"
-            required
-          />
-          <.input
-            field={@form[:password_confirmation]}
-            type="password"
-            label="Confirm password"
-            autocomplete="new-password"
-          />
+        <.form
+          for={@form}
+          id="registration_form"
+          phx-submit="save"
+          phx-change="validate"
+          class="mx-auto max-w-sm space-y-4"
+        >
+          <div>
+            <.input
+              field={@form[:username]}
+              type="text"
+              label="Username"
+              autocomplete="username"
+              required
+              phx-mounted={JS.focus()}
+            />
+            <.input
+              field={@form[:password]}
+              type="password"
+              label="Password"
+              autocomplete="new-password"
+              required
+            />
+            <.input
+              field={@form[:password_confirmation]}
+              type="password"
+              label="Confirm password"
+              autocomplete="new-password"
+            />
+          </div>
 
           <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
-            Create an account
+            Create Account
           </.button>
         </.form>
       </div>

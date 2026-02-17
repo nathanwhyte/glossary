@@ -2,9 +2,11 @@ defmodule Glossary.AccountsTest do
   use Glossary.DataCase
 
   alias Glossary.Accounts
+  alias Glossary.Entries
 
   import Glossary.AccountsFixtures
-  alias Glossary.Accounts.{User, UserToken}
+  alias Glossary.Accounts.{Scope, User, UserToken}
+  alias Glossary.Entries.Entry
 
   describe "get_user_by_username/1" do
     test "does not return the user if the username does not exist" do
@@ -104,6 +106,27 @@ defmodule Glossary.AccountsTest do
       assert user.username == username
       assert is_binary(user.hashed_password)
       assert is_nil(user.password)
+
+      scope = Scope.for_user(user)
+      entries = Entries.list_entries(scope)
+
+      assert length(entries) == 1
+
+      [welcome_entry] = entries
+      assert welcome_entry.title_text == "Welcome to Glossary"
+      assert welcome_entry.body_text =~ "Projects"
+      assert welcome_entry.body_text =~ "Topics"
+      assert welcome_entry.body_text =~ "Tags"
+      assert welcome_entry.body_text =~ "Cmd+K"
+    end
+
+    test "does not create welcome entry when registration fails" do
+      entries_before = Repo.aggregate(Entry, :count, :id)
+
+      {:error, _changeset} =
+        Accounts.register_user(%{username: "ab", password: valid_user_password()})
+
+      assert Repo.aggregate(Entry, :count, :id) == entries_before
     end
   end
 
