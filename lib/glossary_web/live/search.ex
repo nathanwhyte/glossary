@@ -403,7 +403,7 @@ defmodule GlossaryWeb.SearchModal do
             name="name"
             placeholder="Create new..."
             autocomplete="off"
-            class="grow bg-transparent text-primary placeholder-primary/50 font-medium focus:outline-none"
+            class="text-primary placeholder-primary/50 grow bg-transparent font-medium focus:outline-none"
           />
         </.form>
         <div
@@ -651,10 +651,17 @@ defmodule GlossaryWeb.SearchModal do
   defp action_success_message(:add_entry_to_project_from_entry), do: "Added to project."
   defp action_success_message(:add_entry_to_topic_from_entry), do: "Added to topic."
 
-  defp create_success_message(:add_entry_to_project_from_entry, name), do: "Created project \"#{name}\" and added entry."
-  defp create_success_message(:add_entry_to_topic_from_entry, name), do: "Created topic \"#{name}\" and added entry."
-  defp create_success_message(:add_entry_to_project, name), do: "Created entry \"#{name}\" and added to project."
-  defp create_success_message(:add_entry_to_topic, name), do: "Created entry \"#{name}\" and added to topic."
+  defp create_success_message(:add_entry_to_project_from_entry, name),
+    do: "Created project \"#{name}\" and added entry."
+
+  defp create_success_message(:add_entry_to_topic_from_entry, name),
+    do: "Created topic \"#{name}\" and added entry."
+
+  defp create_success_message(:add_entry_to_project, name),
+    do: "Created entry \"#{name}\" and added to project."
+
+  defp create_success_message(:add_entry_to_topic, name),
+    do: "Created entry \"#{name}\" and added to topic."
 
   defp picker_can_create?(%{action: {:action, _}}), do: true
   defp picker_can_create?(_), do: false
