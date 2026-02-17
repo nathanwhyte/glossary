@@ -1,6 +1,10 @@
 defmodule GlossaryWeb.SearchModal do
   use GlossaryWeb, :live_component
 
+  @moduledoc """
+  Live component for global search and keyboard-driven result navigation.
+  """
+
   alias Glossary.Entries
 
   @impl true

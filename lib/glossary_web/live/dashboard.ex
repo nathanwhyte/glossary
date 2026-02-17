@@ -1,6 +1,10 @@
 defmodule GlossaryWeb.Dashboard do
   use GlossaryWeb, :live_view
 
+  @moduledoc """
+  LiveView dashboard showing navigation cards and recent entries.
+  """
+
   alias Glossary.Entries
   alias GlossaryWeb.EntryLayouts
 

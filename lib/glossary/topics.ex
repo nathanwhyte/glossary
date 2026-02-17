@@ -6,8 +6,8 @@ defmodule Glossary.Topics do
   import Ecto.Query, warn: false
   alias Glossary.Repo
 
-  alias Glossary.Topics.Topic
   alias Glossary.Entries.Entry
+  alias Glossary.Topics.Topic
 
   @doc """
   Returns the list of topics, ordered by name.

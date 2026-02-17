@@ -1,8 +1,8 @@
 defmodule GlossaryWeb.TopicLive.Show do
   use GlossaryWeb, :live_view
 
-  alias Glossary.Topics
   alias Glossary.Entries
+  alias Glossary.Topics
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do

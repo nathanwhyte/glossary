@@ -6,8 +6,8 @@ defmodule Glossary.Projects do
   import Ecto.Query, warn: false
   alias Glossary.Repo
 
-  alias Glossary.Projects.Project
   alias Glossary.Entries.Entry
+  alias Glossary.Projects.Project
 
   @doc """
   Returns the list of projects, ordered by name.

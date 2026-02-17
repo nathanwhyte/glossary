@@ -22,11 +22,11 @@ This is a web application written using the Phoenix web framework.
 
 The `entries` table stores each field as both HTML (from Tiptap) and plain text:
 
-| Column | Type | Purpose |
-|---|---|---|
-| `title` / `title_text` | string | Entry title (HTML / plain text) |
-| `subtitle` / `subtitle_text` | string | Subtitle (HTML / plain text) |
-| `body` / `body_text` | string | Body content (HTML / plain text) |
+| Column                       | Type   | Purpose                          |
+| ---------------------------- | ------ | -------------------------------- |
+| `title` / `title_text`       | string | Entry title (HTML / plain text)  |
+| `subtitle` / `subtitle_text` | string | Subtitle (HTML / plain text)     |
+| `body` / `body_text`         | string | Body content (HTML / plain text) |
 
 **Search:** The `pg_trgm` extension is enabled with a GIN trigram index on `title_text` (`entries_title_text_trgm_gin`). Use `similarity()` for fuzzy matching. The search function is `Glossary.Entries.search_entries/1`.
 
@@ -98,6 +98,9 @@ The Entry form uses [Tiptap](https://tiptap.dev/) for rich text editing of title
 ## Mix guidelines
 
 - Read the docs and options before using tasks (by using `mix help task_name`)
+- Run `mix credo` for linting, and use `mix credo explain` to understand and fix reported checks
+  - `mix credo --strict` shows all lints from priority 0 to 5
+  - `mix credo` (without `--strict`) only shows priority 0 through 2 lints
 - To debug test failures, run tests in a specific file with `mix test test/my_test.exs` or run all previously failed tests with `mix test --failed`
 - `mix deps.clean --all` is **almost never needed**. **Avoid** using it unless you have good reason
   <!-- phoenix:elixir-end -->

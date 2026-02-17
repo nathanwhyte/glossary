@@ -1,8 +1,8 @@
 defmodule GlossaryWeb.ProjectLive.Show do
   use GlossaryWeb, :live_view
 
-  alias Glossary.Projects
   alias Glossary.Entries
+  alias Glossary.Projects
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do

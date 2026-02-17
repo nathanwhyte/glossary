@@ -83,9 +83,9 @@ defmodule GlossaryWeb do
       import GlossaryWeb.CoreComponents
 
       # Common modules used in templates
-      alias Phoenix.LiveView.JS
       alias GlossaryWeb.Layouts
       alias GlossaryWeb.LiveLayouts
+      alias Phoenix.LiveView.JS
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

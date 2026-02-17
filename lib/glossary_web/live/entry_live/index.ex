@@ -40,7 +40,7 @@ defmodule GlossaryWeb.EntryLive.Index do
     {:noreply, stream_delete(socket, :entries, entry)}
   end
 
-  defp list_entries() do
+  defp list_entries do
     Entries.list_entries()
   end
 end

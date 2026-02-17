@@ -138,7 +138,7 @@ defmodule Glossary.EntriesTest do
 
       results = Entries.search("sourdough", :entries)
       assert Enum.all?(results, &(&1.type == :entry))
-      assert length(results) >= 1
+      assert results != []
     end
 
     test "mode :projects returns only projects" do
