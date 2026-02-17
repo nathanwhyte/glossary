@@ -7,8 +7,8 @@ defmodule Glossary.EntriesFixtures do
   @doc """
   Generate a entry.
   """
-  def entry_fixture(attrs \\ %{}) do
-    {:ok, entry} =
+  def entry_fixture(%Glossary.Accounts.Scope{} = current_scope, attrs) do
+    merged_attrs =
       attrs
       |> Enum.into(%{
         body: "some body",
@@ -17,8 +17,14 @@ defmodule Glossary.EntriesFixtures do
         title: "some title",
         title_text: "some title"
       })
-      |> Glossary.Entries.create_entry()
+
+    {:ok, entry} = Glossary.Entries.create_entry(current_scope, merged_attrs)
 
     entry
+  end
+
+  def entry_fixture(attrs \\ %{}) do
+    current_scope = Glossary.AccountsFixtures.user_scope_fixture()
+    entry_fixture(current_scope, attrs)
   end
 end

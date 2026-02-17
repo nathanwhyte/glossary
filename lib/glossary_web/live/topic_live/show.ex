@@ -6,7 +6,7 @@ defmodule GlossaryWeb.TopicLive.Show do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    topic = Topics.get_topic!(id)
+    topic = Topics.get_topic!(socket.assigns.current_scope, id)
 
     {:ok,
      socket
@@ -20,7 +20,7 @@ defmodule GlossaryWeb.TopicLive.Show do
 
   @impl true
   def handle_event("show_entry_picker", _params, socket) do
-    available = Topics.available_entries(socket.assigns.topic)
+    available = Topics.available_entries(socket.assigns.current_scope, socket.assigns.topic)
 
     {:noreply,
      socket
@@ -40,7 +40,8 @@ defmodule GlossaryWeb.TopicLive.Show do
 
   @impl true
   def handle_event("search_entries", %{"query" => query}, socket) do
-    available = Topics.available_entries(socket.assigns.topic, query)
+    available =
+      Topics.available_entries(socket.assigns.current_scope, socket.assigns.topic, query)
 
     {:noreply,
      socket
@@ -50,10 +51,15 @@ defmodule GlossaryWeb.TopicLive.Show do
 
   @impl true
   def handle_event("add_entry", %{"id" => entry_id}, socket) do
-    entry = Entries.get_entry!(entry_id)
-    {:ok, topic} = Topics.add_entry(socket.assigns.topic, entry)
+    entry = Entries.get_entry!(socket.assigns.current_scope, entry_id)
+    {:ok, topic} = Topics.add_entry(socket.assigns.current_scope, socket.assigns.topic, entry)
 
-    available = Topics.available_entries(topic, socket.assigns.entry_search_query)
+    available =
+      Topics.available_entries(
+        socket.assigns.current_scope,
+        topic,
+        socket.assigns.entry_search_query
+      )
 
     {:noreply,
      socket
@@ -64,12 +70,16 @@ defmodule GlossaryWeb.TopicLive.Show do
 
   @impl true
   def handle_event("remove_entry", %{"id" => entry_id}, socket) do
-    entry = Entries.get_entry!(entry_id)
-    {:ok, topic} = Topics.remove_entry(socket.assigns.topic, entry)
+    entry = Entries.get_entry!(socket.assigns.current_scope, entry_id)
+    {:ok, topic} = Topics.remove_entry(socket.assigns.current_scope, socket.assigns.topic, entry)
 
     available =
       if socket.assigns.show_entry_picker? do
-        Topics.available_entries(topic, socket.assigns.entry_search_query)
+        Topics.available_entries(
+          socket.assigns.current_scope,
+          topic,
+          socket.assigns.entry_search_query
+        )
       else
         []
       end
@@ -83,7 +93,7 @@ defmodule GlossaryWeb.TopicLive.Show do
 
   @impl true
   def handle_info({:search_modal_action, level, message}, socket) do
-    topic = Topics.get_topic!(socket.assigns.topic.id)
+    topic = Topics.get_topic!(socket.assigns.current_scope, socket.assigns.topic.id)
 
     {:noreply,
      socket
@@ -99,6 +109,7 @@ defmodule GlossaryWeb.TopicLive.Show do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
         context={%{page: :topic_show, topic: @topic}}
       />
 

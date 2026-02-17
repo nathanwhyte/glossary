@@ -7,8 +7,8 @@ defmodule GlossaryWeb.TopicLiveTest do
 
   setup :register_and_log_in_user
 
-  defp create_topic(_) do
-    topic = topic_fixture(%{name: "Test Topic"})
+  defp create_topic(%{scope: current_scope}) do
+    topic = topic_fixture(current_scope, %{name: "Test Topic"})
     %{topic: topic}
   end
 
@@ -71,8 +71,8 @@ defmodule GlossaryWeb.TopicLiveTest do
       assert html =~ "Entries"
     end
 
-    test "adds an entry to the topic", %{conn: conn, topic: topic} do
-      entry = entry_fixture(%{title_text: "Test Entry"})
+    test "adds an entry to the topic", %{conn: conn, topic: topic, scope: current_scope} do
+      entry = entry_fixture(current_scope, %{title_text: "Test Entry"})
 
       {:ok, show_live, _html} = live(conn, ~p"/topics/#{topic}")
 
@@ -86,9 +86,9 @@ defmodule GlossaryWeb.TopicLiveTest do
       assert has_element?(show_live, "#topic_entries-#{entry.id}")
     end
 
-    test "removes an entry from the topic", %{conn: conn, topic: topic} do
-      entry = entry_fixture(%{title_text: "Entry to Remove"})
-      Glossary.Topics.add_entry(topic, entry)
+    test "removes an entry from the topic", %{conn: conn, topic: topic, scope: current_scope} do
+      entry = entry_fixture(current_scope, %{title_text: "Entry to Remove"})
+      Glossary.Topics.add_entry(current_scope, topic, entry)
 
       {:ok, show_live, _html} = live(conn, ~p"/topics/#{topic}")
 
@@ -105,7 +105,7 @@ defmodule GlossaryWeb.TopicLiveTest do
   describe "Edit" do
     setup [:create_topic]
 
-    test "updates topic name", %{conn: conn, topic: topic} do
+    test "updates topic name", %{conn: conn, topic: topic, scope: current_scope} do
       {:ok, edit_live, html} = live(conn, ~p"/topics/#{topic}/edit")
 
       assert html =~ "Edit Topic"
@@ -116,7 +116,7 @@ defmodule GlossaryWeb.TopicLiveTest do
 
       assert_redirect(edit_live, ~p"/topics/#{topic}")
 
-      updated = Glossary.Topics.get_topic!(topic.id)
+      updated = Glossary.Topics.get_topic!(current_scope, topic.id)
       assert updated.name == "Renamed Topic"
     end
 

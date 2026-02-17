@@ -8,13 +8,13 @@ defmodule GlossaryWeb.TopicLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "All Topics")
-     |> stream(:topics, Topics.list_topics())}
+     |> stream(:topics, Topics.list_topics(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    topic = Topics.get_topic!(id)
-    {:ok, _} = Topics.delete_topic(topic)
+    topic = Topics.get_topic!(socket.assigns.current_scope, id)
+    {:ok, _} = Topics.delete_topic(socket.assigns.current_scope, topic)
 
     {:noreply, stream_delete(socket, :topics, topic)}
   end
@@ -26,6 +26,7 @@ defmodule GlossaryWeb.TopicLive.Index do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
       />
 
       <LiveLayouts.back_link navigate={~p"/"} text="Back to Dashboard" />

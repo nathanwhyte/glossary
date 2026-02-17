@@ -8,10 +8,13 @@ defmodule Glossary.Projects.Project do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Glossary.Accounts.User
   alias Glossary.Entries.Entry
 
   schema "projects" do
     field :name, :string
+
+    belongs_to :user, User
 
     many_to_many :entries, Entry, join_through: "project_entries"
 
@@ -29,5 +32,6 @@ defmodule Glossary.Projects.Project do
     project
     |> cast(attrs, [:name])
     |> validate_required([:name])
+    |> unique_constraint(:name, name: :projects_user_id_name_index)
   end
 end

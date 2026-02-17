@@ -6,7 +6,7 @@ defmodule GlossaryWeb.ProjectLive.Show do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    project = Projects.get_project!(id)
+    project = Projects.get_project!(socket.assigns.current_scope, id)
 
     {:ok,
      socket
@@ -20,7 +20,7 @@ defmodule GlossaryWeb.ProjectLive.Show do
 
   @impl true
   def handle_event("show_entry_picker", _params, socket) do
-    available = Projects.available_entries(socket.assigns.project)
+    available = Projects.available_entries(socket.assigns.current_scope, socket.assigns.project)
 
     {:noreply,
      socket
@@ -40,7 +40,8 @@ defmodule GlossaryWeb.ProjectLive.Show do
 
   @impl true
   def handle_event("search_entries", %{"query" => query}, socket) do
-    available = Projects.available_entries(socket.assigns.project, query)
+    available =
+      Projects.available_entries(socket.assigns.current_scope, socket.assigns.project, query)
 
     {:noreply,
      socket
@@ -50,10 +51,17 @@ defmodule GlossaryWeb.ProjectLive.Show do
 
   @impl true
   def handle_event("add_entry", %{"id" => entry_id}, socket) do
-    entry = Entries.get_entry!(entry_id)
-    {:ok, project} = Projects.add_entry(socket.assigns.project, entry)
+    entry = Entries.get_entry!(socket.assigns.current_scope, entry_id)
 
-    available = Projects.available_entries(project, socket.assigns.entry_search_query)
+    {:ok, project} =
+      Projects.add_entry(socket.assigns.current_scope, socket.assigns.project, entry)
+
+    available =
+      Projects.available_entries(
+        socket.assigns.current_scope,
+        project,
+        socket.assigns.entry_search_query
+      )
 
     {:noreply,
      socket
@@ -64,12 +72,18 @@ defmodule GlossaryWeb.ProjectLive.Show do
 
   @impl true
   def handle_event("remove_entry", %{"id" => entry_id}, socket) do
-    entry = Entries.get_entry!(entry_id)
-    {:ok, project} = Projects.remove_entry(socket.assigns.project, entry)
+    entry = Entries.get_entry!(socket.assigns.current_scope, entry_id)
+
+    {:ok, project} =
+      Projects.remove_entry(socket.assigns.current_scope, socket.assigns.project, entry)
 
     available =
       if socket.assigns.show_entry_picker? do
-        Projects.available_entries(project, socket.assigns.entry_search_query)
+        Projects.available_entries(
+          socket.assigns.current_scope,
+          project,
+          socket.assigns.entry_search_query
+        )
       else
         []
       end
@@ -83,7 +97,7 @@ defmodule GlossaryWeb.ProjectLive.Show do
 
   @impl true
   def handle_info({:search_modal_action, level, message}, socket) do
-    project = Projects.get_project!(socket.assigns.project.id)
+    project = Projects.get_project!(socket.assigns.current_scope, socket.assigns.project.id)
 
     {:noreply,
      socket
@@ -99,6 +113,7 @@ defmodule GlossaryWeb.ProjectLive.Show do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
         context={%{page: :project_show, project: @project}}
       />
 

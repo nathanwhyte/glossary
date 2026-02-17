@@ -8,10 +8,13 @@ defmodule Glossary.Topics.Topic do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Glossary.Accounts.User
   alias Glossary.Entries.Entry
 
   schema "topics" do
     field :name, :string
+
+    belongs_to :user, User
 
     many_to_many :entries, Entry, join_through: "entry_topics"
 
@@ -29,5 +32,6 @@ defmodule Glossary.Topics.Topic do
     topic
     |> cast(attrs, [:name])
     |> validate_required([:name])
+    |> unique_constraint(:name, name: :topics_user_id_name_index)
   end
 end

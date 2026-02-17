@@ -26,7 +26,7 @@ defmodule GlossaryWeb.TopicLive.New do
 
   @impl true
   def handle_event("save", %{"topic" => topic_params}, socket) do
-    case Topics.create_topic(topic_params) do
+    case Topics.create_topic(socket.assigns.current_scope, topic_params) do
       {:ok, topic} ->
         {:noreply,
          socket
@@ -45,6 +45,7 @@ defmodule GlossaryWeb.TopicLive.New do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
       />
 
       <LiveLayouts.back_link navigate={~p"/topics"} text="Back to Topics" />

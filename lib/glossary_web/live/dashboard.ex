@@ -12,7 +12,7 @@ defmodule GlossaryWeb.Dashboard do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> stream(:recent_entries, Entries.recent_entries())}
+     |> stream(:recent_entries, Entries.recent_entries(socket.assigns.current_scope))}
   end
 
   @impl true
@@ -23,6 +23,7 @@ defmodule GlossaryWeb.Dashboard do
         <.live_component
           module={GlossaryWeb.SearchModal}
           id="global-search-modal"
+          current_scope={@current_scope}
           show_trigger={true}
         />
 

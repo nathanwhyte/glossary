@@ -5,7 +5,7 @@ defmodule GlossaryWeb.TopicLive.Edit do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    topic = Topics.get_topic!(id)
+    topic = Topics.get_topic!(socket.assigns.current_scope, id)
     changeset = Topics.change_topic(topic)
 
     {:ok,
@@ -27,7 +27,7 @@ defmodule GlossaryWeb.TopicLive.Edit do
 
   @impl true
   def handle_event("save", %{"topic" => topic_params}, socket) do
-    case Topics.update_topic(socket.assigns.topic, topic_params) do
+    case Topics.update_topic(socket.assigns.current_scope, socket.assigns.topic, topic_params) do
       {:ok, topic} ->
         {:noreply,
          socket
@@ -46,6 +46,7 @@ defmodule GlossaryWeb.TopicLive.Edit do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
       />
 
       <LiveLayouts.back_link navigate={~p"/topics"} text="Back to Topics" />

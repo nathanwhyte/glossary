@@ -5,7 +5,7 @@ defmodule GlossaryWeb.ProjectLive.Edit do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    project = Projects.get_project!(id)
+    project = Projects.get_project!(socket.assigns.current_scope, id)
     changeset = Projects.change_project(project)
 
     {:ok,
@@ -27,7 +27,11 @@ defmodule GlossaryWeb.ProjectLive.Edit do
 
   @impl true
   def handle_event("save", %{"project" => project_params}, socket) do
-    case Projects.update_project(socket.assigns.project, project_params) do
+    case Projects.update_project(
+           socket.assigns.current_scope,
+           socket.assigns.project,
+           project_params
+         ) do
       {:ok, project} ->
         {:noreply,
          socket
@@ -46,6 +50,7 @@ defmodule GlossaryWeb.ProjectLive.Edit do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
       />
 
       <LiveLayouts.back_link navigate={~p"/projects"} text="Back to Projects" />

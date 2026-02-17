@@ -6,8 +6,8 @@ defmodule GlossaryWeb.EntryLiveTest do
 
   setup :register_and_log_in_user
 
-  defp create_entry(_) do
-    entry = entry_fixture()
+  defp create_entry(%{scope: current_scope}) do
+    entry = entry_fixture(current_scope, %{})
 
     %{entry: entry}
   end
@@ -22,7 +22,7 @@ defmodule GlossaryWeb.EntryLiveTest do
       assert html =~ entry.title_text
     end
 
-    test "updates entry via events", %{conn: conn, entry: entry} do
+    test "updates entry via events", %{conn: conn, entry: entry, scope: current_scope} do
       {:ok, edit_live, _html} = live(conn, ~p"/entries/#{entry}")
 
       render_hook(edit_live, "title_update", %{
@@ -35,7 +35,7 @@ defmodule GlossaryWeb.EntryLiveTest do
         "body_text" => "some updated body"
       })
 
-      updated = Glossary.Entries.get_entry!(entry.id)
+      updated = Glossary.Entries.get_entry!(current_scope, entry.id)
       assert updated.title == "<p>some updated title</p>"
       assert updated.title_text == "some updated title"
       assert updated.body == "<p>some updated body</p>"

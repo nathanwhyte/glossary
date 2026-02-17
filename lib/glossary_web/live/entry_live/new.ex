@@ -6,12 +6,11 @@ defmodule GlossaryWeb.EntryLive.New do
   """
   use GlossaryWeb, :live_view
 
-  alias Glossary.Entries.Entry
-  alias Glossary.Repo
+  alias Glossary.Entries
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, new_entry} = Repo.insert(%Entry{})
+    {:ok, new_entry} = Entries.create_entry(socket.assigns.current_scope, %{})
     {:ok, push_navigate(socket, to: ~p"/entries/#{new_entry.id}")}
   end
 

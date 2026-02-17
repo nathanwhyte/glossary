@@ -26,7 +26,7 @@ defmodule GlossaryWeb.ProjectLive.New do
 
   @impl true
   def handle_event("save", %{"project" => project_params}, socket) do
-    case Projects.create_project(project_params) do
+    case Projects.create_project(socket.assigns.current_scope, project_params) do
       {:ok, project} ->
         {:noreply,
          socket
@@ -45,6 +45,7 @@ defmodule GlossaryWeb.ProjectLive.New do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
       />
 
       <LiveLayouts.back_link navigate={~p"/projects"} text="Back to Projects" />

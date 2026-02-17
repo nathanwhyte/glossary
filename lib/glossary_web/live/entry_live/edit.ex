@@ -31,7 +31,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
   defp save_field(socket, attrs) do
     entry = socket.assigns.entry
 
-    case Entries.upsert_entry(entry, attrs) do
+    case Entries.upsert_entry(socket.assigns.current_scope, entry, attrs) do
       {:ok, entry} -> assign(socket, :entry, entry)
       {:error, _changeset} -> socket
     end
@@ -44,6 +44,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
       <.live_component
         module={GlossaryWeb.SearchModal}
         id="global-search-modal"
+        current_scope={@current_scope}
         context={%{page: :entry_edit, entry: @entry}}
       />
 
@@ -97,7 +98,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    entry = Entries.get_entry!(id)
+    entry = Entries.get_entry!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, "Edit Entry")

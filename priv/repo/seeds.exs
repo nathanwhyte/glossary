@@ -12,8 +12,24 @@
 #
 
 alias Glossary.Repo
+alias Glossary.Accounts.Scope
+alias Glossary.Accounts.User
 alias Glossary.Entries
 alias Glossary.Entries.Entry
+
+default_user_id = 1001
+default_username = "natew"
+default_password = "password123"
+hashed_password = Bcrypt.hash_pwd_salt(default_password)
+
+Repo.insert!(
+  %User{id: default_user_id, username: default_username, hashed_password: hashed_password},
+  on_conflict: [set: [hashed_password: hashed_password]],
+  conflict_target: :username
+)
+
+user = Repo.get_by!(User, username: default_username)
+current_scope = Scope.for_user(user)
 
 # Entry body is stored as HTML (from Tiptap editor) with a plain text copy in body_text
 entries = [
@@ -111,9 +127,9 @@ entries = [
 
 {inserted, skipped} =
   Enum.reduce(entries, {0, 0}, fn attrs, {inserted_count, skipped_count} ->
-    case Repo.get_by(Entry, title: attrs.title) do
+    case Repo.get_by(Entry, title: attrs.title, user_id: user.id) do
       nil ->
-        {:ok, _entry} = Entries.create_entry(attrs)
+        {:ok, _entry} = Entries.create_entry(current_scope, attrs)
         {inserted_count + 1, skipped_count}
 
       %Entry{} ->
@@ -147,9 +163,9 @@ projects = [
 
 for project_attrs <- projects do
   project =
-    case Repo.get_by(Project, name: project_attrs.name) do
+    case Repo.get_by(Project, name: project_attrs.name, user_id: user.id) do
       nil ->
-        {:ok, p} = Projects.create_project(%{name: project_attrs.name})
+        {:ok, p} = Projects.create_project(current_scope, %{name: project_attrs.name})
         p
 
       %Project{} = p ->
@@ -157,12 +173,12 @@ for project_attrs <- projects do
     end
 
   for title <- project_attrs.entry_titles do
-    case Repo.get_by(Entry, title_text: title) do
+    case Repo.get_by(Entry, title_text: title, user_id: user.id) do
       nil ->
         :skip
 
       %Entry{} = entry ->
-        Projects.add_entry(project, entry)
+        Projects.add_entry(current_scope, project, entry)
     end
   end
 end
@@ -188,9 +204,9 @@ topics = [
 
 for topic_attrs <- topics do
   topic =
-    case Repo.get_by(Topic, name: topic_attrs.name) do
+    case Repo.get_by(Topic, name: topic_attrs.name, user_id: user.id) do
       nil ->
-        {:ok, t} = Topics.create_topic(%{name: topic_attrs.name})
+        {:ok, t} = Topics.create_topic(current_scope, %{name: topic_attrs.name})
         t
 
       %Topic{} = t ->
@@ -198,12 +214,12 @@ for topic_attrs <- topics do
     end
 
   for title <- topic_attrs.entry_titles do
-    case Repo.get_by(Entry, title_text: title) do
+    case Repo.get_by(Entry, title_text: title, user_id: user.id) do
       nil ->
         :skip
 
       %Entry{} = entry ->
-        Topics.add_entry(topic, entry)
+        Topics.add_entry(current_scope, topic, entry)
     end
   end
 end

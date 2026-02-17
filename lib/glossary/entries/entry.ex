@@ -21,6 +21,7 @@ defmodule Glossary.Entries.Entry do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Glossary.Accounts.User
   alias Glossary.Projects.Project
   alias Glossary.Topics.Topic
 
@@ -31,6 +32,8 @@ defmodule Glossary.Entries.Entry do
     field :subtitle_text, :string
     field :body, :string
     field :body_text, :string
+
+    belongs_to :user, User
 
     many_to_many :projects, Project, join_through: "project_entries"
     many_to_many :topics, Topic, join_through: "entry_topics"
