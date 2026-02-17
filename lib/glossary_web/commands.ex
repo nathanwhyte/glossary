@@ -34,6 +34,13 @@ defmodule GlossaryWeb.Commands do
       action: {:navigate, :new_topic}
     },
     %{
+      id: "go_dashboard",
+      label: "Go to Dashboard",
+      icon: "hero-home",
+      scope: :global,
+      action: {:navigate, :dashboard}
+    },
+    %{
       id: "go_entries",
       label: "Go to Entries",
       icon: "hero-document-text",
@@ -83,6 +90,21 @@ defmodule GlossaryWeb.Commands do
       icon: "hero-pencil-square",
       scope: {:context, :topic_show},
       action: {:navigate, :edit_topic}
+    },
+    # Context: entry_edit
+    %{
+      id: "entry_add_to_project",
+      label: "Add to Project",
+      icon: "hero-folder-plus",
+      scope: {:context, :entry_edit},
+      action: {:action, :add_entry_to_project_from_entry}
+    },
+    %{
+      id: "entry_add_to_topic",
+      label: "Add to Topic",
+      icon: "hero-tag",
+      scope: {:context, :entry_edit},
+      action: {:action, :add_entry_to_topic_from_entry}
     }
   ]
 
@@ -120,6 +142,7 @@ defmodule GlossaryWeb.Commands do
   def resolve_action(%{action: {:navigate, :new_project}}, _ctx),
     do: {:navigate, ~p"/projects/new"}
 
+  def resolve_action(%{action: {:navigate, :dashboard}}, _ctx), do: {:navigate, ~p"/"}
   def resolve_action(%{action: {:navigate, :new_topic}}, _ctx), do: {:navigate, ~p"/topics/new"}
   def resolve_action(%{action: {:navigate, :entries}}, _ctx), do: {:navigate, ~p"/entries"}
   def resolve_action(%{action: {:navigate, :projects}}, _ctx), do: {:navigate, ~p"/projects"}

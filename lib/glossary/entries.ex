@@ -220,4 +220,62 @@ defmodule Glossary.Entries do
   def change_entry(%Entry{} = entry, attrs \\ %{}) do
     Entry.changeset(entry, attrs)
   end
+
+  @doc """
+  Returns projects that the given entry is NOT in, optionally filtered by name.
+  Used by the command palette picker.
+  """
+  def available_projects(%Entry{} = entry, query \\ "") do
+    alias Glossary.Projects.Project
+
+    existing_ids =
+      from(pe in "project_entries",
+        where: pe.entry_id == ^entry.id,
+        select: pe.project_id
+      )
+
+    base =
+      from(p in Project,
+        where: p.id not in subquery(existing_ids),
+        order_by: [desc: p.updated_at],
+        limit: 20
+      )
+
+    query = String.trim(query)
+
+    if query == "" do
+      Repo.all(base)
+    else
+      Repo.all(from(p in base, where: ilike(p.name, ^"%#{query}%")))
+    end
+  end
+
+  @doc """
+  Returns topics that the given entry is NOT in, optionally filtered by name.
+  Used by the command palette picker.
+  """
+  def available_topics(%Entry{} = entry, query \\ "") do
+    alias Glossary.Topics.Topic
+
+    existing_ids =
+      from(et in "entry_topics",
+        where: et.entry_id == ^entry.id,
+        select: et.topic_id
+      )
+
+    base =
+      from(t in Topic,
+        where: t.id not in subquery(existing_ids),
+        order_by: [desc: t.updated_at],
+        limit: 20
+      )
+
+    query = String.trim(query)
+
+    if query == "" do
+      Repo.all(base)
+    else
+      Repo.all(from(t in base, where: ilike(t.name, ^"%#{query}%")))
+    end
+  end
 end
