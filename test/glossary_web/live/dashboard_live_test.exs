@@ -37,9 +37,11 @@ defmodule GlossaryWeb.DashboardTest do
     refute has_element?(view, "#search-modal")
   end
 
-  test "shows search results in the modal", %{conn: conn} do
-    matching = entry_fixture(%{title: "<p>Alpha Term</p>", title_text: "Alpha Term"})
-    _other = entry_fixture(%{title: "<p>Zeta Topic</p>", title_text: "Zeta Topic"})
+  test "shows search results in the modal", %{conn: conn, scope: current_scope} do
+    matching =
+      entry_fixture(current_scope, %{title: "<p>Alpha Term</p>", title_text: "Alpha Term"})
+
+    _other = entry_fixture(current_scope, %{title: "<p>Zeta Topic</p>", title_text: "Zeta Topic"})
 
     {:ok, view, _html} = live(conn, ~p"/")
 
@@ -72,5 +74,38 @@ defmodule GlossaryWeb.DashboardTest do
 
     assert has_element?(view, "#search-filter-badge", "Projects")
     assert has_element?(view, "#dashboard-search-input[value='Alpha']")
+  end
+
+  test "shows starter commands for empty query", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
+
+    assert has_element?(view, "#starter-command-results")
+    assert has_element?(view, "#starter-command-results #global-command-results-section")
+    assert has_element?(view, "#starter-command-results #command-new_entry", "New Entry")
+    assert has_element?(view, "#starter-command-results #command-go_entries", "Go to Entries")
+  end
+
+  test "groups command mode results under Global", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    unless has_element?(view, "#search-modal") do
+      view
+      |> element("#dashboard-search-button")
+      |> render_click()
+    end
+
+    view
+    |> element("#dashboard-search-form")
+    |> render_change(%{"query" => "!"})
+
+    assert has_element?(view, "#command-results #global-command-results-section")
+    assert has_element?(view, "#command-results #global-command-results-section", "Global")
+    assert has_element?(view, "#command-results #command-new_entry", "New Entry")
   end
 end

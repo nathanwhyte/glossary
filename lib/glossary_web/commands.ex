@@ -126,6 +126,25 @@ defmodule GlossaryWeb.Commands do
   end
 
   @doc """
+  Returns starter commands for the default search state.
+
+  Context-specific commands are listed first, followed by global commands.
+  """
+  def starter_commands(context \\ %{}) do
+    page = Map.get(context, :page)
+
+    context_commands =
+      Enum.filter(@commands, fn cmd ->
+        match?({:context, ^page}, cmd.scope)
+      end)
+
+    global_commands = Enum.filter(@commands, &(&1.scope == :global))
+
+    (context_commands ++ global_commands)
+    |> Enum.uniq_by(& &1.id)
+  end
+
+  @doc """
   Looks up a command by its id.
   """
   def get_command(id) do

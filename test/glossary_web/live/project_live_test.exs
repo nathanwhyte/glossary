@@ -7,8 +7,8 @@ defmodule GlossaryWeb.ProjectLiveTest do
 
   setup :register_and_log_in_user
 
-  defp create_project(_) do
-    project = project_fixture(%{name: "Test Project"})
+  defp create_project(%{scope: current_scope}) do
+    project = project_fixture(current_scope, %{name: "Test Project"})
     %{project: project}
   end
 
@@ -71,8 +71,8 @@ defmodule GlossaryWeb.ProjectLiveTest do
       assert html =~ "Entries"
     end
 
-    test "adds an entry to the project", %{conn: conn, project: project} do
-      entry = entry_fixture(%{title_text: "Test Entry"})
+    test "adds an entry to the project", %{conn: conn, project: project, scope: current_scope} do
+      entry = entry_fixture(current_scope, %{title_text: "Test Entry"})
 
       {:ok, show_live, _html} = live(conn, ~p"/projects/#{project}")
 
@@ -86,9 +86,13 @@ defmodule GlossaryWeb.ProjectLiveTest do
       assert has_element?(show_live, "#project_entries-#{entry.id}")
     end
 
-    test "removes an entry from the project", %{conn: conn, project: project} do
-      entry = entry_fixture(%{title_text: "Entry to Remove"})
-      Glossary.Projects.add_entry(project, entry)
+    test "removes an entry from the project", %{
+      conn: conn,
+      project: project,
+      scope: current_scope
+    } do
+      entry = entry_fixture(current_scope, %{title_text: "Entry to Remove"})
+      Glossary.Projects.add_entry(current_scope, project, entry)
 
       {:ok, show_live, _html} = live(conn, ~p"/projects/#{project}")
 
@@ -100,12 +104,34 @@ defmodule GlossaryWeb.ProjectLiveTest do
 
       refute has_element?(show_live, "#project_entries-#{entry.id}")
     end
+
+    test "shows context and global starter commands in search", %{conn: conn, project: project} do
+      {:ok, show_live, _html} = live(conn, ~p"/projects/#{project}")
+
+      unless has_element?(show_live, "#search-modal") do
+        show_live
+        |> element("#search-shortcut-trigger")
+        |> render_click()
+      end
+
+      assert has_element?(show_live, "#starter-command-results")
+      assert has_element?(show_live, "#starter-command-results #project-command-results-section")
+      assert has_element?(show_live, "#starter-command-results #global-command-results-section")
+
+      assert has_element?(
+               show_live,
+               "#starter-command-results #command-add_entry_to_project",
+               "Add Entry to Project"
+             )
+
+      assert has_element?(show_live, "#starter-command-results #command-new_entry", "New Entry")
+    end
   end
 
   describe "Edit" do
     setup [:create_project]
 
-    test "updates project name", %{conn: conn, project: project} do
+    test "updates project name", %{conn: conn, project: project, scope: current_scope} do
       {:ok, edit_live, html} = live(conn, ~p"/projects/#{project}/edit")
 
       assert html =~ "Edit Project"
@@ -116,7 +142,7 @@ defmodule GlossaryWeb.ProjectLiveTest do
 
       assert_redirect(edit_live, ~p"/projects/#{project}")
 
-      updated = Glossary.Projects.get_project!(project.id)
+      updated = Glossary.Projects.get_project!(current_scope, project.id)
       assert updated.name == "Renamed Project"
     end
 

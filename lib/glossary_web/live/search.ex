@@ -26,6 +26,10 @@ defmodule GlossaryWeb.SearchModal do
        search_results_empty?: true,
        context: %{},
        command_results: [],
+       command_result_groups: command_groups(),
+       starter_command_results: Commands.starter_commands(%{}),
+       starter_command_result_groups:
+         group_commands(Commands.starter_commands(%{}), command_groups()),
        command_step: nil,
        picker_query: "",
        picker_results: []
@@ -34,7 +38,17 @@ defmodule GlossaryWeb.SearchModal do
 
   @impl true
   def update(assigns, socket) do
-    {:ok, assign(socket, assigns)}
+    context = Map.get(assigns, :context, socket.assigns.context)
+    starter_commands = Commands.starter_commands(context)
+
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(
+       starter_command_results: starter_commands,
+       starter_command_result_groups:
+         group_commands(starter_commands, socket.assigns.starter_command_result_groups)
+     )}
   end
 
   @impl true
@@ -52,12 +66,13 @@ defmodule GlossaryWeb.SearchModal do
             search_modal_open?: true,
             search_mode: :commands,
             command_results: commands,
+            command_result_groups: group_commands(commands, socket.assigns.command_result_groups),
             search_results_empty?: commands == [],
             command_step: nil
           )
 
         _ ->
-          results = Entries.search(search_query, mode)
+          results = Entries.search(socket.assigns.current_scope, search_query, mode)
 
           socket
           |> assign(
@@ -87,7 +102,13 @@ defmodule GlossaryWeb.SearchModal do
          |> push_navigate(to: path)}
 
       {:action, action_name} ->
-        picker_results = load_picker_results(action_name, socket.assigns.context, "")
+        picker_results =
+          load_picker_results(
+            socket.assigns.current_scope,
+            action_name,
+            socket.assigns.context,
+            ""
+          )
 
         {:noreply,
          socket
@@ -104,7 +125,14 @@ defmodule GlossaryWeb.SearchModal do
     {:picking, command} = socket.assigns.command_step
     action = Commands.resolve_action(command, socket.assigns.context)
     {:action, action_name} = action
-    results = load_picker_results(action_name, socket.assigns.context, query)
+
+    results =
+      load_picker_results(
+        socket.assigns.current_scope,
+        action_name,
+        socket.assigns.context,
+        query
+      )
 
     {:noreply,
      socket
@@ -117,8 +145,16 @@ defmodule GlossaryWeb.SearchModal do
     action = Commands.resolve_action(command, socket.assigns.context)
     {:action, action_name} = action
 
-    picked = load_picked_record(type, id)
-    {:ok, _} = execute_picker_action(action_name, socket.assigns.context, picked)
+    picked = load_picked_record(socket.assigns.current_scope, type, id)
+
+    {:ok, _} =
+      execute_picker_action(
+        socket.assigns.current_scope,
+        action_name,
+        socket.assigns.context,
+        picked
+      )
+
     send(self(), {:search_modal_action, :info, action_success_message(action_name)})
 
     {:noreply,
@@ -139,7 +175,13 @@ defmodule GlossaryWeb.SearchModal do
       {:picking, command} = socket.assigns.command_step
       {:action, action_name} = Commands.resolve_action(command, socket.assigns.context)
 
-      created = create_and_associate(action_name, socket.assigns.context, name)
+      created =
+        create_and_associate(
+          socket.assigns.current_scope,
+          action_name,
+          socket.assigns.context,
+          name
+        )
 
       case created do
         {:ok, _} ->
@@ -179,44 +221,47 @@ defmodule GlossaryWeb.SearchModal do
      )}
   end
 
-  defp load_picked_record("entry", id), do: Entries.get_entry!(id)
-  defp load_picked_record("project", id), do: Projects.get_project!(id)
-  defp load_picked_record("topic", id), do: Topics.get_topic!(id)
+  defp load_picked_record(current_scope, "entry", id), do: Entries.get_entry!(current_scope, id)
 
-  defp load_picker_results(:add_entry_to_project, context, query) do
-    Projects.available_entries(context.project, query)
+  defp load_picked_record(current_scope, "project", id),
+    do: Projects.get_project!(current_scope, id)
+
+  defp load_picked_record(current_scope, "topic", id), do: Topics.get_topic!(current_scope, id)
+
+  defp load_picker_results(current_scope, :add_entry_to_project, context, query) do
+    Projects.available_entries(current_scope, context.project, query)
     |> Enum.map(&%{id: &1.id, title: &1.title_text, subtitle: &1.subtitle_text, type: :entry})
   end
 
-  defp load_picker_results(:add_entry_to_topic, context, query) do
-    Topics.available_entries(context.topic, query)
+  defp load_picker_results(current_scope, :add_entry_to_topic, context, query) do
+    Topics.available_entries(current_scope, context.topic, query)
     |> Enum.map(&%{id: &1.id, title: &1.title_text, subtitle: &1.subtitle_text, type: :entry})
   end
 
-  defp load_picker_results(:add_entry_to_project_from_entry, context, query) do
-    Entries.available_projects(context.entry, query)
+  defp load_picker_results(current_scope, :add_entry_to_project_from_entry, context, query) do
+    Entries.available_projects(current_scope, context.entry, query)
     |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :project})
   end
 
-  defp load_picker_results(:add_entry_to_topic_from_entry, context, query) do
-    Entries.available_topics(context.entry, query)
+  defp load_picker_results(current_scope, :add_entry_to_topic_from_entry, context, query) do
+    Entries.available_topics(current_scope, context.entry, query)
     |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :topic})
   end
 
-  defp execute_picker_action(:add_entry_to_project, context, picked) do
-    Projects.add_entry(context.project, picked)
+  defp execute_picker_action(current_scope, :add_entry_to_project, context, picked) do
+    Projects.add_entry(current_scope, context.project, picked)
   end
 
-  defp execute_picker_action(:add_entry_to_topic, context, picked) do
-    Topics.add_entry(context.topic, picked)
+  defp execute_picker_action(current_scope, :add_entry_to_topic, context, picked) do
+    Topics.add_entry(current_scope, context.topic, picked)
   end
 
-  defp execute_picker_action(:add_entry_to_project_from_entry, context, picked) do
-    Projects.add_entry(picked, context.entry)
+  defp execute_picker_action(current_scope, :add_entry_to_project_from_entry, context, picked) do
+    Projects.add_entry(current_scope, picked, context.entry)
   end
 
-  defp execute_picker_action(:add_entry_to_topic_from_entry, context, picked) do
-    Topics.add_entry(picked, context.entry)
+  defp execute_picker_action(current_scope, :add_entry_to_topic_from_entry, context, picked) do
+    Topics.add_entry(current_scope, picked, context.entry)
   end
 
   defp parse_prefix(raw_query, current_mode) do
@@ -297,6 +342,47 @@ defmodule GlossaryWeb.SearchModal do
     end
   end
 
+  defp command_groups do
+    %{
+      global: %{label: "Global Commands", dom_id: "global-command-results-section", commands: []},
+      project: %{label: "Projects", dom_id: "project-command-results-section", commands: []},
+      topic: %{label: "Topics", dom_id: "topic-command-results-section", commands: []},
+      entry: %{label: "Entries", dom_id: "entry-command-results-section", commands: []}
+    }
+  end
+
+  defp group_commands(commands, groups) do
+    groups = reset_command_group_results(groups)
+
+    grouped =
+      Enum.reduce(commands, groups, fn command, acc ->
+        case command_group_key(command.scope) do
+          nil -> acc
+          key -> update_in(acc[key].commands, &[command | &1])
+        end
+      end)
+
+    reverse_command_group_results(grouped)
+  end
+
+  defp reset_command_group_results(groups) do
+    for {key, group} <- groups, into: %{} do
+      {key, %{group | commands: []}}
+    end
+  end
+
+  defp reverse_command_group_results(groups) do
+    for {key, group} <- groups, into: %{} do
+      {key, %{group | commands: Enum.reverse(group.commands)}}
+    end
+  end
+
+  defp command_group_key(:global), do: :global
+  defp command_group_key({:context, :project_show}), do: :project
+  defp command_group_key({:context, :topic_show}), do: :topic
+  defp command_group_key({:context, :entry_edit}), do: :entry
+  defp command_group_key(_), do: nil
+
   attr :group, :map, required: true
 
   defp result_section(assigns) do
@@ -327,18 +413,18 @@ defmodule GlossaryWeb.SearchModal do
     """
   end
 
-  attr :commands, :list, required: true
+  attr :group, :map, required: true
   attr :myself, :any, required: true
 
-  defp command_section(assigns) do
+  defp command_group_section(assigns) do
     ~H"""
-    <div class="space-y-1">
+    <div :if={@group.commands != []} id={@group.dom_id} class="space-y-1">
       <div class="text-base-content/60 px-3 pt-1 text-xs font-semibold uppercase tracking-wide">
-        Commands
+        {@group.label}
       </div>
 
       <button
-        :for={cmd <- @commands}
+        :for={cmd <- @group.commands}
         id={"command-#{cmd.id}"}
         phx-click="select_command"
         phx-value-id={cmd.id}
@@ -550,21 +636,6 @@ defmodule GlossaryWeb.SearchModal do
             </div>
           </label>
 
-          <%!-- Default empty state --%>
-          <div
-            :if={@command_step == nil && @search_mode != :commands && @query == ""}
-            class="text-base-content/25 px-3 py-10 text-center text-sm italic"
-          >
-            <p>Start typing to search entries, projects, or topics.</p>
-            <p class="text-base-content/40 mt-2 text-xs not-italic">
-              Prefix with <kbd class="kbd kbd-xs">@</kbd>
-              projects, <kbd class="kbd kbd-xs">%</kbd>
-              entries, <kbd class="kbd kbd-xs">#</kbd>
-              topics, or <kbd class="kbd kbd-xs">!</kbd>
-              commands
-            </p>
-          </div>
-
           <%!-- Commands mode: empty query shows all commands --%>
           <div
             :if={@command_step == nil && @search_mode == :commands && @command_results == []}
@@ -590,7 +661,10 @@ defmodule GlossaryWeb.SearchModal do
             id="command-results"
             class="space-y-4 pt-4"
           >
-            <.command_section commands={@command_results} myself={@myself} />
+            <.command_group_section group={@command_result_groups.global} myself={@myself} />
+            <.command_group_section group={@command_result_groups.project} myself={@myself} />
+            <.command_group_section group={@command_result_groups.topic} myself={@myself} />
+            <.command_group_section group={@command_result_groups.entry} myself={@myself} />
           </section>
 
           <%!-- Search results --%>
@@ -616,33 +690,63 @@ defmodule GlossaryWeb.SearchModal do
               />
             </section>
           <% end %>
+
+          <%!-- Starter commands for empty query with no active prefix --%>
+          <section
+            :if={
+              @command_step == nil && @search_mode == :all && @query == "" &&
+                @starter_command_results != []
+            }
+            id="starter-command-results"
+            class="space-y-4 pt-4"
+          >
+            <.command_group_section group={@starter_command_result_groups.project} myself={@myself} />
+            <.command_group_section group={@starter_command_result_groups.topic} myself={@myself} />
+            <.command_group_section group={@starter_command_result_groups.entry} myself={@myself} />
+            <.command_group_section group={@starter_command_result_groups.global} myself={@myself} />
+          </section>
+
+          <%!-- Default empty state --%>
+          <div
+            :if={@command_step == nil && @search_mode == :all && @query == ""}
+            class="text-base-content/25 px-3 py-10 text-center text-sm italic"
+          >
+            <p>Start typing to search entries, projects, or topics.</p>
+            <p class="text-base-content/40 mt-2 text-xs not-italic">
+              Prefix with <kbd class="kbd kbd-xs">@</kbd>
+              projects, <kbd class="kbd kbd-xs">%</kbd>
+              entries, <kbd class="kbd kbd-xs">#</kbd>
+              topics, or <kbd class="kbd kbd-xs">!</kbd>
+              commands
+            </p>
+          </div>
         </div>
       </section>
     </div>
     """
   end
 
-  defp create_and_associate(:add_entry_to_project_from_entry, context, name) do
-    with {:ok, project} <- Projects.create_project(%{name: name}) do
-      Projects.add_entry(project, context.entry)
+  defp create_and_associate(current_scope, :add_entry_to_project_from_entry, context, name) do
+    with {:ok, project} <- Projects.create_project(current_scope, %{name: name}) do
+      Projects.add_entry(current_scope, project, context.entry)
     end
   end
 
-  defp create_and_associate(:add_entry_to_topic_from_entry, context, name) do
-    with {:ok, topic} <- Topics.create_topic(%{name: name}) do
-      Topics.add_entry(topic, context.entry)
+  defp create_and_associate(current_scope, :add_entry_to_topic_from_entry, context, name) do
+    with {:ok, topic} <- Topics.create_topic(current_scope, %{name: name}) do
+      Topics.add_entry(current_scope, topic, context.entry)
     end
   end
 
-  defp create_and_associate(:add_entry_to_project, context, name) do
-    with {:ok, entry} <- Entries.create_entry(%{title_text: name}) do
-      Projects.add_entry(context.project, entry)
+  defp create_and_associate(current_scope, :add_entry_to_project, context, name) do
+    with {:ok, entry} <- Entries.create_entry(current_scope, %{title_text: name}) do
+      Projects.add_entry(current_scope, context.project, entry)
     end
   end
 
-  defp create_and_associate(:add_entry_to_topic, context, name) do
-    with {:ok, entry} <- Entries.create_entry(%{title_text: name}) do
-      Topics.add_entry(context.topic, entry)
+  defp create_and_associate(current_scope, :add_entry_to_topic, context, name) do
+    with {:ok, entry} <- Entries.create_entry(current_scope, %{title_text: name}) do
+      Topics.add_entry(current_scope, context.topic, entry)
     end
   end
 
