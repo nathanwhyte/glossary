@@ -112,14 +112,14 @@ defmodule GlossaryWeb.SearchModal do
   end
 
   @impl true
-  def handle_event("picker_select", %{"id" => entry_id}, socket) do
+  def handle_event("picker_select", %{"id" => id, "type" => type}, socket) do
     {:picking, command} = socket.assigns.command_step
     action = Commands.resolve_action(command, socket.assigns.context)
     {:action, action_name} = action
-    entry = Entries.get_entry!(entry_id)
 
-    execute_picker_action(action_name, socket.assigns.context, entry)
-    send(self(), :refresh_entries)
+    picked = load_picked_record(type, id)
+    {:ok, _} = execute_picker_action(action_name, socket.assigns.context, picked)
+    send(self(), {:search_modal_action, :info, action_success_message(action_name)})
 
     {:noreply,
      socket
@@ -129,6 +129,38 @@ defmodule GlossaryWeb.SearchModal do
        picker_query: "",
        picker_results: []
      )}
+  end
+
+  @impl true
+  def handle_event("picker_create", %{"name" => name}, socket) do
+    name = String.trim(name)
+
+    if name != "" do
+      {:picking, command} = socket.assigns.command_step
+      {:action, action_name} = Commands.resolve_action(command, socket.assigns.context)
+
+      created = create_and_associate(action_name, socket.assigns.context, name)
+
+      case created do
+        {:ok, _} ->
+          send(self(), {:search_modal_action, :info, create_success_message(action_name, name)})
+
+          {:noreply,
+           socket
+           |> assign(
+             search_modal_open?: false,
+             command_step: nil,
+             picker_query: "",
+             picker_results: []
+           )}
+
+        {:error, _} ->
+          send(self(), {:search_modal_action, :error, "Failed to create \"#{name}\"."})
+          {:noreply, socket}
+      end
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -147,20 +179,44 @@ defmodule GlossaryWeb.SearchModal do
      )}
   end
 
+  defp load_picked_record("entry", id), do: Entries.get_entry!(id)
+  defp load_picked_record("project", id), do: Projects.get_project!(id)
+  defp load_picked_record("topic", id), do: Topics.get_topic!(id)
+
   defp load_picker_results(:add_entry_to_project, context, query) do
     Projects.available_entries(context.project, query)
+    |> Enum.map(&%{id: &1.id, title: &1.title_text, subtitle: &1.subtitle_text, type: :entry})
   end
 
   defp load_picker_results(:add_entry_to_topic, context, query) do
     Topics.available_entries(context.topic, query)
+    |> Enum.map(&%{id: &1.id, title: &1.title_text, subtitle: &1.subtitle_text, type: :entry})
   end
 
-  defp execute_picker_action(:add_entry_to_project, context, entry) do
-    Projects.add_entry(context.project, entry)
+  defp load_picker_results(:add_entry_to_project_from_entry, context, query) do
+    Entries.available_projects(context.entry, query)
+    |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :project})
   end
 
-  defp execute_picker_action(:add_entry_to_topic, context, entry) do
-    Topics.add_entry(context.topic, entry)
+  defp load_picker_results(:add_entry_to_topic_from_entry, context, query) do
+    Entries.available_topics(context.entry, query)
+    |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :topic})
+  end
+
+  defp execute_picker_action(:add_entry_to_project, context, picked) do
+    Projects.add_entry(context.project, picked)
+  end
+
+  defp execute_picker_action(:add_entry_to_topic, context, picked) do
+    Topics.add_entry(context.topic, picked)
+  end
+
+  defp execute_picker_action(:add_entry_to_project_from_entry, context, picked) do
+    Projects.add_entry(picked, context.entry)
+  end
+
+  defp execute_picker_action(:add_entry_to_topic_from_entry, context, picked) do
+    Topics.add_entry(picked, context.entry)
   end
 
   defp parse_prefix(raw_query, current_mode) do
@@ -324,7 +380,7 @@ defmodule GlossaryWeb.SearchModal do
           phx-mounted={JS.focus()}
           type="text"
           name="picker_query"
-          placeholder="Search entries..."
+          placeholder="Search..."
           autocomplete="off"
           value={@picker_query}
           phx-debounce="100"
@@ -333,17 +389,35 @@ defmodule GlossaryWeb.SearchModal do
       </.form>
 
       <div class="max-h-60 space-y-1 overflow-y-auto">
+        <.form
+          :if={picker_can_create?(@command)}
+          for={%{}}
+          id="picker-create-form"
+          phx-submit="picker_create"
+          phx-target={@myself}
+          class="flex items-center gap-2 rounded-lg p-2 hover:bg-base-200"
+        >
+          <.icon name="hero-plus" class="size-5 text-primary shrink-0" />
+          <input
+            type="text"
+            name="name"
+            placeholder="Create new..."
+            autocomplete="off"
+            class="grow bg-transparent text-primary placeholder-primary/50 font-medium focus:outline-none"
+          />
+        </.form>
         <div
           :if={@picker_results == []}
           class="text-base-content/50 py-4 text-center text-sm"
         >
-          No available entries found.
+          No results found.
         </div>
         <button
-          :for={entry <- @picker_results}
-          id={"picker-entry-#{entry.id}"}
+          :for={result <- @picker_results}
+          id={"picker-#{result.type}-#{result.id}"}
           phx-click="picker_select"
-          phx-value-id={entry.id}
+          phx-value-id={result.id}
+          phx-value-type={result.type}
           phx-target={@myself}
           type="button"
           class="flex w-full items-center gap-2 rounded-lg p-2 text-left hover:bg-base-200"
@@ -351,17 +425,17 @@ defmodule GlossaryWeb.SearchModal do
           <.icon name="hero-plus-circle" class="size-5 text-success shrink-0" />
           <div>
             <div class="font-medium">
-              <%= if entry.title_text && entry.title_text != "" do %>
-                {entry.title_text}
+              <%= if result.title && result.title != "" do %>
+                {result.title}
               <% else %>
-                <em class="text-base-content/25 italic">No Title</em>
+                <em class="text-base-content/25 italic">Untitled</em>
               <% end %>
             </div>
             <div
-              :if={entry.subtitle_text && entry.subtitle_text != ""}
+              :if={result[:subtitle] && result[:subtitle] != ""}
               class="text-base-content/50 text-sm"
             >
-              {entry.subtitle_text}
+              {result.subtitle}
             </div>
           </div>
         </button>
@@ -547,6 +621,43 @@ defmodule GlossaryWeb.SearchModal do
     </div>
     """
   end
+
+  defp create_and_associate(:add_entry_to_project_from_entry, context, name) do
+    with {:ok, project} <- Projects.create_project(%{name: name}) do
+      Projects.add_entry(project, context.entry)
+    end
+  end
+
+  defp create_and_associate(:add_entry_to_topic_from_entry, context, name) do
+    with {:ok, topic} <- Topics.create_topic(%{name: name}) do
+      Topics.add_entry(topic, context.entry)
+    end
+  end
+
+  defp create_and_associate(:add_entry_to_project, context, name) do
+    with {:ok, entry} <- Entries.create_entry(%{title_text: name}) do
+      Projects.add_entry(context.project, entry)
+    end
+  end
+
+  defp create_and_associate(:add_entry_to_topic, context, name) do
+    with {:ok, entry} <- Entries.create_entry(%{title_text: name}) do
+      Topics.add_entry(context.topic, entry)
+    end
+  end
+
+  defp action_success_message(:add_entry_to_project), do: "Entry added to project."
+  defp action_success_message(:add_entry_to_topic), do: "Entry added to topic."
+  defp action_success_message(:add_entry_to_project_from_entry), do: "Added to project."
+  defp action_success_message(:add_entry_to_topic_from_entry), do: "Added to topic."
+
+  defp create_success_message(:add_entry_to_project_from_entry, name), do: "Created project \"#{name}\" and added entry."
+  defp create_success_message(:add_entry_to_topic_from_entry, name), do: "Created topic \"#{name}\" and added entry."
+  defp create_success_message(:add_entry_to_project, name), do: "Created entry \"#{name}\" and added to project."
+  defp create_success_message(:add_entry_to_topic, name), do: "Created entry \"#{name}\" and added to topic."
+
+  defp picker_can_create?(%{action: {:action, _}}), do: true
+  defp picker_can_create?(_), do: false
 
   defp search_placeholder(:all), do: "Search"
   defp search_placeholder(:projects), do: "Search projects..."
