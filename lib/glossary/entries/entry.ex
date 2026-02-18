@@ -32,6 +32,7 @@ defmodule Glossary.Entries.Entry do
     field :subtitle_text, :string
     field :body, :string
     field :body_text, :string
+    field :status, Ecto.Enum, values: [:draft, :published, :hidden, :pinned], default: :draft
 
     belongs_to :user, User
 
@@ -53,6 +54,6 @@ defmodule Glossary.Entries.Entry do
   """
   def changeset(entry, attrs) do
     entry
-    |> cast(attrs, [:title, :subtitle, :body, :body_text, :title_text, :subtitle_text])
+    |> cast(attrs, [:title, :subtitle, :body, :body_text, :title_text, :subtitle_text, :status])
   end
 end
