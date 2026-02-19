@@ -5,7 +5,7 @@ defmodule GlossaryWeb.SearchModal do
   Live component for global search and keyboard-driven result navigation.
 
   Supports prefix-based modes:
-  - `@` projects, `%` entries, `#` topics, `!` commands
+  - `$` projects, `%` entries, `#` topics, `@` tags, `!` commands
   """
 
   alias Glossary.Entries
@@ -342,10 +342,10 @@ defmodule GlossaryWeb.SearchModal do
   defp parse_prefix(raw_query, current_mode) do
     case raw_query do
       "!" <> rest -> {:commands, String.trim_leading(rest)}
-      "@" <> rest -> {:projects, String.trim_leading(rest)}
+      "$" <> rest -> {:projects, String.trim_leading(rest)}
       "%" <> rest -> {:entries, String.trim_leading(rest)}
       "#" <> rest -> {:topics, String.trim_leading(rest)}
-      "$" <> rest -> {:tags, String.trim_leading(rest)}
+      "@" <> rest -> {:tags, String.trim_leading(rest)}
       "" -> {:all, ""}
       _ when current_mode not in [:all] -> {current_mode, raw_query}
       _ -> {:all, raw_query}
@@ -812,10 +812,10 @@ defmodule GlossaryWeb.SearchModal do
           >
             <p>Start typing to search entries, projects, topics, or tags.</p>
             <p class="text-base-content/40 mt-2 text-xs not-italic">
-              Prefix with <kbd class="kbd kbd-xs">@</kbd>
+              Prefix with <kbd class="kbd kbd-xs">$</kbd>
               projects, <kbd class="kbd kbd-xs">%</kbd>
               entries, <kbd class="kbd kbd-xs">#</kbd>
-              topics, <kbd class="kbd kbd-xs">$</kbd>
+              topics, <kbd class="kbd kbd-xs">@</kbd>
               tags, or <kbd class="kbd kbd-xs">!</kbd>
               commands
             </p>
