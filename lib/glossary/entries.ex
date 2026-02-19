@@ -18,6 +18,7 @@ defmodule Glossary.Entries do
       Entry
       |> where([e], e.user_id == ^user_id)
       |> order_by(desc: :inserted_at)
+      # NOTE: we may not need the pre-load here
       |> preload([:projects, :topics])
     )
   end
@@ -33,6 +34,7 @@ defmodule Glossary.Entries do
       |> where([e], e.user_id == ^user_id)
       |> order_by(desc: :inserted_at)
       |> limit(^count)
+      # NOTE: we may not need the pre-load here
       |> preload([:projects, :topics])
     )
   end
@@ -46,6 +48,18 @@ defmodule Glossary.Entries do
     user_id = scope_user_id!(current_scope)
 
     Repo.get_by!(Entry, id: id, user_id: user_id)
+  end
+
+  @doc """
+  Gets a single entry from the current scope, including its relations.
+
+  Raises `Ecto.NoResultsError` if the Entry does not exist.
+  """
+  def get_entry_all!(%Scope{} = current_scope, id) do
+    user_id = scope_user_id!(current_scope)
+
+    Repo.get_by!(Entry, id: id, user_id: user_id)
+    |> Repo.preload([:projects, :topics])
   end
 
   @doc """

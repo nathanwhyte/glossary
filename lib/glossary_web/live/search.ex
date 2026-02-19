@@ -13,6 +13,8 @@ defmodule GlossaryWeb.SearchModal do
   alias Glossary.Topics
   alias GlossaryWeb.Commands
 
+  import GlossaryWeb.Mappings
+
   @impl true
   def mount(socket) do
     {:ok,
@@ -334,10 +336,10 @@ defmodule GlossaryWeb.SearchModal do
   defp mode_label(:commands), do: "Commands"
   defp mode_label(:all), do: nil
 
-  defp mode_badge_class(:projects), do: "badge-accent"
-  defp mode_badge_class(:entries), do: "badge-primary"
-  defp mode_badge_class(:topics), do: "badge-info"
-  defp mode_badge_class(:commands), do: "badge-warning"
+  defp mode_badge_class(:projects), do: map_entity_to_badge_color(:projects)
+  defp mode_badge_class(:entries), do: map_entity_to_badge_color(:entries)
+  defp mode_badge_class(:topics), do: map_entity_to_badge_color(:topics)
+  defp mode_badge_class(:commands), do: map_entity_to_badge_color(:commands)
   defp mode_badge_class(_), do: ""
 
   defp empty_message(:projects), do: "No matching projects."

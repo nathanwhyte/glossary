@@ -76,6 +76,28 @@ defmodule GlossaryWeb.EntryLive.Edit do
         </div>
       </div>
 
+      <div class="flex items-center gap-6">
+        <div class="join">
+          <div class="badge badge-ghost badge-sm join-item">
+            Status
+          </div>
+          <div class="badge badge-warning badge-sm join-item">
+            {@entry.status |> to_string() |> String.capitalize()}
+            <.icon name="hero-chevron-up-down-micro" class="size-4 -mr-1 -ml-0.5" />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs">Projects</span>
+          <%= for project <- @entry.projects do %>
+            <div class="badge badge-accent badge-sm">
+              {project.name}
+            </div>
+          <% end %>
+          <.icon name="hero-plus-micro" class="size-4 text-base-content/50 cursor-pointer" />
+        </div>
+      </div>
+
       <div class="divider" />
 
       <div class="mt-4">
@@ -98,7 +120,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    entry = Entries.get_entry!(socket.assigns.current_scope, id)
+    entry = Entries.get_entry_all!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, "Edit Entry")
