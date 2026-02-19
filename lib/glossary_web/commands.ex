@@ -61,6 +61,20 @@ defmodule GlossaryWeb.Commands do
       scope: :global,
       action: {:navigate, :topics}
     },
+    %{
+      id: "new_tag",
+      label: "New Tag",
+      icon: "hero-plus",
+      scope: :global,
+      action: {:navigate, :new_tag}
+    },
+    %{
+      id: "go_tags",
+      label: "Go to Tags",
+      icon: "hero-hashtag",
+      scope: :global,
+      action: {:navigate, :tags}
+    },
     # Context: project_show
     %{
       id: "add_entry_to_project",
@@ -91,6 +105,28 @@ defmodule GlossaryWeb.Commands do
       scope: {:context, :topic_show},
       action: {:navigate, :edit_topic}
     },
+    # Context: tag_show
+    %{
+      id: "add_entry_to_tag",
+      label: "Add Entry to Tag",
+      icon: "hero-plus-circle",
+      scope: {:context, :tag_show},
+      action: {:action, :add_entry_to_tag}
+    },
+    %{
+      id: "add_project_to_tag",
+      label: "Add Project to Tag",
+      icon: "hero-plus-circle",
+      scope: {:context, :tag_show},
+      action: {:action, :add_project_to_tag}
+    },
+    %{
+      id: "edit_tag",
+      label: "Edit Tag",
+      icon: "hero-pencil-square",
+      scope: {:context, :tag_show},
+      action: {:navigate, :edit_tag}
+    },
     # Context: entry_edit
     %{
       id: "entry_add_to_project",
@@ -105,6 +141,13 @@ defmodule GlossaryWeb.Commands do
       icon: "hero-tag",
       scope: {:context, :entry_edit},
       action: {:action, :add_entry_to_topic_from_entry}
+    },
+    %{
+      id: "entry_add_to_tag",
+      label: "Add to Tag",
+      icon: "hero-hashtag",
+      scope: {:context, :entry_edit},
+      action: {:action, :add_entry_to_tag_from_entry}
     }
   ]
 
@@ -173,6 +216,13 @@ defmodule GlossaryWeb.Commands do
 
   def resolve_action(%{action: {:navigate, :edit_topic}}, ctx) do
     {:navigate, ~p"/topics/#{ctx.topic}/edit"}
+  end
+
+  def resolve_action(%{action: {:navigate, :new_tag}}, _ctx), do: {:navigate, ~p"/tags/new"}
+  def resolve_action(%{action: {:navigate, :tags}}, _ctx), do: {:navigate, ~p"/tags"}
+
+  def resolve_action(%{action: {:navigate, :edit_tag}}, ctx) do
+    {:navigate, ~p"/tags/#{ctx.tag}/edit"}
   end
 
   def resolve_action(%{action: {:action, _} = action}, _ctx), do: action

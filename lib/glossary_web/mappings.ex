@@ -7,6 +7,7 @@ defmodule GlossaryWeb.Mappings do
       :projects -> "badge-accent"
       :entries -> "badge-primary"
       :topics -> "badge-info"
+      :tags -> "badge-secondary"
       :commands -> "badge-warning"
       _ -> "badge-ghost"
     end

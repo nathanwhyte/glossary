@@ -10,6 +10,7 @@ defmodule GlossaryWeb.SearchModal do
 
   alias Glossary.Entries
   alias Glossary.Projects
+  alias Glossary.Tags
   alias Glossary.Topics
   alias GlossaryWeb.Commands
 
@@ -273,6 +274,7 @@ defmodule GlossaryWeb.SearchModal do
     do: Projects.get_project!(current_scope, id)
 
   defp load_picked_record(current_scope, "topic", id), do: Topics.get_topic!(current_scope, id)
+  defp load_picked_record(current_scope, "tag", id), do: Tags.get_tag!(current_scope, id)
 
   defp load_picker_results(current_scope, :add_entry_to_project, context, query) do
     Projects.available_entries(current_scope, context.project, query)
@@ -294,6 +296,21 @@ defmodule GlossaryWeb.SearchModal do
     |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :topic})
   end
 
+  defp load_picker_results(current_scope, :add_entry_to_tag, context, query) do
+    Tags.available_entries(current_scope, context.tag, query)
+    |> Enum.map(&%{id: &1.id, title: &1.title_text, subtitle: &1.subtitle_text, type: :entry})
+  end
+
+  defp load_picker_results(current_scope, :add_project_to_tag, context, query) do
+    Tags.available_projects(current_scope, context.tag, query)
+    |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :project})
+  end
+
+  defp load_picker_results(current_scope, :add_entry_to_tag_from_entry, context, query) do
+    Entries.available_tags(current_scope, context.entry, query)
+    |> Enum.map(&%{id: &1.id, title: &1.name, subtitle: nil, type: :tag})
+  end
+
   defp execute_picker_action(current_scope, :add_entry_to_project, context, picked) do
     Projects.add_entry(current_scope, context.project, picked)
   end
@@ -310,12 +327,25 @@ defmodule GlossaryWeb.SearchModal do
     Topics.add_entry(current_scope, picked, context.entry)
   end
 
+  defp execute_picker_action(current_scope, :add_entry_to_tag, context, picked) do
+    Tags.add_entry(current_scope, context.tag, picked)
+  end
+
+  defp execute_picker_action(current_scope, :add_project_to_tag, context, picked) do
+    Tags.add_project(current_scope, context.tag, picked)
+  end
+
+  defp execute_picker_action(current_scope, :add_entry_to_tag_from_entry, context, picked) do
+    Tags.add_entry(current_scope, picked, context.entry)
+  end
+
   defp parse_prefix(raw_query, current_mode) do
     case raw_query do
       "!" <> rest -> {:commands, String.trim_leading(rest)}
       "@" <> rest -> {:projects, String.trim_leading(rest)}
       "%" <> rest -> {:entries, String.trim_leading(rest)}
       "#" <> rest -> {:topics, String.trim_leading(rest)}
+      "$" <> rest -> {:tags, String.trim_leading(rest)}
       "" -> {:all, ""}
       _ when current_mode not in [:all] -> {current_mode, raw_query}
       _ -> {:all, raw_query}
@@ -333,30 +363,35 @@ defmodule GlossaryWeb.SearchModal do
   defp mode_label(:projects), do: "Projects"
   defp mode_label(:entries), do: "Entries"
   defp mode_label(:topics), do: "Topics"
+  defp mode_label(:tags), do: "Tags"
   defp mode_label(:commands), do: "Commands"
   defp mode_label(:all), do: nil
 
   defp mode_badge_class(:projects), do: map_entity_to_badge_color(:projects)
   defp mode_badge_class(:entries), do: map_entity_to_badge_color(:entries)
   defp mode_badge_class(:topics), do: map_entity_to_badge_color(:topics)
+  defp mode_badge_class(:tags), do: map_entity_to_badge_color(:tags)
   defp mode_badge_class(:commands), do: map_entity_to_badge_color(:commands)
   defp mode_badge_class(_), do: ""
 
   defp empty_message(:projects), do: "No matching projects."
   defp empty_message(:entries), do: "No matching entries."
   defp empty_message(:topics), do: "No matching topics."
+  defp empty_message(:tags), do: "No matching tags."
   defp empty_message(:commands), do: "No matching commands."
   defp empty_message(:all), do: "No matching results."
 
   defp result_path(%{type: :entry, id: id}), do: ~p"/entries/#{id}"
   defp result_path(%{type: :project, id: id}), do: ~p"/projects/#{id}"
   defp result_path(%{type: :topic, id: id}), do: ~p"/topics/#{id}"
+  defp result_path(%{type: :tag, id: id}), do: ~p"/tags/#{id}"
 
   defp result_groups do
     %{
       entry: %{label: "Entries", dom_id: "entry-results-section", results: []},
       project: %{label: "Projects", dom_id: "project-results-section", results: []},
-      topic: %{label: "Topics", dom_id: "topic-results-section", results: []}
+      topic: %{label: "Topics", dom_id: "topic-results-section", results: []},
+      tag: %{label: "Tags", dom_id: "tag-results-section", results: []}
     }
   end
 
@@ -369,6 +404,7 @@ defmodule GlossaryWeb.SearchModal do
           :entry -> update_in(acc.entry.results, &[result | &1])
           :project -> update_in(acc.project.results, &[result | &1])
           :topic -> update_in(acc.topic.results, &[result | &1])
+          :tag -> update_in(acc.tag.results, &[result | &1])
           _ -> acc
         end
       end)
@@ -393,6 +429,7 @@ defmodule GlossaryWeb.SearchModal do
       global: %{label: "Global Commands", dom_id: "global-command-results-section", commands: []},
       project: %{label: "Projects", dom_id: "project-command-results-section", commands: []},
       topic: %{label: "Topics", dom_id: "topic-command-results-section", commands: []},
+      tag: %{label: "Tags", dom_id: "tag-command-results-section", commands: []},
       entry: %{label: "Entries", dom_id: "entry-command-results-section", commands: []}
     }
   end
@@ -426,6 +463,7 @@ defmodule GlossaryWeb.SearchModal do
   defp command_group_key(:global), do: :global
   defp command_group_key({:context, :project_show}), do: :project
   defp command_group_key({:context, :topic_show}), do: :topic
+  defp command_group_key({:context, :tag_show}), do: :tag
   defp command_group_key({:context, :entry_edit}), do: :entry
   defp command_group_key(_), do: nil
 
@@ -710,6 +748,7 @@ defmodule GlossaryWeb.SearchModal do
             <.command_group_section group={@command_result_groups.global} myself={@myself} />
             <.command_group_section group={@command_result_groups.project} myself={@myself} />
             <.command_group_section group={@command_result_groups.topic} myself={@myself} />
+            <.command_group_section group={@command_result_groups.tag} myself={@myself} />
             <.command_group_section group={@command_result_groups.entry} myself={@myself} />
           </section>
 
@@ -727,12 +766,14 @@ defmodule GlossaryWeb.SearchModal do
               <.command_group_section group={@command_result_groups.global} myself={@myself} />
               <.command_group_section group={@command_result_groups.project} myself={@myself} />
               <.command_group_section group={@command_result_groups.topic} myself={@myself} />
+              <.command_group_section group={@command_result_groups.tag} myself={@myself} />
               <.command_group_section group={@command_result_groups.entry} myself={@myself} />
             </section>
 
             <.result_section group={@search_result_groups.entry} />
             <.result_section group={@search_result_groups.project} />
             <.result_section group={@search_result_groups.topic} />
+            <.result_section group={@search_result_groups.tag} />
           </section>
 
           <%!-- Two-step picker --%>
@@ -759,6 +800,7 @@ defmodule GlossaryWeb.SearchModal do
           >
             <.command_group_section group={@starter_command_result_groups.project} myself={@myself} />
             <.command_group_section group={@starter_command_result_groups.topic} myself={@myself} />
+            <.command_group_section group={@starter_command_result_groups.tag} myself={@myself} />
             <.command_group_section group={@starter_command_result_groups.entry} myself={@myself} />
             <.command_group_section group={@starter_command_result_groups.global} myself={@myself} />
           </section>
@@ -768,12 +810,13 @@ defmodule GlossaryWeb.SearchModal do
             :if={@command_step == nil && @search_mode == :all && @query == ""}
             class="text-base-content/25 px-3 py-10 text-center text-sm italic"
           >
-            <p>Start typing to search entries, projects, or topics.</p>
+            <p>Start typing to search entries, projects, topics, or tags.</p>
             <p class="text-base-content/40 mt-2 text-xs not-italic">
               Prefix with <kbd class="kbd kbd-xs">@</kbd>
               projects, <kbd class="kbd kbd-xs">%</kbd>
               entries, <kbd class="kbd kbd-xs">#</kbd>
-              topics, or <kbd class="kbd kbd-xs">!</kbd>
+              topics, <kbd class="kbd kbd-xs">$</kbd>
+              tags, or <kbd class="kbd kbd-xs">!</kbd>
               commands
             </p>
           </div>
@@ -795,6 +838,24 @@ defmodule GlossaryWeb.SearchModal do
     end
   end
 
+  defp create_and_associate(current_scope, :add_entry_to_tag_from_entry, context, name) do
+    with {:ok, tag} <- Tags.create_tag(current_scope, %{name: name}) do
+      Tags.add_entry(current_scope, tag, context.entry)
+    end
+  end
+
+  defp create_and_associate(current_scope, :add_entry_to_tag, context, name) do
+    with {:ok, entry} <- Entries.create_entry(current_scope, %{title_text: name}) do
+      Tags.add_entry(current_scope, context.tag, entry)
+    end
+  end
+
+  defp create_and_associate(current_scope, :add_project_to_tag, context, name) do
+    with {:ok, project} <- Projects.create_project(current_scope, %{name: name}) do
+      Tags.add_project(current_scope, context.tag, project)
+    end
+  end
+
   defp create_and_associate(current_scope, :add_entry_to_project, context, name) do
     with {:ok, entry} <- Entries.create_entry(current_scope, %{title_text: name}) do
       Projects.add_entry(current_scope, context.project, entry)
@@ -809,8 +870,11 @@ defmodule GlossaryWeb.SearchModal do
 
   defp action_success_message(:add_entry_to_project), do: "Entry added to project."
   defp action_success_message(:add_entry_to_topic), do: "Entry added to topic."
+  defp action_success_message(:add_entry_to_tag), do: "Entry added to tag."
+  defp action_success_message(:add_project_to_tag), do: "Project added to tag."
   defp action_success_message(:add_entry_to_project_from_entry), do: "Added to project."
   defp action_success_message(:add_entry_to_topic_from_entry), do: "Added to topic."
+  defp action_success_message(:add_entry_to_tag_from_entry), do: "Added to tag."
 
   defp create_success_message(:add_entry_to_project_from_entry, name),
     do: "Created project \"#{name}\" and added entry."
@@ -818,11 +882,20 @@ defmodule GlossaryWeb.SearchModal do
   defp create_success_message(:add_entry_to_topic_from_entry, name),
     do: "Created topic \"#{name}\" and added entry."
 
+  defp create_success_message(:add_entry_to_tag_from_entry, name),
+    do: "Created tag \"#{name}\" and added entry."
+
   defp create_success_message(:add_entry_to_project, name),
     do: "Created entry \"#{name}\" and added to project."
 
   defp create_success_message(:add_entry_to_topic, name),
     do: "Created entry \"#{name}\" and added to topic."
+
+  defp create_success_message(:add_entry_to_tag, name),
+    do: "Created entry \"#{name}\" and added to tag."
+
+  defp create_success_message(:add_project_to_tag, name),
+    do: "Created project \"#{name}\" and added to tag."
 
   defp picker_can_create?(%{action: {:action, _}}), do: true
   defp picker_can_create?(_), do: false
@@ -831,5 +904,6 @@ defmodule GlossaryWeb.SearchModal do
   defp search_placeholder(:projects), do: "Search projects..."
   defp search_placeholder(:entries), do: "Search entries..."
   defp search_placeholder(:topics), do: "Search topics..."
+  defp search_placeholder(:tags), do: "Search tags..."
   defp search_placeholder(:commands), do: "Search commands..."
 end

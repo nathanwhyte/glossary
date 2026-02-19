@@ -131,6 +131,11 @@ defmodule Glossary.Entries do
     |> Enum.map(&topic_to_result/1)
   end
 
+  defp do_filtered_search(current_scope, query, :tags) do
+    Glossary.Tags.search_tags(current_scope, query)
+    |> Enum.map(&tag_to_result/1)
+  end
+
   defp do_filtered_search(current_scope, query, :all) do
     entries = do_search(current_scope, query) |> Enum.map(&entry_to_result/1)
 
@@ -139,7 +144,9 @@ defmodule Glossary.Entries do
 
     topics = Glossary.Topics.search_topics(current_scope, query) |> Enum.map(&topic_to_result/1)
 
-    projects ++ topics ++ entries
+    tags = Glossary.Tags.search_tags(current_scope, query) |> Enum.map(&tag_to_result/1)
+
+    projects ++ topics ++ tags ++ entries
   end
 
   defp entry_to_result(entry) do
@@ -152,6 +159,10 @@ defmodule Glossary.Entries do
 
   defp topic_to_result(topic) do
     %{type: :topic, id: topic.id, title: topic.name, subtitle: nil}
+  end
+
+  defp tag_to_result(tag) do
+    %{type: :tag, id: tag.id, title: tag.name, subtitle: nil}
   end
 
   def search_entries(%Scope{} = current_scope, query) do
@@ -321,6 +332,36 @@ defmodule Glossary.Entries do
       Repo.all(base)
     else
       Repo.all(from(p in base, where: ilike(p.name, ^"%#{query}%")))
+    end
+  end
+
+  @doc """
+  Returns tags that the given entry does NOT have, within the current scope.
+  """
+  def available_tags(%Scope{} = current_scope, %Entry{} = entry, query \\ "") do
+    user_id = scope_user_id!(current_scope)
+    _ = ensure_entry_owned!(entry, current_scope)
+
+    existing_ids =
+      from(et in "entry_tags",
+        where: et.entry_id == ^entry.id,
+        select: et.tag_id
+      )
+
+    base =
+      from(t in Tag,
+        where: t.user_id == ^user_id,
+        where: t.id not in subquery(existing_ids),
+        order_by: [desc: t.updated_at],
+        limit: 20
+      )
+
+    query = String.trim(query)
+
+    if query == "" do
+      Repo.all(base)
+    else
+      Repo.all(from(t in base, where: ilike(t.name, ^"%#{query}%")))
     end
   end
 
