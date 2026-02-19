@@ -257,7 +257,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
           </div>
           <div class="dropdown dropdown-left">
             <div tabindex="0" role="button" class="cursor-pointer">
-              <.icon name="hero-plus-micro" class="size-4 text-base-content/50" />
+              <.icon name="hero-plus-micro" class="size-4 text-base-content/50 -mt-1" />
             </div>
             <div
               tabindex="0"
@@ -313,7 +313,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
           </div>
           <div class="dropdown dropdown-left">
             <div tabindex="0" role="button" class="cursor-pointer">
-              <.icon name="hero-plus-micro" class="size-4 text-base-content/50" />
+              <.icon name="hero-plus-micro" class="size-4 text-base-content/50 -mt-1" />
             </div>
             <div
               tabindex="0"
@@ -369,7 +369,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
           </div>
           <div class="dropdown dropdown-left">
             <div tabindex="0" role="button" class="cursor-pointer">
-              <.icon name="hero-plus-micro" class="size-4 text-base-content/50" />
+              <.icon name="hero-plus-micro" class="size-4 text-base-content/50 -mt-1" />
             </div>
             <div
               tabindex="0"
