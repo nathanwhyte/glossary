@@ -8,6 +8,7 @@ defmodule Glossary.Entries do
   alias Glossary.Entries.Entry
   alias Glossary.Projects.Project
   alias Glossary.Repo
+  alias Glossary.Topics.Topic
 
   @doc """
   Possible values for the `status` field of an entry.
@@ -230,6 +231,35 @@ defmodule Glossary.Entries do
     |> Repo.delete_all()
 
     {:ok, Repo.preload(entry, :projects, force: true)}
+  end
+
+  @doc """
+  Adds a topic to an entry in the current scope.
+  """
+  def add_topic(%Scope{} = current_scope, %Entry{} = entry, %Topic{} = topic) do
+    entry = ensure_entry_owned!(entry, current_scope)
+
+    Repo.insert_all(
+      "entry_topics",
+      [%{entry_id: entry.id, topic_id: topic.id}],
+      on_conflict: :nothing
+    )
+
+    {:ok, Repo.preload(entry, :topics, force: true)}
+  end
+
+  @doc """
+  Removes a topic from an entry in the current scope.
+  """
+  def remove_topic(%Scope{} = current_scope, %Entry{} = entry, %Topic{} = topic) do
+    entry = ensure_entry_owned!(entry, current_scope)
+
+    from(et in "entry_topics",
+      where: et.entry_id == ^entry.id and et.topic_id == ^topic.id
+    )
+    |> Repo.delete_all()
+
+    {:ok, Repo.preload(entry, :topics, force: true)}
   end
 
   @doc """
