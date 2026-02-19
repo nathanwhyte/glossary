@@ -135,38 +135,29 @@ defmodule GlossaryWeb.EntryLive.Edit do
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-2">
           <div class="text-xs font-medium">Status</div>
-          <div
-            tabindex="0"
-            role="button"
-            class="dropdown dropdown-bottom flex cursor-pointer items-center"
-          >
-            <div class={[
-              "badge badge-sm",
+          <details id="status-dropdown" class="dropdown dropdown-bottom">
+            <summary class={[
+              "badge badge-sm list-none cursor-pointer",
               GlossaryWeb.Mappings.map_entry_status_to_badge_color(@entry.status)
             ]}>
               {@entry.status |> to_string() |> String.capitalize()}
               <.icon name="hero-chevron-down-micro" class="size-4 -mr-1 -ml-0.5" />
-            </div>
-            <ul
-              tabindex="0"
-              class="dropdown-content menu bg-base-200 border-base-300 rounded-box z-10 mt-2 w-36 space-y-1 border p-2 shadow shadow-xl"
-            >
+            </summary>
+            <ul class="dropdown-content menu bg-base-200 border-base-300 rounded-box z-10 mt-2 w-36 space-y-1 border p-2 shadow shadow-xl">
               <li :for={status <- Entries.entry_statuses()}>
                 <button
-                  phx-click="set_status"
-                  phx-value-status={status}
-                  type="button"
-                  class={
-                    if @entry.status == status,
-                      do: "bg-base-300",
-                      else: "hover:bg-base-100"
+                  phx-click={
+                    JS.push("set_status", value: %{status: status})
+                    |> JS.remove_attribute("open", to: "#status-dropdown")
                   }
+                  type="button"
+                  class={if @entry.status == status, do: "bg-base-300", else: "hover:bg-base-100"}
                 >
                   {status |> to_string() |> String.capitalize()}
                 </button>
               </li>
             </ul>
-          </div>
+          </details>
         </div>
 
         <div class="flex items-center gap-2">
@@ -174,13 +165,13 @@ defmodule GlossaryWeb.EntryLive.Edit do
           <div :for={project <- @entry.projects} class="badge badge-accent badge-sm">
             {project.name}
           </div>
-          <div class="dropdown dropdown-left">
+          <div class="dropdown dropdown-right">
             <div tabindex="0" role="button" class="cursor-pointer">
               <.icon name="hero-plus-micro" class="size-4 text-base-content/50" />
             </div>
             <div
               tabindex="0"
-              class="dropdown-content bg-base-200 border-base-300 rounded-box z-10 w-52 border p-2 shadow shadow-xl"
+              class="dropdown-content bg-base-200 border-base-300 rounded-box z-10 w-52 border p-2 ml-2 shadow shadow-xl"
             >
               <form phx-change="filter_projects" phx-submit="create_project">
                 <input
