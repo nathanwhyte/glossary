@@ -10,6 +10,7 @@ defmodule Glossary.Projects.Project do
 
   alias Glossary.Accounts.User
   alias Glossary.Entries.Entry
+  alias Glossary.Tags.Tag
 
   schema "projects" do
     field :name, :string
@@ -17,6 +18,7 @@ defmodule Glossary.Projects.Project do
     belongs_to :user, User
 
     many_to_many :entries, Entry, join_through: "project_entries"
+    many_to_many :tags, Tag, join_through: "project_tags"
 
     timestamps(type: :utc_datetime)
   end

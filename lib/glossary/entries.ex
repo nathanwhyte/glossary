@@ -8,6 +8,7 @@ defmodule Glossary.Entries do
   alias Glossary.Entries.Entry
   alias Glossary.Projects.Project
   alias Glossary.Repo
+  alias Glossary.Tags.Tag
   alias Glossary.Topics.Topic
 
   @doc """
@@ -260,6 +261,35 @@ defmodule Glossary.Entries do
     |> Repo.delete_all()
 
     {:ok, Repo.preload(entry, :topics, force: true)}
+  end
+
+  @doc """
+  Adds a tag to an entry in the current scope.
+  """
+  def add_tag(%Scope{} = current_scope, %Entry{} = entry, %Tag{} = tag) do
+    entry = ensure_entry_owned!(entry, current_scope)
+
+    Repo.insert_all(
+      "entry_tags",
+      [%{entry_id: entry.id, tag_id: tag.id}],
+      on_conflict: :nothing
+    )
+
+    {:ok, Repo.preload(entry, :tags, force: true)}
+  end
+
+  @doc """
+  Removes a tag from an entry in the current scope.
+  """
+  def remove_tag(%Scope{} = current_scope, %Entry{} = entry, %Tag{} = tag) do
+    entry = ensure_entry_owned!(entry, current_scope)
+
+    from(et in "entry_tags",
+      where: et.entry_id == ^entry.id and et.tag_id == ^tag.id
+    )
+    |> Repo.delete_all()
+
+    {:ok, Repo.preload(entry, :tags, force: true)}
   end
 
   @doc """

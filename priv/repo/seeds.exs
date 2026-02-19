@@ -223,3 +223,56 @@ for topic_attrs <- topics do
     end
   end
 end
+
+# Seed tags and associate entries and projects
+alias Glossary.Tags
+alias Glossary.Tags.Tag
+
+tags = [
+  %{
+    name: "overview",
+    entry_titles: ["What Are Corvids?", "History of Map Projections"],
+    project_names: ["Ornithology"]
+  },
+  %{
+    name: "research",
+    entry_titles: ["Corvid Intelligence", "Mycelial Networks", "Circadian Rhythms"],
+    project_names: ["Corvid Intelligence", "Natural Sciences"]
+  },
+  %{
+    name: "nature",
+    entry_titles: ["What Are Corvids?", "Corvid Intelligence", "Mycelial Networks"],
+    project_names: ["Ornithology", "Natural Sciences"]
+  },
+  %{
+    name: "fermentation",
+    entry_titles: ["Sourdough Fermentation"],
+    project_names: []
+  }
+]
+
+for tag_attrs <- tags do
+  tag =
+    case Repo.get_by(Tag, name: tag_attrs.name, user_id: user.id) do
+      nil ->
+        {:ok, t} = Tags.create_tag(current_scope, %{name: tag_attrs.name})
+        t
+
+      %Tag{} = t ->
+        t
+    end
+
+  for title <- tag_attrs.entry_titles do
+    case Repo.get_by(Entry, title_text: title, user_id: user.id) do
+      nil -> :skip
+      %Entry{} = entry -> Tags.add_entry(current_scope, tag, entry)
+    end
+  end
+
+  for name <- tag_attrs.project_names do
+    case Repo.get_by(Project, name: name, user_id: user.id) do
+      nil -> :skip
+      %Project{} = project -> Tags.add_project(current_scope, tag, project)
+    end
+  end
+end

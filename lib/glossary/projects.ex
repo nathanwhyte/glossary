@@ -8,6 +8,7 @@ defmodule Glossary.Projects do
   alias Glossary.Entries.Entry
   alias Glossary.Projects.Project
   alias Glossary.Repo
+  alias Glossary.Tags.Tag
 
   @doc """
   Returns the list of projects for the current scope, ordered by name.
@@ -98,6 +99,35 @@ defmodule Glossary.Projects do
     |> Repo.delete_all()
 
     {:ok, Repo.preload(project, :entries, force: true)}
+  end
+
+  @doc """
+  Adds a tag to a project in the current scope.
+  """
+  def add_tag(%Scope{} = current_scope, %Project{} = project, %Tag{} = tag) do
+    project = ensure_project_owned!(project, current_scope)
+
+    Repo.insert_all(
+      "project_tags",
+      [%{project_id: project.id, tag_id: tag.id}],
+      on_conflict: :nothing
+    )
+
+    {:ok, Repo.preload(project, :tags, force: true)}
+  end
+
+  @doc """
+  Removes a tag from a project in the current scope.
+  """
+  def remove_tag(%Scope{} = current_scope, %Project{} = project, %Tag{} = tag) do
+    project = ensure_project_owned!(project, current_scope)
+
+    from(pt in "project_tags",
+      where: pt.project_id == ^project.id and pt.tag_id == ^tag.id
+    )
+    |> Repo.delete_all()
+
+    {:ok, Repo.preload(project, :tags, force: true)}
   end
 
   @doc """
