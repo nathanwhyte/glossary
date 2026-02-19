@@ -67,7 +67,7 @@ defmodule Glossary.Entries do
     user_id = scope_user_id!(current_scope)
 
     Repo.get_by!(Entry, id: id, user_id: user_id)
-    |> Repo.preload([:projects, :topics])
+    |> Repo.preload([:projects, :tags, :topics])
   end
 
   @doc """

@@ -4,6 +4,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
   alias Glossary.Entries
   alias Glossary.Entries.Entry
   alias Glossary.Projects
+  alias Glossary.Tags
   alias Glossary.Topics
 
   @impl true
@@ -94,6 +95,50 @@ defmodule GlossaryWeb.EntryLive.Edit do
          all_topics: all_topics,
          filtered_topics: all_topics,
          topic_filter: ""
+       )}
+    else
+      _ -> {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("toggle_tag", %{"id" => tag_id}, socket) do
+    entry = socket.assigns.entry
+    tag = Tags.get_tag!(socket.assigns.current_scope, tag_id)
+    already_associated = Enum.any?(entry.tags, &(&1.id == tag.id))
+
+    {:ok, entry} =
+      if already_associated do
+        Entries.remove_tag(socket.assigns.current_scope, entry, tag)
+      else
+        Entries.add_tag(socket.assigns.current_scope, entry, tag)
+      end
+
+    {:noreply, assign(socket, :entry, entry)}
+  end
+
+  @impl true
+  def handle_event("filter_tags", %{"query" => query}, socket) do
+    filtered = filter_tags(socket.assigns.all_tags, query)
+    {:noreply, assign(socket, tag_filter: query, filtered_tags: filtered)}
+  end
+
+  @impl true
+  def handle_event("create_tag", _params, socket) do
+    name = String.trim(socket.assigns.tag_filter)
+
+    with true <- name != "",
+         {:ok, tag} <- Tags.create_tag(socket.assigns.current_scope, %{name: name}),
+         {:ok, entry} <-
+           Entries.add_tag(socket.assigns.current_scope, socket.assigns.entry, tag) do
+      all_tags = Tags.list_tags(socket.assigns.current_scope)
+
+      {:noreply,
+       assign(socket,
+         entry: entry,
+         all_tags: all_tags,
+         filtered_tags: all_tags,
+         tag_filter: ""
        )}
     else
       _ -> {:noreply, socket}
@@ -316,6 +361,62 @@ defmodule GlossaryWeb.EntryLive.Edit do
             </div>
           </div>
         </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs">Tags</span>
+          <div :for={tag <- @entry.tags} class="badge badge-secondary badge-sm">
+            {tag.name}
+          </div>
+          <div class="dropdown dropdown-left">
+            <div tabindex="0" role="button" class="cursor-pointer">
+              <.icon name="hero-plus-micro" class="size-4 text-base-content/50" />
+            </div>
+            <div
+              tabindex="0"
+              class="dropdown-content bg-base-200 border-base-300 rounded-box z-10 ml-2 w-52 border p-2 shadow shadow-xl"
+            >
+              <form phx-change="filter_tags" phx-submit="create_tag">
+                <input
+                  id="tag-filter-input"
+                  type="text"
+                  name="query"
+                  value={@tag_filter}
+                  placeholder="Search..."
+                  autocomplete="off"
+                  phx-debounce="100"
+                  class="size-full text-base-content/75 px-2 pt-1 pb-2 text-sm focus:outline-none"
+                />
+              </form>
+              <ul class="menu gap-0 p-0">
+                <li :if={@filtered_tags == [] and @tag_filter == ""}>
+                  <span class="text-base-content/50 px-2 text-sm italic">No tags yet</span>
+                </li>
+                <li :if={@filtered_tags == [] and @tag_filter != ""}>
+                  <button
+                    phx-click="create_tag"
+                    type="button"
+                    class="text-primary flex items-center gap-2"
+                  >
+                    <.icon name="hero-plus" class="size-4 shrink-0" />
+                    <span>Create "{@tag_filter}"</span>
+                  </button>
+                </li>
+                <li :for={tag <- @filtered_tags}>
+                  <label class="flex cursor-pointer items-center gap-2 p-2">
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm"
+                      checked={Enum.any?(@entry.tags, &(&1.id == tag.id))}
+                      phx-click="toggle_tag"
+                      phx-value-id={tag.id}
+                    />
+                    <span>{tag.name}</span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="divider" />
@@ -342,6 +443,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
   defp apply_action(socket, :edit, %{"id" => id}) do
     entry = Entries.get_entry_all!(socket.assigns.current_scope, id)
     all_projects = Projects.list_projects(socket.assigns.current_scope)
+    all_tags = Tags.list_tags(socket.assigns.current_scope)
     all_topics = Topics.list_topics(socket.assigns.current_scope)
 
     socket
@@ -350,6 +452,9 @@ defmodule GlossaryWeb.EntryLive.Edit do
     |> assign(:all_projects, all_projects)
     |> assign(:project_filter, "")
     |> assign(:filtered_projects, all_projects)
+    |> assign(:all_tags, all_tags)
+    |> assign(:tag_filter, "")
+    |> assign(:filtered_tags, all_tags)
     |> assign(:all_topics, all_topics)
     |> assign(:topic_filter, "")
     |> assign(:filtered_topics, all_topics)
@@ -357,14 +462,18 @@ defmodule GlossaryWeb.EntryLive.Edit do
 
   defp apply_action(socket, :new, _params) do
     all_projects = Projects.list_projects(socket.assigns.current_scope)
+    all_tags = Tags.list_tags(socket.assigns.current_scope)
     all_topics = Topics.list_topics(socket.assigns.current_scope)
 
     socket
     |> assign(:page_title, "New Entry")
-    |> assign(:entry, %Entry{projects: [], topics: []})
+    |> assign(:entry, %Entry{projects: [], tags: [], topics: []})
     |> assign(:all_projects, all_projects)
     |> assign(:project_filter, "")
     |> assign(:filtered_projects, all_projects)
+    |> assign(:all_tags, all_tags)
+    |> assign(:tag_filter, "")
+    |> assign(:filtered_tags, all_tags)
     |> assign(:all_topics, all_topics)
     |> assign(:topic_filter, "")
     |> assign(:filtered_topics, all_topics)
@@ -375,6 +484,13 @@ defmodule GlossaryWeb.EntryLive.Edit do
   defp filter_projects(projects, query) do
     q = String.downcase(query)
     Enum.filter(projects, &String.contains?(String.downcase(&1.name), q))
+  end
+
+  defp filter_tags(tags, ""), do: tags
+
+  defp filter_tags(tags, query) do
+    q = String.downcase(query)
+    Enum.filter(tags, &String.contains?(String.downcase(&1.name), q))
   end
 
   defp filter_topics(topics, ""), do: topics
