@@ -46,6 +46,16 @@ defmodule GlossaryWeb.EntryLive.Edit do
   end
 
   @impl true
+  def handle_event("set_status", %{"status" => status}, socket) do
+    case Entries.update_entry(socket.assigns.current_scope, socket.assigns.entry, %{
+           status: status
+         }) do
+      {:ok, entry} -> {:noreply, assign(socket, :entry, entry)}
+      {:error, _} -> {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("filter_projects", %{"query" => query}, socket) do
     filtered = filter_projects(socket.assigns.all_projects, query)
     {:noreply, assign(socket, project_filter: query, filtered_projects: filtered)}
@@ -101,12 +111,13 @@ defmodule GlossaryWeb.EntryLive.Edit do
             id="title-editor"
             phx-hook="TitleEditor"
             data-value={@entry.title}
+            class="flex-1"
           >
             <div data-editor="title" id="entry-title" phx-update="ignore" class="title-editor" />
           </div>
 
           <%!-- IDEA: entry actions menu --%>
-          <div>
+          <div class="shrink-0">
             <.icon name="hero-ellipsis-vertical-micro" class="size-6 text-base-content/50" />
           </div>
         </div>
@@ -122,13 +133,39 @@ defmodule GlossaryWeb.EntryLive.Edit do
       </div>
 
       <div class="flex items-center gap-6">
-        <div class="join">
-          <div class="badge badge-ghost badge-sm join-item">
-            Status
-          </div>
-          <div class="badge badge-warning badge-sm join-item">
-            {@entry.status |> to_string() |> String.capitalize()}
-            <.icon name="hero-chevron-up-down-micro" class="size-4 -mr-1 -ml-0.5" />
+        <div class="flex items-center gap-2">
+          <div class="text-xs font-medium">Status</div>
+          <div
+            tabindex="0"
+            role="button"
+            class="dropdown dropdown-bottom flex cursor-pointer items-center"
+          >
+            <div class={[
+              "badge badge-sm",
+              GlossaryWeb.Mappings.map_entry_status_to_badge_color(@entry.status)
+            ]}>
+              {@entry.status |> to_string() |> String.capitalize()}
+              <.icon name="hero-chevron-down-micro" class="size-4 -mr-1 -ml-0.5" />
+            </div>
+            <ul
+              tabindex="0"
+              class="dropdown-content menu bg-base-200 border-base-300 rounded-box z-10 mt-2 w-36 space-y-1 border p-2 shadow shadow-xl"
+            >
+              <li :for={status <- Entries.entry_statuses()}>
+                <button
+                  phx-click="set_status"
+                  phx-value-status={status}
+                  type="button"
+                  class={
+                    if @entry.status == status,
+                      do: "bg-base-300",
+                      else: "hover:bg-base-100"
+                  }
+                >
+                  {status |> to_string() |> String.capitalize()}
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -154,7 +191,6 @@ defmodule GlossaryWeb.EntryLive.Edit do
                   placeholder="Search..."
                   autocomplete="off"
                   phx-debounce="100"
-                  phx-mounted={JS.focus()}
                   class="size-full text-base-content/75 px-2 pt-1 pb-2 text-sm focus:outline-none"
                 />
               </form>

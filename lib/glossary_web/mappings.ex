@@ -11,4 +11,14 @@ defmodule GlossaryWeb.Mappings do
       _ -> "badge-ghost"
     end
   end
+
+  def map_entry_status_to_badge_color(status) do
+    case status do
+      :draft -> "badge-warning"
+      :published -> "badge-success"
+      :hidden -> "badge-neutral"
+      :pinned -> "badge-primary"
+      _ -> ""
+    end
+  end
 end

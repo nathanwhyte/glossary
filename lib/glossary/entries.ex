@@ -10,6 +10,11 @@ defmodule Glossary.Entries do
   alias Glossary.Repo
 
   @doc """
+  Possible values for the `status` field of an entry.
+  """
+  def entry_statuses, do: [:draft, :published, :hidden, :pinned]
+
+  @doc """
   Returns the list of entries for the current scope.
   """
   def list_entries(%Scope{} = current_scope) do
