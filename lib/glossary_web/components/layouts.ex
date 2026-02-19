@@ -35,7 +35,7 @@ defmodule GlossaryWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar pt-2 px-4 lg:px-8">
+    <header class="navbar px-4 pt-2 lg:px-8">
       <div class="flex-1">
         <a href="/" class="flex-1 items-center gap-2 text-2xl">
           🧠 <span class="ml-4 font-bold">Glossary</span>

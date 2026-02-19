@@ -6,6 +6,7 @@ defmodule Glossary.Entries do
   import Ecto.Query, warn: false
   alias Glossary.Accounts.Scope
   alias Glossary.Entries.Entry
+  alias Glossary.Projects.Project
   alias Glossary.Repo
 
   @doc """
@@ -195,6 +196,35 @@ defmodule Glossary.Entries do
   """
   def change_entry(%Entry{} = entry, attrs \\ %{}) do
     Entry.changeset(entry, attrs)
+  end
+
+  @doc """
+  Adds a project to an entry in the current scope.
+  """
+  def add_project(%Scope{} = current_scope, %Entry{} = entry, %Project{} = project) do
+    entry = ensure_entry_owned!(entry, current_scope)
+
+    Repo.insert_all(
+      "project_entries",
+      [%{project_id: project.id, entry_id: entry.id}],
+      on_conflict: :nothing
+    )
+
+    {:ok, Repo.preload(entry, :projects, force: true)}
+  end
+
+  @doc """
+  Removes a project from an entry in the current scope.
+  """
+  def remove_project(%Scope{} = current_scope, %Entry{} = entry, %Project{} = project) do
+    entry = ensure_entry_owned!(entry, current_scope)
+
+    from(pe in "project_entries",
+      where: pe.entry_id == ^entry.id and pe.project_id == ^project.id
+    )
+    |> Repo.delete_all()
+
+    {:ok, Repo.preload(entry, :projects, force: true)}
   end
 
   @doc """
