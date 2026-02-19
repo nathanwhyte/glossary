@@ -70,7 +70,7 @@ defmodule GlossaryWeb.DashboardTest do
 
     view
     |> element("#dashboard-search-form")
-    |> render_change(%{"query" => "@Alpha"})
+    |> render_change(%{"query" => "$Alpha"})
 
     assert has_element?(view, "#search-filter-badge", "Projects")
     assert has_element?(view, "#dashboard-search-input[value='Alpha']")
@@ -137,7 +137,7 @@ defmodule GlossaryWeb.DashboardTest do
 
     view
     |> element("#dashboard-search-form")
-    |> render_change(%{"query" => "@"})
+    |> render_change(%{"query" => "$"})
 
     assert has_element?(view, "#search-filter-badge", "Projects")
 
