@@ -55,6 +55,11 @@ defmodule GlossaryWeb.Router do
       live "/topics/:id", TopicLive.Show, :show
       live "/topics/:id/edit", TopicLive.Edit, :edit
 
+      live "/tags", TagLive.Index, :index
+      live "/tags/new", TagLive.New, :new
+      live "/tags/:id", TagLive.Show, :show
+      live "/tags/:id/edit", TagLive.Edit, :edit
+
       live "/users/settings", UserLive.Settings, :edit
     end
 

@@ -133,6 +133,70 @@ defmodule Glossary.Tags do
   end
 
   @doc """
+  Returns entries that are NOT tagged with the given tag, within the current scope.
+  """
+  def available_entries(%Scope{} = current_scope, %Tag{} = tag, query \\ "") do
+    tag = ensure_tag_owned!(tag, current_scope)
+    user_id = scope_user_id!(current_scope)
+
+    existing_ids =
+      from(et in "entry_tags",
+        where: et.tag_id == ^tag.id,
+        select: et.entry_id
+      )
+
+    base =
+      from(e in Entry,
+        where: e.user_id == ^user_id,
+        where: e.id not in subquery(existing_ids),
+        order_by: [desc: e.updated_at],
+        limit: 20
+      )
+
+    query = String.trim(query)
+
+    if query == "" do
+      Repo.all(base)
+    else
+      from(e in base,
+        where: fragment("similarity(title_text, ?) > 0.1", ^query),
+        order_by: [desc: fragment("similarity(title_text, ?)", ^query)]
+      )
+      |> Repo.all()
+    end
+  end
+
+  @doc """
+  Returns projects that are NOT tagged with the given tag, within the current scope.
+  """
+  def available_projects(%Scope{} = current_scope, %Tag{} = tag, query \\ "") do
+    tag = ensure_tag_owned!(tag, current_scope)
+    user_id = scope_user_id!(current_scope)
+
+    existing_ids =
+      from(pt in "project_tags",
+        where: pt.tag_id == ^tag.id,
+        select: pt.project_id
+      )
+
+    base =
+      from(p in Project,
+        where: p.user_id == ^user_id,
+        where: p.id not in subquery(existing_ids),
+        order_by: [desc: p.updated_at],
+        limit: 20
+      )
+
+    query = String.trim(query)
+
+    if query == "" do
+      Repo.all(base)
+    else
+      Repo.all(from(p in base, where: ilike(p.name, ^"%#{query}%")))
+    end
+  end
+
+  @doc """
   Searches tags by name using trigram similarity in the current scope.
   """
   def search_tags(%Scope{} = current_scope, query) do
