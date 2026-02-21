@@ -27,7 +27,7 @@ defmodule GlossaryWeb.Dashboard do
           show_trigger={true}
         />
 
-        <section class="grid auto-rows-fr grid-cols-1 gap-4 lg:grid-cols-3">
+        <section class="grid auto-rows-fr grid-cols-2 gap-4 lg:grid-cols-4">
           <a
             href={~p"/entries"}
             class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
@@ -60,6 +60,19 @@ defmodule GlossaryWeb.Dashboard do
           >
             <div class="card-body">
               <h2 class="card-title">Topics</h2>
+              <div class="h-6" />
+              <div class="card-actions justify-end">
+                <.icon name="hero-arrow-long-right-micro" class="size-6" />
+              </div>
+            </div>
+          </a>
+
+          <a
+            href={~p"/tags"}
+            class="card card-border bg-base-100 shadow-xl transition-colors hover:bg-base-200/75 focus:bg-base-200/75"
+          >
+            <div class="card-body">
+              <h2 class="card-title">Tags</h2>
               <div class="h-6" />
               <div class="card-actions justify-end">
                 <.icon name="hero-arrow-long-right-micro" class="size-6" />
