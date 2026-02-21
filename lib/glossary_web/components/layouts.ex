@@ -44,6 +44,19 @@ defmodule GlossaryWeb.Layouts do
       <div class="flex-none">
         <ul class="menu menu-horizontal flex items-center gap-4 px-1">
           <%= if @current_scope do %>
+            <button
+              phx-click={JS.dispatch("click", to: "#search-shortcut-trigger")}
+              class="btn btn-soft btn-sm text-base-content/70 space-x-1 hover:text-base-content"
+              type="button"
+              title="Search (⌘K)"
+            >
+              <.icon name="hero-magnifying-glass-micro" class="size-4" />
+              <span class="w-16 text-start">Search</span>
+              <span class="space-x-1">
+                <kbd class="kbd kbd-sm">⌘</kbd><kbd class="kbd kbd-sm">k</kbd>
+              </span>
+            </button>
+
             <li class="text-accent text-base font-semibold">
               <.link href={~p"/users/settings"}>
                 <.icon name="hero-user-circle-mini" class="size-5" />
