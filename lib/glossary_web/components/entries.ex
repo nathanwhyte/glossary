@@ -67,7 +67,7 @@ defmodule GlossaryWeb.EntryLayouts do
           <%= if !entry.topics || length(entry.topics) <= 0 do %>
             <em class="text-base-content/25 italic">None</em>
           <% else %>
-            <div class="flex flex-wrap">
+            <div class="flex flex-wrap gap-1">
               <%= for topic <- entry.topics do %>
                 <div class="badge badge-sm badge-primary text-nowrap">
                   {topic.name}

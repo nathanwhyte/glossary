@@ -309,7 +309,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
         <div class="flex items-center gap-2">
           <span class="text-xs">Topics</span>
           <div :for={topic <- @entry.topics} class="badge badge-info badge-sm">
-            {topic.name}
+            #{topic.name}
           </div>
           <div class="dropdown dropdown-left">
             <div tabindex="0" role="button" class="cursor-pointer">
@@ -365,7 +365,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
         <div class="flex items-center gap-2">
           <span class="text-xs">Tags</span>
           <div :for={tag <- @entry.tags} class="badge badge-secondary badge-sm">
-            {tag.name}
+            @{tag.name}
           </div>
           <div class="dropdown dropdown-left">
             <div tabindex="0" role="button" class="cursor-pointer">
