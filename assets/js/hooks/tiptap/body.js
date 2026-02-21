@@ -23,11 +23,13 @@
  *   - Cmd/Ctrl+`: Code
  *   - Cmd/Ctrl+Z: Undo
  *   - Cmd/Ctrl+Shift+Z: Redo
+ *   - Cmd/Ctrl+Shift+K: Set/unset link on selection
  */
 
 import { Editor } from "@tiptap/core";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 import debounce from "debounce";
 
 /**
@@ -47,6 +49,32 @@ const BodyEditor = {
         StarterKit,
         Placeholder.configure({
           placeholder: "Write something ...",
+        }),
+        Link.extend({
+          addKeyboardShortcuts() {
+            return {
+              "Mod-Shift-k": () => {
+                const previousUrl = this.editor.getAttributes("link").href;
+                const url = window.prompt("URL", previousUrl);
+                if (url === null) return true;
+                if (url === "") {
+                  this.editor.chain().focus().unsetLink().run();
+                } else {
+                  this.editor.chain().focus().setLink({ href: url }).run();
+                }
+                return true;
+              },
+            };
+          },
+        }).configure({
+          openOnClick: false,
+          autolink: true,
+          linkOnPaste: true,
+          defaultProtocol: "https",
+          HTMLAttributes: {
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
         }),
       ],
       content: this.el.dataset.value || "",

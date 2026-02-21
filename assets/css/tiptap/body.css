@@ -14,8 +14,7 @@
 .body-editor .ProseMirror h1,
 .body-editor .ProseMirror h2,
 .body-editor .ProseMirror h3 {
-    font-weight: 600;
-    margin: 1em 0 0.5em;
+    margin: 0.75em 0 0.5em;
 }
 
 .body-editor .ProseMirror h1 {
@@ -30,7 +29,7 @@
 
 .body-editor .ProseMirror h3 {
     font-size: 1em;
-    @apply text-violet-200;
+    @apply font-medium text-violet-200;
 }
 
 .body-editor .ProseMirror blockquote {
