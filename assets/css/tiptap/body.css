@@ -19,15 +19,18 @@
 }
 
 .body-editor .ProseMirror h1 {
-    font-size: 1.5em;
+    font-size: 2em;
+    @apply font-bold text-violet-400;
 }
 
 .body-editor .ProseMirror h2 {
     font-size: 1.25em;
+    @apply font-semibold text-violet-300;
 }
 
 .body-editor .ProseMirror h3 {
-    font-size: 1.1em;
+    font-size: 1em;
+    @apply text-violet-200;
 }
 
 .body-editor .ProseMirror blockquote {
