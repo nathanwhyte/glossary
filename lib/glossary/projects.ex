@@ -5,6 +5,7 @@ defmodule Glossary.Projects do
 
   import Ecto.Query, warn: false
   alias Glossary.Accounts.Scope
+  alias Glossary.Cache
   alias Glossary.Entries.Entry
   alias Glossary.Projects.Project
   alias Glossary.Repo
@@ -15,7 +16,10 @@ defmodule Glossary.Projects do
   """
   def list_projects(%Scope{} = current_scope) do
     user_id = scope_user_id!(current_scope)
+    Cache.fetch({user_id, :projects}, fn -> do_list_projects(user_id) end)
+  end
 
+  defp do_list_projects(user_id) do
     Project
     |> where([p], p.user_id == ^user_id)
     |> order_by(:name)
@@ -39,28 +43,46 @@ defmodule Glossary.Projects do
   Creates a project in the current scope.
   """
   def create_project(%Scope{} = current_scope, attrs) do
-    %Project{user_id: scope_user_id!(current_scope)}
+    user_id = scope_user_id!(current_scope)
+
+    %Project{user_id: user_id}
     |> Project.changeset(attrs)
     |> Repo.insert()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :projects})
+      _ -> :ok
+    end)
   end
 
   @doc """
   Updates a project in the current scope.
   """
   def update_project(%Scope{} = current_scope, %Project{} = project, attrs) do
+    user_id = scope_user_id!(current_scope)
+
     project
     |> ensure_project_owned!(current_scope)
     |> Project.changeset(attrs)
     |> Repo.update()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :projects})
+      _ -> :ok
+    end)
   end
 
   @doc """
   Deletes a project in the current scope.
   """
   def delete_project(%Scope{} = current_scope, %Project{} = project) do
+    user_id = scope_user_id!(current_scope)
+
     project
     |> ensure_project_owned!(current_scope)
     |> Repo.delete()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :projects})
+      _ -> :ok
+    end)
   end
 
   @doc """

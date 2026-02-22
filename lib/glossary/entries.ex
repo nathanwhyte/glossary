@@ -5,6 +5,7 @@ defmodule Glossary.Entries do
 
   import Ecto.Query, warn: false
   alias Glossary.Accounts.Scope
+  alias Glossary.Cache
   alias Glossary.Entries.Entry
   alias Glossary.Projects.Project
   alias Glossary.Repo
@@ -36,7 +37,10 @@ defmodule Glossary.Entries do
   """
   def recent_entries(%Scope{} = current_scope, count \\ 7) do
     user_id = scope_user_id!(current_scope)
+    Cache.fetch({user_id, :recent_entries, count}, fn -> do_recent_entries(user_id, count) end)
+  end
 
+  defp do_recent_entries(user_id, count) do
     Repo.all(
       Entry
       |> where([e], e.user_id == ^user_id)
@@ -74,19 +78,31 @@ defmodule Glossary.Entries do
   Creates an entry in the current scope.
   """
   def create_entry(%Scope{} = current_scope, attrs) do
-    %Entry{user_id: scope_user_id!(current_scope)}
+    user_id = scope_user_id!(current_scope)
+
+    %Entry{user_id: user_id}
     |> Entry.changeset(attrs)
     |> Repo.insert()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :recent_entries, 7})
+      _ -> :ok
+    end)
   end
 
   @doc """
   Updates an entry in the current scope.
   """
   def update_entry(%Scope{} = current_scope, %Entry{} = entry, attrs) do
+    user_id = scope_user_id!(current_scope)
+
     entry
     |> ensure_entry_owned!(current_scope)
     |> Entry.changeset(attrs)
     |> Repo.update()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :recent_entries, 7})
+      _ -> :ok
+    end)
   end
 
   def upsert_entry(%Scope{} = current_scope, %Entry{id: nil}, attrs) do
@@ -101,9 +117,15 @@ defmodule Glossary.Entries do
   Deletes an entry in the current scope.
   """
   def delete_entry(%Scope{} = current_scope, %Entry{} = entry) do
+    user_id = scope_user_id!(current_scope)
+
     entry
     |> ensure_entry_owned!(current_scope)
     |> Repo.delete()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :recent_entries, 7})
+      _ -> :ok
+    end)
   end
 
   @doc """

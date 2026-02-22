@@ -12,8 +12,7 @@ defmodule Glossary.Application do
       Glossary.Repo,
       {DNSCluster, query: Application.get_env(:glossary, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Glossary.PubSub},
-      # Start a worker by calling: Glossary.Worker.start_link(arg)
-      # {Glossary.Worker, arg},
+      {Cachex, name: :glossary_cache},
       # Start to serve requests, typically the last entry
       GlossaryWeb.Endpoint
     ]

@@ -5,6 +5,7 @@ defmodule Glossary.Tags do
 
   import Ecto.Query, warn: false
   alias Glossary.Accounts.Scope
+  alias Glossary.Cache
   alias Glossary.Entries.Entry
   alias Glossary.Projects.Project
   alias Glossary.Repo
@@ -15,7 +16,10 @@ defmodule Glossary.Tags do
   """
   def list_tags(%Scope{} = current_scope) do
     user_id = scope_user_id!(current_scope)
+    Cache.fetch({user_id, :tags}, fn -> do_list_tags(user_id) end)
+  end
 
+  defp do_list_tags(user_id) do
     Tag
     |> where([t], t.user_id == ^user_id)
     |> order_by(:name)
@@ -39,28 +43,46 @@ defmodule Glossary.Tags do
   Creates a tag in the current scope.
   """
   def create_tag(%Scope{} = current_scope, attrs) do
-    %Tag{user_id: scope_user_id!(current_scope)}
+    user_id = scope_user_id!(current_scope)
+
+    %Tag{user_id: user_id}
     |> Tag.changeset(attrs)
     |> Repo.insert()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :tags})
+      _ -> :ok
+    end)
   end
 
   @doc """
   Updates a tag in the current scope.
   """
   def update_tag(%Scope{} = current_scope, %Tag{} = tag, attrs) do
+    user_id = scope_user_id!(current_scope)
+
     tag
     |> ensure_tag_owned!(current_scope)
     |> Tag.changeset(attrs)
     |> Repo.update()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :tags})
+      _ -> :ok
+    end)
   end
 
   @doc """
   Deletes a tag in the current scope.
   """
   def delete_tag(%Scope{} = current_scope, %Tag{} = tag) do
+    user_id = scope_user_id!(current_scope)
+
     tag
     |> ensure_tag_owned!(current_scope)
     |> Repo.delete()
+    |> tap(fn
+      {:ok, _} -> Cache.invalidate({user_id, :tags})
+      _ -> :ok
+    end)
   end
 
   @doc """
