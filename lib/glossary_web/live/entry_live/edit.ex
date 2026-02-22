@@ -44,7 +44,10 @@ defmodule GlossaryWeb.EntryLive.Edit do
         Entries.add_project(socket.assigns.current_scope, entry, project)
       end
 
-    {:noreply, assign(socket, :entry, entry)}
+    {:noreply,
+     socket
+     |> assign(:entry, entry)
+     |> load_available_projects(socket.assigns.project_filter)}
   end
 
   @impl true
@@ -70,13 +73,15 @@ defmodule GlossaryWeb.EntryLive.Edit do
         Entries.add_topic(socket.assigns.current_scope, entry, topic)
       end
 
-    {:noreply, assign(socket, :entry, entry)}
+    {:noreply,
+     socket
+     |> assign(:entry, entry)
+     |> load_available_topics(socket.assigns.topic_filter)}
   end
 
   @impl true
-  def handle_event("filter_topics", %{"query" => query}, socket) do
-    filtered = filter_topics(socket.assigns.all_topics, query)
-    {:noreply, assign(socket, topic_filter: query, filtered_topics: filtered)}
+  def handle_event("search_topics", %{"query" => query}, socket) do
+    {:noreply, load_available_topics(socket, query)}
   end
 
   @impl true
@@ -87,15 +92,10 @@ defmodule GlossaryWeb.EntryLive.Edit do
          {:ok, topic} <- Topics.create_topic(socket.assigns.current_scope, %{name: name}),
          {:ok, entry} <-
            Entries.add_topic(socket.assigns.current_scope, socket.assigns.entry, topic) do
-      all_topics = Topics.list_topics(socket.assigns.current_scope)
-
       {:noreply,
-       assign(socket,
-         entry: entry,
-         all_topics: all_topics,
-         filtered_topics: all_topics,
-         topic_filter: ""
-       )}
+       socket
+       |> assign(:entry, entry)
+       |> load_available_topics()}
     else
       _ -> {:noreply, socket}
     end
@@ -114,13 +114,15 @@ defmodule GlossaryWeb.EntryLive.Edit do
         Entries.add_tag(socket.assigns.current_scope, entry, tag)
       end
 
-    {:noreply, assign(socket, :entry, entry)}
+    {:noreply,
+     socket
+     |> assign(:entry, entry)
+     |> load_available_tags(socket.assigns.tag_filter)}
   end
 
   @impl true
-  def handle_event("filter_tags", %{"query" => query}, socket) do
-    filtered = filter_tags(socket.assigns.all_tags, query)
-    {:noreply, assign(socket, tag_filter: query, filtered_tags: filtered)}
+  def handle_event("search_tags", %{"query" => query}, socket) do
+    {:noreply, load_available_tags(socket, query)}
   end
 
   @impl true
@@ -131,24 +133,18 @@ defmodule GlossaryWeb.EntryLive.Edit do
          {:ok, tag} <- Tags.create_tag(socket.assigns.current_scope, %{name: name}),
          {:ok, entry} <-
            Entries.add_tag(socket.assigns.current_scope, socket.assigns.entry, tag) do
-      all_tags = Tags.list_tags(socket.assigns.current_scope)
-
       {:noreply,
-       assign(socket,
-         entry: entry,
-         all_tags: all_tags,
-         filtered_tags: all_tags,
-         tag_filter: ""
-       )}
+       socket
+       |> assign(:entry, entry)
+       |> load_available_tags()}
     else
       _ -> {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_event("filter_projects", %{"query" => query}, socket) do
-    filtered = filter_projects(socket.assigns.all_projects, query)
-    {:noreply, assign(socket, project_filter: query, filtered_projects: filtered)}
+  def handle_event("search_projects", %{"query" => query}, socket) do
+    {:noreply, load_available_projects(socket, query)}
   end
 
   @impl true
@@ -159,15 +155,10 @@ defmodule GlossaryWeb.EntryLive.Edit do
          {:ok, project} <- Projects.create_project(socket.assigns.current_scope, %{name: name}),
          {:ok, entry} <-
            Entries.add_project(socket.assigns.current_scope, socket.assigns.entry, project) do
-      all_projects = Projects.list_projects(socket.assigns.current_scope)
-
       {:noreply,
-       assign(socket,
-         entry: entry,
-         all_projects: all_projects,
-         filtered_projects: all_projects,
-         project_filter: ""
-       )}
+       socket
+       |> assign(:entry, entry)
+       |> load_available_projects()}
     else
       _ -> {:noreply, socket}
     end
@@ -256,14 +247,20 @@ defmodule GlossaryWeb.EntryLive.Edit do
             {project.name}
           </div>
           <div class="dropdown dropdown-left">
-            <div tabindex="0" role="button" class="cursor-pointer">
+            <div
+              tabindex="0"
+              role="button"
+              class="cursor-pointer"
+              phx-click="search_projects"
+              phx-value-query=""
+            >
               <.icon name="hero-plus-micro" class="size-4 text-base-content/50 -mt-1" />
             </div>
             <div
               tabindex="0"
               class="dropdown-content bg-base-200 border-base-300 rounded-box z-10 ml-2 w-52 border p-2 shadow shadow-xl"
             >
-              <form phx-change="filter_projects" phx-submit="create_project">
+              <form phx-change="search_projects" phx-submit="create_project">
                 <input
                   id="project-filter-input"
                   type="text"
@@ -276,10 +273,24 @@ defmodule GlossaryWeb.EntryLive.Edit do
                 />
               </form>
               <ul class="menu gap-0 p-0">
-                <li :if={@filtered_projects == [] and @project_filter == ""}>
+                <li :for={project <- @entry.projects}>
+                  <label class="flex cursor-pointer items-center gap-2 p-2">
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm"
+                      checked
+                      phx-click="toggle_project"
+                      phx-value-id={project.id}
+                    />
+                    <span>{project.name}</span>
+                  </label>
+                </li>
+                <li :if={
+                  @available_projects == [] and @entry.projects == [] and @project_filter == ""
+                }>
                   <span class="text-base-content/50 px-2 text-sm italic">No projects yet</span>
                 </li>
-                <li :if={@filtered_projects == [] and @project_filter != ""}>
+                <li :if={@available_projects == [] and @project_filter != ""}>
                   <button
                     phx-click="create_project"
                     type="button"
@@ -289,12 +300,11 @@ defmodule GlossaryWeb.EntryLive.Edit do
                     <span>Create "{@project_filter}"</span>
                   </button>
                 </li>
-                <li :for={project <- @filtered_projects}>
+                <li :for={project <- @available_projects}>
                   <label class="flex cursor-pointer items-center gap-2 p-2">
                     <input
                       type="checkbox"
                       class="checkbox checkbox-sm"
-                      checked={Enum.any?(@entry.projects, &(&1.id == project.id))}
                       phx-click="toggle_project"
                       phx-value-id={project.id}
                     />
@@ -312,14 +322,20 @@ defmodule GlossaryWeb.EntryLive.Edit do
             #{topic.name}
           </div>
           <div class="dropdown dropdown-left">
-            <div tabindex="0" role="button" class="cursor-pointer">
+            <div
+              tabindex="0"
+              role="button"
+              class="cursor-pointer"
+              phx-click="search_topics"
+              phx-value-query=""
+            >
               <.icon name="hero-plus-micro" class="size-4 text-base-content/50 -mt-1" />
             </div>
             <div
               tabindex="0"
               class="dropdown-content bg-base-200 border-base-300 rounded-box z-10 ml-2 w-52 border p-2 shadow shadow-xl"
             >
-              <form phx-change="filter_topics" phx-submit="create_topic">
+              <form phx-change="search_topics" phx-submit="create_topic">
                 <input
                   id="topic-filter-input"
                   type="text"
@@ -332,10 +348,22 @@ defmodule GlossaryWeb.EntryLive.Edit do
                 />
               </form>
               <ul class="menu gap-0 p-0">
-                <li :if={@filtered_topics == [] and @topic_filter == ""}>
+                <li :for={topic <- @entry.topics}>
+                  <label class="flex cursor-pointer items-center gap-2 p-2">
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm"
+                      checked
+                      phx-click="toggle_topic"
+                      phx-value-id={topic.id}
+                    />
+                    <span>{topic.name}</span>
+                  </label>
+                </li>
+                <li :if={@available_topics == [] and @entry.topics == [] and @topic_filter == ""}>
                   <span class="text-base-content/50 px-2 text-sm italic">No topics yet</span>
                 </li>
-                <li :if={@filtered_topics == [] and @topic_filter != ""}>
+                <li :if={@available_topics == [] and @topic_filter != ""}>
                   <button
                     phx-click="create_topic"
                     type="button"
@@ -345,12 +373,11 @@ defmodule GlossaryWeb.EntryLive.Edit do
                     <span>Create "{@topic_filter}"</span>
                   </button>
                 </li>
-                <li :for={topic <- @filtered_topics}>
+                <li :for={topic <- @available_topics}>
                   <label class="flex cursor-pointer items-center gap-2 p-2">
                     <input
                       type="checkbox"
                       class="checkbox checkbox-sm"
-                      checked={Enum.any?(@entry.topics, &(&1.id == topic.id))}
                       phx-click="toggle_topic"
                       phx-value-id={topic.id}
                     />
@@ -368,14 +395,20 @@ defmodule GlossaryWeb.EntryLive.Edit do
             @{tag.name}
           </div>
           <div class="dropdown dropdown-left">
-            <div tabindex="0" role="button" class="cursor-pointer">
+            <div
+              tabindex="0"
+              role="button"
+              class="cursor-pointer"
+              phx-click="search_tags"
+              phx-value-query=""
+            >
               <.icon name="hero-plus-micro" class="size-4 text-base-content/50 -mt-1" />
             </div>
             <div
               tabindex="0"
               class="dropdown-content bg-base-200 border-base-300 rounded-box z-10 ml-2 w-52 border p-2 shadow shadow-xl"
             >
-              <form phx-change="filter_tags" phx-submit="create_tag">
+              <form phx-change="search_tags" phx-submit="create_tag">
                 <input
                   id="tag-filter-input"
                   type="text"
@@ -388,10 +421,22 @@ defmodule GlossaryWeb.EntryLive.Edit do
                 />
               </form>
               <ul class="menu gap-0 p-0">
-                <li :if={@filtered_tags == [] and @tag_filter == ""}>
+                <li :for={tag <- @entry.tags}>
+                  <label class="flex cursor-pointer items-center gap-2 p-2">
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm"
+                      checked
+                      phx-click="toggle_tag"
+                      phx-value-id={tag.id}
+                    />
+                    <span>{tag.name}</span>
+                  </label>
+                </li>
+                <li :if={@available_tags == [] and @entry.tags == [] and @tag_filter == ""}>
                   <span class="text-base-content/50 px-2 text-sm italic">No tags yet</span>
                 </li>
-                <li :if={@filtered_tags == [] and @tag_filter != ""}>
+                <li :if={@available_tags == [] and @tag_filter != ""}>
                   <button
                     phx-click="create_tag"
                     type="button"
@@ -401,12 +446,11 @@ defmodule GlossaryWeb.EntryLive.Edit do
                     <span>Create "{@tag_filter}"</span>
                   </button>
                 </li>
-                <li :for={tag <- @filtered_tags}>
+                <li :for={tag <- @available_tags}>
                   <label class="flex cursor-pointer items-center gap-2 p-2">
                     <input
                       type="checkbox"
                       class="checkbox checkbox-sm"
-                      checked={Enum.any?(@entry.tags, &(&1.id == tag.id))}
                       phx-click="toggle_tag"
                       phx-value-id={tag.id}
                     />
@@ -442,61 +486,46 @@ defmodule GlossaryWeb.EntryLive.Edit do
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     entry = Entries.get_entry_all!(socket.assigns.current_scope, id)
-    all_projects = Projects.list_projects(socket.assigns.current_scope)
-    all_tags = Tags.list_tags(socket.assigns.current_scope)
-    all_topics = Topics.list_topics(socket.assigns.current_scope)
 
     socket
     |> assign(:page_title, "Edit Entry")
     |> assign(:entry, entry)
-    |> assign(:all_projects, all_projects)
-    |> assign(:project_filter, "")
-    |> assign(:filtered_projects, all_projects)
-    |> assign(:all_tags, all_tags)
-    |> assign(:tag_filter, "")
-    |> assign(:filtered_tags, all_tags)
-    |> assign(:all_topics, all_topics)
-    |> assign(:topic_filter, "")
-    |> assign(:filtered_topics, all_topics)
+    |> assign_picker_defaults()
   end
 
   defp apply_action(socket, :new, _params) do
-    all_projects = Projects.list_projects(socket.assigns.current_scope)
-    all_tags = Tags.list_tags(socket.assigns.current_scope)
-    all_topics = Topics.list_topics(socket.assigns.current_scope)
-
     socket
     |> assign(:page_title, "New Entry")
     |> assign(:entry, %Entry{projects: [], tags: [], topics: []})
-    |> assign(:all_projects, all_projects)
+    |> assign_picker_defaults()
+  end
+
+  defp assign_picker_defaults(socket) do
+    socket
     |> assign(:project_filter, "")
-    |> assign(:filtered_projects, all_projects)
-    |> assign(:all_tags, all_tags)
+    |> assign(:available_projects, [])
     |> assign(:tag_filter, "")
-    |> assign(:filtered_tags, all_tags)
-    |> assign(:all_topics, all_topics)
+    |> assign(:available_tags, [])
     |> assign(:topic_filter, "")
-    |> assign(:filtered_topics, all_topics)
+    |> assign(:available_topics, [])
   end
 
-  defp filter_projects(projects, ""), do: projects
+  defp load_available_projects(socket, query \\ "") do
+    available =
+      Entries.available_projects(socket.assigns.current_scope, socket.assigns.entry, query)
 
-  defp filter_projects(projects, query) do
-    q = String.downcase(query)
-    Enum.filter(projects, &String.contains?(String.downcase(&1.name), q))
+    assign(socket, available_projects: available, project_filter: query)
   end
 
-  defp filter_tags(tags, ""), do: tags
-
-  defp filter_tags(tags, query) do
-    q = String.downcase(query)
-    Enum.filter(tags, &String.contains?(String.downcase(&1.name), q))
+  defp load_available_tags(socket, query \\ "") do
+    available = Entries.available_tags(socket.assigns.current_scope, socket.assigns.entry, query)
+    assign(socket, available_tags: available, tag_filter: query)
   end
 
-  defp filter_topics(topics, ""), do: topics
+  defp load_available_topics(socket, query \\ "") do
+    available =
+      Entries.available_topics(socket.assigns.current_scope, socket.assigns.entry, query)
 
-  defp filter_topics(topics, query) do
-    q = String.downcase(query)
-    Enum.filter(topics, &String.contains?(String.downcase(&1.name), q))
+    assign(socket, available_topics: available, topic_filter: query)
   end
 end
