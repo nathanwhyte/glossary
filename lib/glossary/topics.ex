@@ -48,8 +48,17 @@ defmodule Glossary.Topics do
     |> Topic.changeset(attrs)
     |> Repo.insert()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :topics})
-      _ -> :ok
+      {:ok, topic} ->
+        Cache.invalidate({user_id, :topics})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_topics:#{user_id}",
+          {:topic_created, topic.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 
@@ -64,8 +73,17 @@ defmodule Glossary.Topics do
     |> Topic.changeset(attrs)
     |> Repo.update()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :topics})
-      _ -> :ok
+      {:ok, topic} ->
+        Cache.invalidate({user_id, :topics})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_topics:#{user_id}",
+          {:topic_updated, topic.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 
@@ -79,8 +97,17 @@ defmodule Glossary.Topics do
     |> ensure_topic_owned!(current_scope)
     |> Repo.delete()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :topics})
-      _ -> :ok
+      {:ok, topic} ->
+        Cache.invalidate({user_id, :topics})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_topics:#{user_id}",
+          {:topic_deleted, topic.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 

@@ -49,8 +49,17 @@ defmodule Glossary.Projects do
     |> Project.changeset(attrs)
     |> Repo.insert()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :projects})
-      _ -> :ok
+      {:ok, project} ->
+        Cache.invalidate({user_id, :projects})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_projects:#{user_id}",
+          {:project_created, project.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 
@@ -65,8 +74,17 @@ defmodule Glossary.Projects do
     |> Project.changeset(attrs)
     |> Repo.update()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :projects})
-      _ -> :ok
+      {:ok, project} ->
+        Cache.invalidate({user_id, :projects})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_projects:#{user_id}",
+          {:project_updated, project.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 
@@ -80,8 +98,17 @@ defmodule Glossary.Projects do
     |> ensure_project_owned!(current_scope)
     |> Repo.delete()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :projects})
-      _ -> :ok
+      {:ok, project} ->
+        Cache.invalidate({user_id, :projects})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_projects:#{user_id}",
+          {:project_deleted, project.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 

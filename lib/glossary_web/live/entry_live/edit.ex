@@ -44,6 +44,14 @@ defmodule GlossaryWeb.EntryLive.Edit do
         Entries.add_project(socket.assigns.current_scope, entry, project)
       end
 
+    user_id = socket.assigns.current_scope.user.id
+
+    Phoenix.PubSub.broadcast(
+      Glossary.PubSub,
+      "user_entries:#{user_id}",
+      {:entry_updated, entry.id}
+    )
+
     {:noreply,
      socket
      |> assign(:entry, entry)
@@ -55,8 +63,19 @@ defmodule GlossaryWeb.EntryLive.Edit do
     case Entries.update_entry(socket.assigns.current_scope, socket.assigns.entry, %{
            status: status
          }) do
-      {:ok, entry} -> {:noreply, assign(socket, :entry, entry)}
-      {:error, _} -> {:noreply, socket}
+      {:ok, entry} ->
+        user_id = socket.assigns.current_scope.user.id
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_entries:#{user_id}",
+          {:entry_updated, entry.id}
+        )
+
+        {:noreply, assign(socket, :entry, entry)}
+
+      {:error, _} ->
+        {:noreply, socket}
     end
   end
 
@@ -72,6 +91,14 @@ defmodule GlossaryWeb.EntryLive.Edit do
       else
         Entries.add_topic(socket.assigns.current_scope, entry, topic)
       end
+
+    user_id = socket.assigns.current_scope.user.id
+
+    Phoenix.PubSub.broadcast(
+      Glossary.PubSub,
+      "user_entries:#{user_id}",
+      {:entry_updated, entry.id}
+    )
 
     {:noreply,
      socket
@@ -113,6 +140,14 @@ defmodule GlossaryWeb.EntryLive.Edit do
       else
         Entries.add_tag(socket.assigns.current_scope, entry, tag)
       end
+
+    user_id = socket.assigns.current_scope.user.id
+
+    Phoenix.PubSub.broadcast(
+      Glossary.PubSub,
+      "user_entries:#{user_id}",
+      {:entry_updated, entry.id}
+    )
 
     {:noreply,
      socket
@@ -168,8 +203,18 @@ defmodule GlossaryWeb.EntryLive.Edit do
     entry = socket.assigns.entry
 
     case Entries.upsert_entry(socket.assigns.current_scope, entry, attrs) do
-      {:ok, entry} -> assign(socket, :entry, entry)
-      {:error, _changeset} -> socket
+      {:ok, entry} ->
+        if socket.assigns.broadcast_timer,
+          do: Process.cancel_timer(socket.assigns.broadcast_timer)
+
+        timer = Process.send_after(self(), {:broadcast_entry_updated, entry.id}, 5_000)
+
+        socket
+        |> assign(:entry, entry)
+        |> assign(:broadcast_timer, timer)
+
+      {:error, _changeset} ->
+        socket
     end
   end
 
@@ -480,6 +525,19 @@ defmodule GlossaryWeb.EntryLive.Edit do
   end
 
   @impl true
+  def handle_info({:broadcast_entry_updated, entry_id}, socket) do
+    user_id = socket.assigns.current_scope.user.id
+
+    Phoenix.PubSub.broadcast(
+      Glossary.PubSub,
+      "user_entries:#{user_id}",
+      {:entry_updated, entry_id}
+    )
+
+    {:noreply, assign(socket, :broadcast_timer, nil)}
+  end
+
+  @impl true
   def handle_info({:search_modal_action, level, message}, socket) do
     {:noreply, put_flash(socket, level, message)}
   end
@@ -508,6 +566,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
     |> assign(:available_tags, [])
     |> assign(:topic_filter, "")
     |> assign(:available_topics, [])
+    |> assign(:broadcast_timer, nil)
   end
 
   defp load_available_projects(socket, query \\ "") do

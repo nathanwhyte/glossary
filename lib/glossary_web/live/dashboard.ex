@@ -10,9 +10,26 @@ defmodule GlossaryWeb.Dashboard do
 
   @impl true
   def mount(_params, _session, socket) do
+    user_id = socket.assigns.current_scope.user.id
+
+    if connected?(socket),
+      do: Phoenix.PubSub.subscribe(Glossary.PubSub, "user_entries:#{user_id}")
+
     {:ok,
      socket
+     |> assign(:current_user_id, user_id)
      |> stream(:recent_entries, Entries.recent_entries(socket.assigns.current_scope))}
+  end
+
+  @impl true
+  def handle_info({event, _id}, socket)
+      when event in [:entry_created, :entry_updated, :entry_deleted] do
+    Glossary.Cache.invalidate({socket.assigns.current_user_id, :recent_entries, 7})
+
+    {:noreply,
+     stream(socket, :recent_entries, Entries.recent_entries(socket.assigns.current_scope),
+       reset: true
+     )}
   end
 
   @impl true

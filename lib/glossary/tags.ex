@@ -49,8 +49,12 @@ defmodule Glossary.Tags do
     |> Tag.changeset(attrs)
     |> Repo.insert()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :tags})
-      _ -> :ok
+      {:ok, tag} ->
+        Cache.invalidate({user_id, :tags})
+        Phoenix.PubSub.broadcast(Glossary.PubSub, "user_tags:#{user_id}", {:tag_created, tag.id})
+
+      _ ->
+        :ok
     end)
   end
 
@@ -65,8 +69,12 @@ defmodule Glossary.Tags do
     |> Tag.changeset(attrs)
     |> Repo.update()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :tags})
-      _ -> :ok
+      {:ok, tag} ->
+        Cache.invalidate({user_id, :tags})
+        Phoenix.PubSub.broadcast(Glossary.PubSub, "user_tags:#{user_id}", {:tag_updated, tag.id})
+
+      _ ->
+        :ok
     end)
   end
 
@@ -80,8 +88,12 @@ defmodule Glossary.Tags do
     |> ensure_tag_owned!(current_scope)
     |> Repo.delete()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :tags})
-      _ -> :ok
+      {:ok, tag} ->
+        Cache.invalidate({user_id, :tags})
+        Phoenix.PubSub.broadcast(Glossary.PubSub, "user_tags:#{user_id}", {:tag_deleted, tag.id})
+
+      _ ->
+        :ok
     end)
   end
 

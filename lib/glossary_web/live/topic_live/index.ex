@@ -5,10 +5,26 @@ defmodule GlossaryWeb.TopicLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    user_id = socket.assigns.current_scope.user.id
+    if connected?(socket), do: Phoenix.PubSub.subscribe(Glossary.PubSub, "user_topics:#{user_id}")
+
     {:ok,
      socket
      |> assign(:page_title, "All Topics")
      |> stream(:topics, Topics.list_topics(socket.assigns.current_scope))}
+  end
+
+  @impl true
+  def handle_info({event, topic_id}, socket) when event in [:topic_created, :topic_updated] do
+    topic = Topics.get_topic!(socket.assigns.current_scope, topic_id)
+
+    {:noreply,
+     stream_insert(socket, :topics, topic, at: if(event == :topic_created, do: 0, else: -1))}
+  end
+
+  @impl true
+  def handle_info({:topic_deleted, topic_id}, socket) do
+    {:noreply, stream_delete(socket, :topics, %Topics.Topic{id: topic_id})}
   end
 
   @impl true

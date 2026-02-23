@@ -27,10 +27,28 @@ defmodule GlossaryWeb.EntryLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    user_id = socket.assigns.current_scope.user.id
+
+    if connected?(socket),
+      do: Phoenix.PubSub.subscribe(Glossary.PubSub, "user_entries:#{user_id}")
+
     {:ok,
      socket
      |> assign(:page_title, "All Entries")
      |> stream(:entries, list_entries(socket.assigns.current_scope))}
+  end
+
+  @impl true
+  def handle_info({event, entry_id}, socket) when event in [:entry_created, :entry_updated] do
+    entry = Entries.get_entry_all!(socket.assigns.current_scope, entry_id)
+
+    {:noreply,
+     stream_insert(socket, :entries, entry, at: if(event == :entry_created, do: 0, else: -1))}
+  end
+
+  @impl true
+  def handle_info({:entry_deleted, entry_id}, socket) do
+    {:noreply, stream_delete(socket, :entries, %Entries.Entry{id: entry_id})}
   end
 
   @impl true

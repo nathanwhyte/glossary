@@ -5,10 +5,24 @@ defmodule GlossaryWeb.TagLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    user_id = socket.assigns.current_scope.user.id
+    if connected?(socket), do: Phoenix.PubSub.subscribe(Glossary.PubSub, "user_tags:#{user_id}")
+
     {:ok,
      socket
      |> assign(:page_title, "All Tags")
      |> stream(:tags, Tags.list_tags(socket.assigns.current_scope))}
+  end
+
+  @impl true
+  def handle_info({event, tag_id}, socket) when event in [:tag_created, :tag_updated] do
+    tag = Tags.get_tag!(socket.assigns.current_scope, tag_id)
+    {:noreply, stream_insert(socket, :tags, tag, at: if(event == :tag_created, do: 0, else: -1))}
+  end
+
+  @impl true
+  def handle_info({:tag_deleted, tag_id}, socket) do
+    {:noreply, stream_delete(socket, :tags, %Tags.Tag{id: tag_id})}
   end
 
   @impl true

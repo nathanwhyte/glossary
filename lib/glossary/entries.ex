@@ -80,12 +80,25 @@ defmodule Glossary.Entries do
   def create_entry(%Scope{} = current_scope, attrs) do
     user_id = scope_user_id!(current_scope)
 
+    title_html = "<p>#{Map.get(attrs, :title_text, "")}</p>"
+
+    attrs = Map.put(attrs, :title, title_html)
+
     %Entry{user_id: user_id}
     |> Entry.changeset(attrs)
     |> Repo.insert()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :recent_entries, 7})
-      _ -> :ok
+      {:ok, entry} ->
+        Cache.invalidate({user_id, :recent_entries, 7})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_entries:#{user_id}",
+          {:entry_created, entry.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 
@@ -123,8 +136,17 @@ defmodule Glossary.Entries do
     |> ensure_entry_owned!(current_scope)
     |> Repo.delete()
     |> tap(fn
-      {:ok, _} -> Cache.invalidate({user_id, :recent_entries, 7})
-      _ -> :ok
+      {:ok, deleted} ->
+        Cache.invalidate({user_id, :recent_entries, 7})
+
+        Phoenix.PubSub.broadcast(
+          Glossary.PubSub,
+          "user_entries:#{user_id}",
+          {:entry_deleted, deleted.id}
+        )
+
+      _ ->
+        :ok
     end)
   end
 

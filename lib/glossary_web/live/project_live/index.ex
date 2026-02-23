@@ -5,10 +5,29 @@ defmodule GlossaryWeb.ProjectLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    user_id = socket.assigns.current_scope.user.id
+
+    if connected?(socket),
+      do: Phoenix.PubSub.subscribe(Glossary.PubSub, "user_projects:#{user_id}")
+
     {:ok,
      socket
      |> assign(:page_title, "All Projects")
      |> stream(:projects, Projects.list_projects(socket.assigns.current_scope))}
+  end
+
+  @impl true
+  def handle_info({event, project_id}, socket)
+      when event in [:project_created, :project_updated] do
+    project = Projects.get_project!(socket.assigns.current_scope, project_id)
+
+    {:noreply,
+     stream_insert(socket, :projects, project, at: if(event == :project_created, do: 0, else: -1))}
+  end
+
+  @impl true
+  def handle_info({:project_deleted, project_id}, socket) do
+    {:noreply, stream_delete(socket, :projects, %Projects.Project{id: project_id})}
   end
 
   @impl true
