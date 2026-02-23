@@ -36,7 +36,7 @@ defmodule Glossary.EntriesTest do
       }
 
       assert {:ok, %Entry{} = entry} = Entries.create_entry(current_scope, valid_attrs)
-      assert entry.title == "some title"
+      assert entry.title == "<p>some title</p>"
       assert entry.body == "some body"
       assert entry.body_text == "some body"
       assert entry.subtitle == "some subtitle"
