@@ -1,0 +1,14 @@
+13:46:52.614 [info] Running GlossaryWeb.Endpoint with Bandit 1.10.2 at :::4400 (http)
+13:46:52.617 [info] Access GlossaryWeb.Endpoint at https://localhost
+13:46:55.762 [info] CONNECTED TO Phoenix.LiveView.Socket in 26µs
+  Transport: :longpoll
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "DhE-DmhZBBofIwR-R2lgNScPP1txBiQHVbmtX4MbxE0JqDWxfVVo81FW", "_live_referer" => "http://localhost:4400/", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://localhost:4400/assets/css/app-b5dd1d02aa9f5a27e30c6aa2b96d0d17.css?vsn=d", "1" => "http://localhost:4400/assets/js/app-fa4f41398793fa5c841bd4b12acd6699.js?vsn=d"}, "vsn" => "2.0.0"}
+13:46:55.791 request_id=GJjPVKMcmrwqlpgAAAAF [info] GET /
+13:46:55.804 request_id=GJjPVKMcmrwqlpgAAAAF [info] Sent 302 in 12ms
+13:46:55.807 request_id=GJjPVKQVlyIqlpgAAABF [info] GET /users/log-in
+13:46:55.835 request_id=GJjPVKQVlyIqlpgAAABF [info] Sent 200 in 28ms
+13:46:55.865 [info] CONNECTED TO Phoenix.LiveView.Socket in 9µs
+  Transport: :websocket
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "bWM3DyEXMzopWy8ID2oDIAUDL3d0B0EVZ4BufdxxznYX69jpAow9LB3z", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://localhost:4400/assets/css/app-b5dd1d02aa9f5a27e30c6aa2b96d0d17.css?vsn=d", "1" => "http://localhost:4400/assets/js/app-fa4f41398793fa5c841bd4b12acd6699.js?vsn=d"}, "vsn" => "2.0.0"}
