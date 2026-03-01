@@ -1,4 +1,49 @@
 services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: glossary
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build: .
+    command: /app/bin/migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/glossary
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-iSWG7H37skj1ynzwNwTcc+4bWngIxAtbY4GfVMtw70f6mxdt2cyLqFCdmWwAhXwq}
+
+  app:
+    build: .
+    ports:
+      - 4400:4000
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/glossary
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-iSWG7H37skj1ynzwNwTcc+4bWngIxAtbY4GfVMtw70f6mxdt2cyLqFCdmWwAhXwq}
+      PHX_HOST: localhost
+      PHX_SCHEME: http
+      PORT: "4000"
+      POOL_SIZE: "10"
+    restart: unless-stopped
+
   adminer:
     image: adminer
     restart: always
@@ -6,18 +51,6 @@ services:
       ADMINER_DESIGN: lavender-light
     ports:
       - 8008:8080
-
-  db:
-    image: postgres:alpine
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: glossary_dev
-    ports:
-      - 5432:5432
-    volumes:
-      - db_data:/var/lib/postgresql/data
 
 volumes:
   db_data:

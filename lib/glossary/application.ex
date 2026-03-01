@@ -13,6 +13,7 @@ defmodule Glossary.Application do
       {DNSCluster, query: Application.get_env(:glossary, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Glossary.PubSub},
       {Cachex, name: :glossary_cache},
+      {Task.Supervisor, name: Glossary.TaskSupervisor},
       # Start to serve requests, typically the last entry
       GlossaryWeb.Endpoint
     ]

@@ -35,3 +35,6 @@ config :phoenix_live_view,
 
 # Disable cache in tests to prevent cross-test state leakage
 config :glossary, cache_enabled: false
+
+# Disable AI in tests
+config :glossary, Glossary.AI.LLM, enabled: false

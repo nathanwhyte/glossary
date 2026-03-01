@@ -20,6 +20,28 @@ if System.get_env("PHX_SERVER") do
   config :glossary, GlossaryWeb.Endpoint, server: true
 end
 
+# LLM provider configuration (applies to all environments)
+if llm_provider = System.get_env("LLM_PROVIDER") do
+  case llm_provider do
+    "openai" ->
+      config :glossary, Glossary.AI.LLM,
+        base_url: "https://api.openai.com/v1",
+        api_key:
+          System.get_env("OPENAI_API_KEY") ||
+            raise("OPENAI_API_KEY required when LLM_PROVIDER=openai"),
+        model: System.get_env("LLM_MODEL") || "gpt-4o-mini"
+
+    "ollama" ->
+      config :glossary, Glossary.AI.LLM,
+        base_url: System.get_env("OLLAMA_URL") || "http://localhost:11434/v1",
+        api_key: "ollama",
+        model: System.get_env("LLM_MODEL") || "llama3.2"
+
+    _ ->
+      :ok
+  end
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -52,11 +74,17 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
+  scheme = System.get_env("PHX_SCHEME") || "https"
+
+  url_port =
+    String.to_integer(
+      System.get_env("PHX_URL_PORT") || if(scheme == "https", do: "443", else: to_string(port))
+    )
 
   config :glossary, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :glossary, GlossaryWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
+    url: [host: host, port: url_port, scheme: scheme],
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.

@@ -70,7 +70,8 @@ defmodule Glossary.MixProject do
       {:cachex, "~> 4.0"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:bcrypt_elixir, "~> 3.0"}
+      {:bcrypt_elixir, "~> 3.0"},
+      {:req, "~> 0.5"}
     ]
   end
 

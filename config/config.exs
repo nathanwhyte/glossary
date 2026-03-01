@@ -64,6 +64,12 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Default LLM config (Ollama local)
+config :glossary, Glossary.AI.LLM,
+  base_url: "http://localhost:11434/v1",
+  api_key: "ollama",
+  model: "llama3.2"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

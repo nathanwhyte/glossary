@@ -199,6 +199,18 @@ defmodule GlossaryWeb.EntryLive.Edit do
     end
   end
 
+  @impl true
+  def handle_event("regenerate_ai", _params, socket) do
+    entry = socket.assigns.entry
+    Glossary.AI.generate_entry_ai(entry)
+    {:noreply, assign(socket, :ai_loading, true)}
+  end
+
+  def handle_event("delete", _params, socket) do
+    {:ok, _} = Entries.delete_entry(socket.assigns.current_scope, socket.assigns.entry)
+    {:noreply, push_navigate(socket, to: ~p"/entries")}
+  end
+
   defp save_field(socket, attrs) do
     entry = socket.assigns.entry
 
@@ -212,10 +224,19 @@ defmodule GlossaryWeb.EntryLive.Edit do
         socket
         |> assign(:entry, entry)
         |> assign(:broadcast_timer, timer)
+        |> maybe_generate_ai(entry)
 
       {:error, _changeset} ->
         socket
     end
+  end
+
+  defp maybe_generate_ai(socket, entry) do
+    if is_nil(entry.summary) and entry.body_text != nil and String.trim(entry.body_text) != "" do
+      Glossary.AI.generate_entry_ai(entry)
+    end
+
+    socket
   end
 
   @impl true
@@ -242,9 +263,39 @@ defmodule GlossaryWeb.EntryLive.Edit do
             <div data-editor="title" id="entry-title" phx-update="ignore" class="title-editor" />
           </div>
 
-          <%!-- IDEA: entry actions menu --%>
           <div class="shrink-0">
-            <.icon name="hero-ellipsis-vertical-micro" class="size-6 text-base-content/50" />
+            <details id="entry-actions" class="dropdown dropdown-end">
+              <summary class="btn btn-ghost btn-sm btn-square list-none">
+                <.icon name="hero-ellipsis-vertical-micro" class="size-6 text-base-content/50" />
+              </summary>
+              <ul class="dropdown-content menu bg-base-200 border-base-300 rounded-box z-10 mt-1 border p-2 shadow shadow-xl">
+                <li>
+                  <button
+                    phx-click={
+                      JS.push("regenerate_ai")
+                      |> JS.remove_attribute("open", to: "#entry-actions")
+                    }
+                    type="button"
+                    disabled={@ai_loading}
+                    class="text-nowrap"
+                  >
+                    <.icon name="hero-sparkles" class="size-4" />
+                    {if @ai_loading, do: "Generating...", else: "Regenerate Summary & Tags"}
+                  </button>
+                </li>
+                <li :if={@live_action == :edit}>
+                  <button
+                    phx-click="delete"
+                    data-confirm="Are you sure you want to delete this entry?"
+                    type="button"
+                    class="text-nowrap text-error"
+                  >
+                    <.icon name="hero-trash" class="size-4" />
+                    Delete Entry
+                  </button>
+                </li>
+              </ul>
+            </details>
           </div>
         </div>
 
@@ -508,6 +559,26 @@ defmodule GlossaryWeb.EntryLive.Edit do
         </div>
       </div>
 
+      <div
+        :if={@entry.summary || @entry.ai_tags != []}
+        class="bg-base-200/50 mt-4 rounded-lg p-4"
+      >
+        <div class="text-base-content/70 mb-2 flex items-center gap-2 text-sm font-medium">
+          <.icon name="hero-sparkles" class="size-4" /> AI Generated
+        </div>
+        <p :if={@entry.summary} class="text-base-content/80 text-sm">{@entry.summary}</p>
+        <div :if={@entry.ai_tags != []} class="mt-2 flex flex-wrap gap-1">
+          <span :for={tag <- @entry.ai_tags} class="badge badge-ghost badge-sm">{tag}</span>
+        </div>
+      </div>
+
+      <div
+        :if={@ai_loading}
+        class="text-base-content/50 mt-4 flex items-center gap-2 text-sm"
+      >
+        <span class="loading loading-spinner loading-xs"></span> Generating summary and tags...
+      </div>
+
       <div class="divider" />
 
       <div class="mt-4">
@@ -535,6 +606,24 @@ defmodule GlossaryWeb.EntryLive.Edit do
     )
 
     {:noreply, assign(socket, :broadcast_timer, nil)}
+  end
+
+  @impl true
+  def handle_info({:ai_generated, entry_id}, socket) do
+    if socket.assigns.entry.id == entry_id do
+      entry = Entries.get_entry_all!(socket.assigns.current_scope, entry_id)
+      {:noreply, socket |> assign(:entry, entry) |> assign(:ai_loading, false)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:ai_error, _entry_id, _reason}, socket) do
+    {:noreply,
+     socket
+     |> assign(:ai_loading, false)
+     |> put_flash(:error, "AI generation failed. You can try again manually.")}
   end
 
   @impl true
@@ -567,6 +656,7 @@ defmodule GlossaryWeb.EntryLive.Edit do
     |> assign(:topic_filter, "")
     |> assign(:available_topics, [])
     |> assign(:broadcast_timer, nil)
+    |> assign(:ai_loading, false)
   end
 
   defp load_available_projects(socket, query \\ "") do

@@ -14,6 +14,7 @@ defmodule Glossary.Projects.Project do
 
   schema "projects" do
     field :name, :string
+    field :summary, :string
 
     belongs_to :user, User
 
@@ -32,7 +33,7 @@ defmodule Glossary.Projects.Project do
   """
   def changeset(project, attrs) do
     project
-    |> cast(attrs, [:name])
+    |> cast(attrs, [:name, :summary])
     |> validate_required([:name])
     |> unique_constraint(:name, name: :projects_user_id_name_index)
   end

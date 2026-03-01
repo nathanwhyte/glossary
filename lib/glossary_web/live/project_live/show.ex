@@ -15,6 +15,7 @@ defmodule GlossaryWeb.ProjectLive.Show do
      |> assign(:entry_search_query, "")
      |> assign(:available_entries, [])
      |> assign(:show_entry_picker?, false)
+     |> assign(:ai_loading, false)
      |> stream(:project_entries, project.entries)}
   end
 
@@ -96,6 +97,31 @@ defmodule GlossaryWeb.ProjectLive.Show do
   end
 
   @impl true
+  def handle_event("generate_summary", _params, socket) do
+    project = socket.assigns.project
+    Glossary.AI.generate_project_summary(project)
+    {:noreply, assign(socket, :ai_loading, true)}
+  end
+
+  @impl true
+  def handle_info({:project_ai_generated, project_id}, socket) do
+    if socket.assigns.project.id == project_id do
+      project = Projects.get_project!(socket.assigns.current_scope, project_id)
+      {:noreply, socket |> assign(:project, project) |> assign(:ai_loading, false)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:project_ai_error, _project_id, _reason}, socket) do
+    {:noreply,
+     socket
+     |> assign(:ai_loading, false)
+     |> put_flash(:error, "AI summary generation failed. Try again.")}
+  end
+
+  @impl true
   def handle_info({:search_modal_action, level, message}, socket) do
     project = Projects.get_project!(socket.assigns.current_scope, socket.assigns.project.id)
 
@@ -128,6 +154,36 @@ defmodule GlossaryWeb.ProjectLive.Show do
             </.button>
           </:actions>
         </.header>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3
+              :if={@project.summary}
+              class="text-base-content/70 flex items-center gap-1 text-sm font-medium"
+            >
+              <.icon name="hero-sparkles" class="size-4" /> Summary
+            </h3>
+            <button
+              phx-click="generate_summary"
+              type="button"
+              class="btn btn-ghost btn-xs"
+              disabled={@ai_loading}
+            >
+              <%= if @ai_loading do %>
+                <span class="loading loading-spinner loading-xs"></span> Generating...
+              <% else %>
+                <.icon name="hero-sparkles" class="size-4" />
+                {if @project.summary, do: "Regenerate", else: "Generate Summary"}
+              <% end %>
+            </button>
+          </div>
+          <p
+            :if={@project.summary}
+            class="bg-base-200/50 text-base-content/80 rounded-lg p-3 text-sm"
+          >
+            {@project.summary}
+          </p>
+        </div>
 
         <section class="space-y-2">
           <div class="flex items-center justify-between">
