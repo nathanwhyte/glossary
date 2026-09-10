@@ -64,6 +64,30 @@ spec:
               containerPort: 4000
               protocol: TCP
           env:
+            # Skip distributed Erlang entirely, so epmd is never spawned.
+            #
+            # This app does not cluster: replicas is 1, there is no libcluster /
+            # horde / swarm / syn, and DNS_CLUSTER_QUERY is unset, so the
+            # {DNSCluster, query: ... || :ignore} child in
+            # lib/glossary/application.ex starts in no-op mode. epmd was
+            # therefore starting for nothing — and because the release's PID 1
+            # never reaps, its exited children accumulated as <defunct> entries
+            # in the node process table, which the k3s nodes' MOTD reports on
+            # every SSH login.
+            #
+            # Preferred over `-start_epmd false`, which leaves the VM trying to
+            # bring up distribution against a name server that isn't there.
+            #
+            # Only set on this container, not the `migrate` initContainer: that
+            # runs `bin/glossary eval`, which starts a fresh non-distributed
+            # node and so never spawns epmd in the first place.
+            #
+            # Cost: `bin/glossary remote` and `bin/glossary rpc` stop working,
+            # since both need distribution. `bin/glossary eval` still works, as
+            # does `kubectl exec` for non-IEx use. Reversible with a one-line
+            # redeploy.
+            - name: RELEASE_DISTRIBUTION
+              value: none
             - name: PHX_SERVER
               value: "true"
             - name: DATABASE_URL
